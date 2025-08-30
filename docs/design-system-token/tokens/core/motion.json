@@ -1,0 +1,58 @@
+{
+  "motion": {
+    "duration": {
+      "instant": {
+        "value": "0ms",
+        "type": "duration",
+        "description": "No duration"
+      },
+      "fast": {
+        "value": "150ms",
+        "type": "duration",
+        "description": "Fast animation"
+      },
+      "normal": {
+        "value": "300ms",
+        "type": "duration",
+        "description": "Normal animation"
+      },
+      "slow": {
+        "value": "500ms",
+        "type": "duration",
+        "description": "Slow animation"
+      },
+      "slower": {
+        "value": "700ms",
+        "type": "duration",
+        "description": "Slower animation"
+      }
+    },
+    "easing": {
+      "linear": {
+        "value": "linear",
+        "type": "cubicBezier",
+        "description": "Linear easing"
+      },
+      "ease-in": {
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "type": "cubicBezier",
+        "description": "Ease in curve"
+      },
+      "ease-out": {
+        "value": "cubic-bezier(0, 0, 0.2, 1)",
+        "type": "cubicBezier",
+        "description": "Ease out curve"
+      },
+      "ease-in-out": {
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "type": "cubicBezier",
+        "description": "Ease in-out curve"
+      },
+      "bounce": {
+        "value": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "type": "cubicBezier",
+        "description": "Bounce effect"
+      }
+    }
+  }
+}

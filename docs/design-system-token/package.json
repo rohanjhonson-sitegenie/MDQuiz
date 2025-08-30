@@ -1,0 +1,34 @@
+{
+  "name": "@ctrc/design-tokens",
+  "version": "1.0.0",
+  "description": "Caution Tape Robotics Design Token System",
+  "main": "build/js/tokens.js",
+  "scripts": {
+    "build": "style-dictionary build --config ./style-dictionary.config.js",
+    "clean": "rm -rf build",
+    "rebuild": "npm run clean && npm run build",
+    "watch": "npm run build && chokidar 'tokens/**/*.json' -c 'npm run build'"
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "ctrc",
+    "robotics",
+    "stem-education"
+  ],
+  "author": "Caution Tape Robotics",
+  "license": "MIT",
+  "devDependencies": {
+    "style-dictionary": "^3.8.0",
+    "chokidar-cli": "^3.0.0"
+  },
+  "files": [
+    "build/",
+    "tokens/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caution-tape-robotics/design-tokens.git"
+  }
+}

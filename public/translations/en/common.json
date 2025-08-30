@@ -1,0 +1,11 @@
+{
+  "navigation.home": "Home",
+  "navigation.about": "About",
+  "navigation.contact": "Contact",
+  "navigation.settings": "Settings",
+  "common.welcome": "Welcome",
+  "common.loading": "Loading...",
+  "common.save": "Save",
+  "common.cancel": "Cancel",
+  "welcome.message": "Welcome, {{name}}!"
+}

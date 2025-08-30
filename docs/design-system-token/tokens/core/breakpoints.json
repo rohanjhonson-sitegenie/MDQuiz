@@ -1,0 +1,168 @@
+{
+  "breakpoint": {
+    "xs": {
+      "value": "0px",
+      "type": "dimension",
+      "description": "Extra small devices"
+    },
+    "sm": {
+      "value": "640px",
+      "type": "dimension",
+      "description": "Small devices"
+    },
+    "md": {
+      "value": "768px",
+      "type": "dimension",
+      "description": "Medium devices"
+    },
+    "lg": {
+      "value": "1024px",
+      "type": "dimension",
+      "description": "Large devices"
+    },
+    "xl": {
+      "value": "1280px",
+      "type": "dimension",
+      "description": "Extra large devices"
+    },
+    "2xl": {
+      "value": "1536px",
+      "type": "dimension",
+      "description": "2X large devices"
+    }
+  },
+  "z-index": {
+    "deep": {
+      "value": "-999",
+      "type": "number",
+      "description": "Deep background layer"
+    },
+    "base": {
+      "value": "0",
+      "type": "number",
+      "description": "Base layer"
+    },
+    "dropdown": {
+      "value": "100",
+      "type": "number",
+      "description": "Dropdown layer"
+    },
+    "sticky": {
+      "value": "200",
+      "type": "number",
+      "description": "Sticky elements"
+    },
+    "fixed": {
+      "value": "300",
+      "type": "number",
+      "description": "Fixed elements"
+    },
+    "modal-backdrop": {
+      "value": "400",
+      "type": "number",
+      "description": "Modal backdrop"
+    },
+    "modal": {
+      "value": "500",
+      "type": "number",
+      "description": "Modal content"
+    },
+    "popover": {
+      "value": "600",
+      "type": "number",
+      "description": "Popover layer"
+    },
+    "tooltip": {
+      "value": "700",
+      "type": "number",
+      "description": "Tooltip layer"
+    },
+    "notification": {
+      "value": "800",
+      "type": "number",
+      "description": "Notifications"
+    },
+    "top": {
+      "value": "999",
+      "type": "number",
+      "description": "Topmost layer"
+    }
+  },
+  "opacity": {
+    "0": {
+      "value": "0",
+      "type": "opacity",
+      "description": "Fully transparent"
+    },
+    "5": {
+      "value": "0.05",
+      "type": "opacity",
+      "description": "5% opacity"
+    },
+    "10": {
+      "value": "0.1",
+      "type": "opacity",
+      "description": "10% opacity"
+    },
+    "20": {
+      "value": "0.2",
+      "type": "opacity",
+      "description": "20% opacity"
+    },
+    "25": {
+      "value": "0.25",
+      "type": "opacity",
+      "description": "25% opacity"
+    },
+    "30": {
+      "value": "0.3",
+      "type": "opacity",
+      "description": "30% opacity"
+    },
+    "40": {
+      "value": "0.4",
+      "type": "opacity",
+      "description": "40% opacity"
+    },
+    "50": {
+      "value": "0.5",
+      "type": "opacity",
+      "description": "50% opacity"
+    },
+    "60": {
+      "value": "0.6",
+      "type": "opacity",
+      "description": "60% opacity"
+    },
+    "70": {
+      "value": "0.7",
+      "type": "opacity",
+      "description": "70% opacity"
+    },
+    "75": {
+      "value": "0.75",
+      "type": "opacity",
+      "description": "75% opacity"
+    },
+    "80": {
+      "value": "0.8",
+      "type": "opacity",
+      "description": "80% opacity"
+    },
+    "90": {
+      "value": "0.9",
+      "type": "opacity",
+      "description": "90% opacity"
+    },
+    "95": {
+      "value": "0.95",
+      "type": "opacity",
+      "description": "95% opacity"
+    },
+    "100": {
+      "value": "1",
+      "type": "opacity",
+      "description": "Fully opaque"
+    }
+  }
+}

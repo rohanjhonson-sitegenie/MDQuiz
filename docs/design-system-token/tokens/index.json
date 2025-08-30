@@ -1,0 +1,37 @@
+{
+  "ctrc-design-tokens": {
+    "version": "1.0.0",
+    "description": "Caution Tape Robotics Design Token System",
+    "core": {
+      "$import": [
+        "./core/colors.json",
+        "./core/typography.json",
+        "./core/spacing.json",
+        "./core/borders.json",
+        "./core/shadows.json",
+        "./core/motion.json",
+        "./core/breakpoints.json"
+      ]
+    },
+    "semantic": {
+      "$import": [
+        "./semantic/colors.json",
+        "./semantic/typography.json"
+      ]
+    },
+    "components": {
+      "$import": [
+        "./components/button.json",
+        "./components/card.json",
+        "./components/input.json",
+        "./components/logo.json"
+      ]
+    },
+    "themes": {
+      "$import": [
+        "./themes/light.json",
+        "./themes/dark.json"
+      ]
+    }
+  }
+}

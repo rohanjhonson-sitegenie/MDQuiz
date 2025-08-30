@@ -1,0 +1,78 @@
+{
+  "border": {
+    "width": {
+      "none": {
+        "value": "0",
+        "type": "borderWidth",
+        "description": "No border"
+      },
+      "thin": {
+        "value": "1px",
+        "type": "borderWidth",
+        "description": "Thin border"
+      },
+      "medium": {
+        "value": "2px",
+        "type": "borderWidth",
+        "description": "Medium border"
+      },
+      "thick": {
+        "value": "4px",
+        "type": "borderWidth",
+        "description": "Thick border"
+      },
+      "heavy": {
+        "value": "8px",
+        "type": "borderWidth",
+        "description": "Heavy border"
+      }
+    },
+    "radius": {
+      "none": {
+        "value": "0",
+        "type": "borderRadius",
+        "description": "No border radius"
+      },
+      "sm": {
+        "value": "0.125rem",
+        "type": "borderRadius",
+        "description": "Small radius - 2px"
+      },
+      "base": {
+        "value": "0.25rem",
+        "type": "borderRadius",
+        "description": "Base radius - 4px"
+      },
+      "md": {
+        "value": "0.375rem",
+        "type": "borderRadius",
+        "description": "Medium radius - 6px"
+      },
+      "lg": {
+        "value": "0.5rem",
+        "type": "borderRadius",
+        "description": "Large radius - 8px"
+      },
+      "xl": {
+        "value": "0.75rem",
+        "type": "borderRadius",
+        "description": "Extra large radius - 12px"
+      },
+      "2xl": {
+        "value": "1rem",
+        "type": "borderRadius",
+        "description": "2X large radius - 16px"
+      },
+      "3xl": {
+        "value": "1.5rem",
+        "type": "borderRadius",
+        "description": "3X large radius - 24px"
+      },
+      "full": {
+        "value": "9999px",
+        "type": "borderRadius",
+        "description": "Full rounded"
+      }
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "logo": {
+    "colors": {
+      "primary": {
+        "yellow": {
+          "value": "#F9D900",
+          "type": "color",
+          "description": "Primary yellow from logo - slightly different from brand yellow"
+        },
+        "yellow-gradient-start": {
+          "value": "#F9D900",
+          "type": "color",
+          "description": "Gradient start color for yellow stripes"
+        },
+        "yellow-gradient-end": {
+          "value": "#F7EF72",
+          "type": "color",
+          "description": "Gradient end color for yellow stripes"
+        },
+        "black": {
+          "value": "#231F20",
+          "type": "color",
+          "description": "Logo black color"
+        },
+        "white": {
+          "value": "#FFFFFF",
+          "type": "color",
+          "description": "White for dark backgrounds"
+        }
+      }
+    },
+    "sizes": {
+      "height": {
+        "sm": {
+          "value": "30px",
+          "type": "dimension",
+          "description": "Small logo height"
+        },
+        "md": {
+          "value": "50px",
+          "type": "dimension",
+          "description": "Medium logo height"
+        },
+        "lg": {
+          "value": "70px",
+          "type": "dimension",
+          "description": "Large logo height"
+        },
+        "xl": {
+          "value": "100px",
+          "type": "dimension",
+          "description": "Extra large logo height"
+        }
+      },
+      "aspect-ratio": {
+        "full": {
+          "value": "4.33",
+          "type": "number",
+          "description": "Full logo aspect ratio (260:60)"
+        },
+        "mark": {
+          "value": "1.42",
+          "type": "number",
+          "description": "Logo mark aspect ratio (85:60)"
+        }
+      },
+      "min-width": {
+        "full": {
+          "value": "200px",
+          "type": "dimension",
+          "description": "Minimum width for full logo"
+        },
+        "mark": {
+          "value": "60px",
+          "type": "dimension",
+          "description": "Minimum width for logo mark"
+        }
+      }
+    },
+    "spacing": {
+      "clear-space": {
+        "value": "{spacing.4}",
+        "type": "dimension",
+        "description": "Minimum clear space around logo"
+      },
+      "icon-gap": {
+        "value": "{spacing.3}",
+        "type": "dimension",
+        "description": "Space between icon and text in logo"
+      }
+    },
+    "variants": {
+      "full-color": {
+        "description": "Full color logo on light background",
+        "background": "light",
+        "icon-fill": "{logo.colors.primary.yellow}",
+        "text-fill": "{logo.colors.primary.black}",
+        "stripe-fill": "gradient"
+      },
+      "full-white": {
+        "description": "White logo on dark background",
+        "background": "dark",
+        "icon-fill": "{logo.colors.primary.yellow}",
+        "text-fill": "{logo.colors.primary.white}",
+        "stripe-fill": "gradient"
+      },
+      "monochrome-black": {
+        "description": "All black logo for single color printing",
+        "background": "light",
+        "icon-fill": "{logo.colors.primary.black}",
+        "text-fill": "{logo.colors.primary.black}",
+        "stripe-fill": "{logo.colors.primary.black}"
+      },
+      "monochrome-white": {
+        "description": "All white logo for dark backgrounds",
+        "background": "dark",
+        "icon-fill": "{logo.colors.primary.white}",
+        "text-fill": "{logo.colors.primary.white}",
+        "stripe-fill": "{logo.colors.primary.white}"
+      }
+    },
+    "usage": {
+      "header": {
+        "variant": "full-color",
+        "size": "md",
+        "type": "full"
+      },
+      "footer": {
+        "variant": "full-white",
+        "size": "sm",
+        "type": "full"
+      },
+      "favicon": {
+        "variant": "mark-only",
+        "size": "sm",
+        "type": "mark"
+      },
+      "social": {
+        "variant": "full-color",
+        "size": "lg",
+        "type": "full"
+      }
+    }
+  }
+}

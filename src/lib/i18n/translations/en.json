@@ -1,0 +1,16 @@
+{
+  "nav.features": "Features",
+  "nav.services": "Services",
+  "nav.pricing": "Pricing",
+  "nav.about": "About",
+  "nav.faq": "FAQ",
+  "nav.blogs": "Blogs",
+  "nav.badges": "Badges",
+  "nav.videoWall": "Video Wall",
+  "auth.signIn": "Sign In",
+  "auth.getStarted": "Get Started",
+  "auth.adminPortal": "Admin Portal",
+  "auth.userPortal": "User Portal",
+  "language.english": "English",
+  "language.chinese": "简体中文"
+}

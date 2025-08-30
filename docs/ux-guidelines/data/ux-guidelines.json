@@ -1,0 +1,845 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01",
+  "categories": [
+    {
+      "id": "navigation",
+      "name": "Navigation Patterns",
+      "description": "Patterns for helping users navigate and understand their location",
+      "patterns": [
+        {
+          "id": "breadcrumb",
+          "name": "Breadcrumb Navigation",
+          "category": "navigation",
+          "description": "Shows users their current location within a hierarchical structure",
+          "complexity": "simple",
+          "tags": ["wayfinding", "hierarchy", "desktop"],
+          "whenToUse": [
+            "Hierarchical sites with 3+ levels",
+            "E-commerce category navigation",
+            "Documentation sites",
+            "File/folder structures"
+          ],
+          "whenNotToUse": [
+            "Flat site structures",
+            "Mobile-first applications",
+            "Single-level navigation",
+            "As primary navigation"
+          ],
+          "bestPractices": [
+            "Start with Home or Root",
+            "Current page not clickable",
+            "Use consistent separators",
+            "Truncate long paths"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use nav element with aria-label",
+              "Mark current page with aria-current='page'",
+              "Ensure keyboard navigable"
+            ]
+          },
+          "relatedPatterns": ["back-link", "side-navigation"],
+          "codeExample": "breadcrumb.tsx"
+        },
+        {
+          "id": "back-link",
+          "name": "Back Link",
+          "category": "navigation",
+          "description": "Provides a clear way to return to the previous page",
+          "complexity": "simple",
+          "tags": ["return", "context-aware", "mobile-friendly"],
+          "whenToUse": [
+            "Detail pages from lists",
+            "Multi-step forms/wizards",
+            "Modal-like full pages",
+            "Deep-dive content pages"
+          ],
+          "whenNotToUse": [
+            "Home or landing pages",
+            "Multiple entry points exist",
+            "Browser back works differently",
+            "Complex navigation paths"
+          ],
+          "bestPractices": [
+            "Use descriptive labels",
+            "Position consistently (top-left)",
+            "Don't rely on browser back"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Clear link text describing destination",
+              "Keyboard accessible",
+              "Sufficient color contrast"
+            ]
+          },
+          "relatedPatterns": ["breadcrumb", "stepper"],
+          "codeExample": "back-link.tsx"
+        },
+        {
+          "id": "tabs",
+          "name": "Tabs Navigation",
+          "category": "navigation",
+          "description": "Organizes related content into distinct sections",
+          "complexity": "moderate",
+          "tags": ["content-organization", "peer-navigation"],
+          "whenToUse": [
+            "2-7 related content sections",
+            "User needs quick comparison",
+            "Content is mutually exclusive",
+            "Reducing cognitive load"
+          ],
+          "whenNotToUse": [
+            "Sequential content/steps",
+            "More than 7 tabs needed",
+            "Tabs require scrolling",
+            "On mobile (consider accordion)"
+          ],
+          "bestPractices": [
+            "Keep tab labels concise",
+            "Indicate active tab clearly",
+            "Support keyboard navigation",
+            "Consider mobile alternatives"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use role='tablist', role='tab', role='tabpanel'",
+              "Support arrow key navigation",
+              "Manage focus properly"
+            ]
+          },
+          "relatedPatterns": ["accordion", "side-navigation"],
+          "codeExample": "tabs.tsx"
+        },
+        {
+          "id": "side-navigation",
+          "name": "Side Navigation",
+          "category": "navigation",
+          "description": "Persistent navigation for complex applications",
+          "complexity": "complex",
+          "tags": ["primary-navigation", "hierarchical", "desktop"],
+          "whenToUse": [
+            "Complex applications",
+            "5+ main sections",
+            "Nested navigation needed",
+            "Desktop-first applications"
+          ],
+          "whenNotToUse": [
+            "Simple websites",
+            "Mobile-first design",
+            "Marketing pages",
+            "Less than 5 sections"
+          ],
+          "bestPractices": [
+            "Collapsible on mobile",
+            "Clear active states",
+            "Support keyboard navigation",
+            "Group related items"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use nav element",
+              "Indicate current page",
+              "Keyboard navigable",
+              "Skip navigation link"
+            ]
+          },
+          "relatedPatterns": ["tabs", "hamburger-menu"],
+          "codeExample": "side-navigation.tsx"
+        }
+      ]
+    },
+    {
+      "id": "layout-flows",
+      "name": "Layout & Flows",
+      "description": "Patterns for organizing content and guiding user flow",
+      "patterns": [
+        {
+          "id": "stepper",
+          "name": "Stepper",
+          "category": "layout-flows",
+          "description": "Guides users through multi-step workflows",
+          "complexity": "moderate",
+          "tags": ["multi-step", "progress", "forms"],
+          "whenToUse": [
+            "Forms with 3+ logical sections",
+            "Onboarding flows",
+            "Checkout processes",
+            "Configuration wizards"
+          ],
+          "whenNotToUse": [
+            "Simple forms",
+            "Non-linear processes",
+            "Optional/skippable content",
+            "Mobile screens (limited space)"
+          ],
+          "bestPractices": [
+            "Show clear progress",
+            "Allow backward navigation",
+            "Save progress automatically",
+            "Validate before proceeding"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Announce step changes",
+              "Keyboard navigable",
+              "Clear focus management"
+            ]
+          },
+          "relatedPatterns": ["progress-bar", "wizard"],
+          "codeExample": "stepper.tsx"
+        },
+        {
+          "id": "pagination",
+          "name": "Pagination",
+          "category": "layout-flows",
+          "description": "Divides content into discrete pages",
+          "complexity": "simple",
+          "tags": ["navigation", "performance", "seo-friendly"],
+          "whenToUse": [
+            "Search results",
+            "E-commerce catalogs",
+            "Tables and data grids",
+            "When users need to reference pages"
+          ],
+          "whenNotToUse": [
+            "Continuous browsing experiences",
+            "Social media feeds",
+            "Small datasets (<20 items)",
+            "Mobile-first interfaces"
+          ],
+          "bestPractices": [
+            "Show current page clearly",
+            "Provide first/last page links",
+            "Display total pages/results",
+            "Allow direct page input"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use nav element with aria-label",
+              "Indicate current page",
+              "Keyboard accessible"
+            ]
+          },
+          "relatedPatterns": ["infinite-scroll", "load-more"],
+          "codeExample": "pagination.tsx"
+        },
+        {
+          "id": "infinite-scroll",
+          "name": "Infinite Scroll",
+          "category": "layout-flows",
+          "description": "Continuously loads content as user scrolls",
+          "complexity": "complex",
+          "tags": ["continuous", "engagement", "mobile-friendly"],
+          "whenToUse": [
+            "Social media feeds",
+            "Image galleries",
+            "Discovery/exploration",
+            "Mobile-first interfaces"
+          ],
+          "whenNotToUse": [
+            "Users need to reach footer",
+            "SEO is critical",
+            "Users need specific items",
+            "Limited bandwidth users"
+          ],
+          "bestPractices": [
+            "Show loading indicators",
+            "Handle errors gracefully",
+            "Consider performance limits",
+            "Provide alternative navigation"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Announce new content loads",
+              "Provide skip mechanism",
+              "Ensure keyboard scrollable"
+            ]
+          },
+          "relatedPatterns": ["pagination", "load-more"],
+          "codeExample": "infinite-scroll.tsx"
+        },
+        {
+          "id": "card-list-toggle",
+          "name": "Card vs List View",
+          "category": "layout-flows",
+          "description": "Allows users to switch between view modes",
+          "complexity": "simple",
+          "tags": ["view-modes", "user-preference", "responsive"],
+          "whenToUse": [
+            "Product catalogs",
+            "File browsers",
+            "Search results",
+            "User-generated content"
+          ],
+          "whenNotToUse": [
+            "Single view suffices",
+            "Mobile-only interfaces",
+            "Simple text lists",
+            "Data tables"
+          ],
+          "bestPractices": [
+            "Remember user preference",
+            "Responsive defaults",
+            "Maintain scroll position",
+            "Clear toggle controls"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Label toggle clearly",
+              "Announce view changes",
+              "Maintain focus position"
+            ]
+          },
+          "relatedPatterns": ["grid-view", "table-view"],
+          "codeExample": "view-toggle.tsx"
+        }
+      ]
+    },
+    {
+      "id": "overlays",
+      "name": "Overlays",
+      "description": "Patterns for content that appears over the main interface",
+      "patterns": [
+        {
+          "id": "modal",
+          "name": "Modal Dialog",
+          "category": "overlays",
+          "description": "Demands immediate attention by blocking page interaction",
+          "complexity": "moderate",
+          "tags": ["focus-required", "blocking", "critical"],
+          "whenToUse": [
+            "Confirmations for destructive actions",
+            "Complex forms requiring focus",
+            "Terms acceptance",
+            "Error states requiring resolution"
+          ],
+          "whenNotToUse": [
+            "Non-critical information",
+            "Frequently accessed tools",
+            "Mobile-first interfaces",
+            "Marketing content"
+          ],
+          "bestPractices": [
+            "Include close options",
+            "Focus management",
+            "Avoid modal stacking",
+            "Clear action buttons"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Trap focus within modal",
+              "Return focus on close",
+              "Use role='dialog' and aria-modal",
+              "Escape key closes"
+            ]
+          },
+          "relatedPatterns": ["drawer", "alert-dialog"],
+          "codeExample": "modal.tsx"
+        },
+        {
+          "id": "drawer",
+          "name": "Drawer / Sheet",
+          "category": "overlays",
+          "description": "Slides in from screen edge maintaining context",
+          "complexity": "moderate",
+          "tags": ["contextual", "mobile-friendly", "non-blocking"],
+          "whenToUse": [
+            "Navigation menus on mobile",
+            "Filter and sort controls",
+            "Settings panels",
+            "Shopping carts"
+          ],
+          "whenNotToUse": [
+            "Critical alerts",
+            "Simple confirmations",
+            "Content requiring full width",
+            "Multi-step processes"
+          ],
+          "bestPractices": [
+            "Choose appropriate edge",
+            "Smooth animations",
+            "Overlay backdrop",
+            "Swipe gestures on mobile"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Trap focus when open",
+              "Announce state changes",
+              "Keyboard closeable",
+              "Touch-friendly controls"
+            ]
+          },
+          "relatedPatterns": ["modal", "sidebar"],
+          "codeExample": "drawer.tsx"
+        },
+        {
+          "id": "popover",
+          "name": "Popover",
+          "category": "overlays",
+          "description": "Floating panel anchored to trigger element",
+          "complexity": "simple",
+          "tags": ["non-blocking", "contextual", "lightweight"],
+          "whenToUse": [
+            "Inline editing forms",
+            "Extended information",
+            "Quick actions menus",
+            "Color/emoji pickers"
+          ],
+          "whenNotToUse": [
+            "Simple text hints",
+            "Critical actions",
+            "Large content areas",
+            "Mobile interfaces"
+          ],
+          "bestPractices": [
+            "Position intelligently",
+            "Click outside to close",
+            "Arrow pointing to trigger",
+            "Reasonable max width"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Keyboard triggered and dismissed",
+              "Announce content",
+              "Maintain focus context"
+            ]
+          },
+          "relatedPatterns": ["tooltip", "dropdown-menu"],
+          "codeExample": "popover.tsx"
+        },
+        {
+          "id": "tooltip",
+          "name": "Tooltip",
+          "category": "overlays",
+          "description": "Brief contextual information on hover/focus",
+          "complexity": "simple",
+          "tags": ["minimal", "hover", "helper-text"],
+          "whenToUse": [
+            "Icon button labels",
+            "Truncated text expansion",
+            "Keyboard shortcuts",
+            "Form field hints"
+          ],
+          "whenNotToUse": [
+            "Essential information",
+            "Interactive content",
+            "Long explanations",
+            "Touch-only interfaces"
+          ],
+          "bestPractices": [
+            "Keep it brief",
+            "Delay before showing",
+            "Position intelligently",
+            "High contrast"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Show on focus not just hover",
+              "Dismissible",
+              "Sufficient contrast"
+            ]
+          },
+          "relatedPatterns": ["popover", "help-text"],
+          "codeExample": "tooltip.tsx"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "name": "Feedback",
+      "description": "Patterns for system status and user action feedback",
+      "patterns": [
+        {
+          "id": "toast",
+          "name": "Toast Notification",
+          "category": "feedback",
+          "description": "Brief, non-intrusive feedback messages",
+          "complexity": "simple",
+          "tags": ["non-blocking", "temporary", "status"],
+          "whenToUse": [
+            "Action confirmations",
+            "Background process updates",
+            "Non-critical errors",
+            "Actions with undo"
+          ],
+          "whenNotToUse": [
+            "Critical errors",
+            "Complex information",
+            "Form validation",
+            "Legal messages"
+          ],
+          "bestPractices": [
+            "Position consistently",
+            "Auto-dismiss timing",
+            "Stack multiple toasts",
+            "Include actions when relevant"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use ARIA live regions",
+              "Sufficient display time",
+              "Keyboard dismissible"
+            ]
+          },
+          "relatedPatterns": ["snackbar", "alert"],
+          "codeExample": "toast.tsx"
+        },
+        {
+          "id": "inline-alert",
+          "name": "Inline Alert",
+          "category": "feedback",
+          "description": "Contextual messages within content flow",
+          "complexity": "simple",
+          "tags": ["contextual", "persistent", "informational"],
+          "whenToUse": [
+            "Form validation errors",
+            "Section-specific warnings",
+            "Empty states",
+            "Feature announcements"
+          ],
+          "whenNotToUse": [
+            "Temporary confirmations",
+            "System-wide messages",
+            "Actions requiring response",
+            "Progress indicators"
+          ],
+          "bestPractices": [
+            "Place near related content",
+            "Use appropriate severity",
+            "Don't overuse",
+            "Clear dismiss option"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use appropriate ARIA roles",
+              "Color not sole indicator",
+              "Screen reader friendly"
+            ]
+          },
+          "relatedPatterns": ["banner", "callout"],
+          "codeExample": "inline-alert.tsx"
+        },
+        {
+          "id": "snackbar",
+          "name": "Snackbar",
+          "category": "feedback",
+          "description": "Material Design feedback pattern at screen bottom",
+          "complexity": "simple",
+          "tags": ["material-design", "action-oriented", "mobile"],
+          "whenToUse": [
+            "Mobile interfaces",
+            "Single action feedback",
+            "Undo operations",
+            "Brief confirmations"
+          ],
+          "whenNotToUse": [
+            "Desktop-first apps",
+            "Multiple actions needed",
+            "Long messages",
+            "Critical errors"
+          ],
+          "bestPractices": [
+            "Bottom position",
+            "One action maximum",
+            "4-10 second duration",
+            "Queue multiple snackbars"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Announce via ARIA",
+              "Keyboard accessible action",
+              "Sufficient time to read"
+            ]
+          },
+          "relatedPatterns": ["toast", "banner"],
+          "codeExample": "snackbar.tsx"
+        }
+      ]
+    },
+    {
+      "id": "forms",
+      "name": "Forms & Validation",
+      "description": "Patterns for data entry and validation feedback",
+      "patterns": [
+        {
+          "id": "inline-validation",
+          "name": "Inline Validation",
+          "category": "forms",
+          "description": "Real-time validation feedback at field level",
+          "complexity": "moderate",
+          "tags": ["validation", "real-time", "errors"],
+          "whenToUse": [
+            "Email/URL format validation",
+            "Password strength",
+            "Username availability",
+            "Required field validation"
+          ],
+          "whenNotToUse": [
+            "Complex business rules",
+            "Cross-field validation",
+            "Async validations with delay",
+            "Optional fields"
+          ],
+          "bestPractices": [
+            "Validate on blur not keystroke",
+            "Clear error messages",
+            "Show success states too",
+            "Group related errors"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Use aria-invalid",
+              "Associate errors with fields",
+              "Announce errors to screen readers"
+            ]
+          },
+          "relatedPatterns": ["error-summary", "help-text"],
+          "codeExample": "inline-validation.tsx"
+        },
+        {
+          "id": "password-field",
+          "name": "Password Field",
+          "category": "forms",
+          "description": "Secure password entry with visibility toggle",
+          "complexity": "simple",
+          "tags": ["security", "forms", "toggle"],
+          "whenToUse": [
+            "Login forms",
+            "Registration",
+            "Password changes",
+            "Secure data entry"
+          ],
+          "whenNotToUse": [
+            "Public terminals",
+            "Non-sensitive data",
+            "Confirmation fields",
+            "Read-only displays"
+          ],
+          "bestPractices": [
+            "Show/hide toggle",
+            "Strength indicators",
+            "Clear requirements",
+            "Allow paste"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Label toggle button",
+              "Announce visibility state",
+              "Support password managers"
+            ]
+          },
+          "relatedPatterns": ["input-field", "strength-meter"],
+          "codeExample": "password-field.tsx"
+        }
+      ]
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "description": "Patterns for inclusive, accessible interfaces",
+      "patterns": [
+        {
+          "id": "keyboard-navigation",
+          "name": "Keyboard Navigation",
+          "category": "accessibility",
+          "description": "Full keyboard operability for all interactions",
+          "complexity": "complex",
+          "tags": ["keyboard", "focus", "navigation"],
+          "whenToUse": [
+            "All interactive elements",
+            "Custom components",
+            "Complex widgets",
+            "Form controls"
+          ],
+          "whenNotToUse": [
+            "Never - always required",
+            "Decorative elements only"
+          ],
+          "bestPractices": [
+            "Logical tab order",
+            "Visible focus indicators",
+            "Standard key behaviors",
+            "Skip links"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "All functionality keyboard accessible",
+              "No keyboard traps",
+              "Focus indicators visible"
+            ]
+          },
+          "relatedPatterns": ["focus-management", "skip-links"],
+          "codeExample": "keyboard-nav.tsx"
+        },
+        {
+          "id": "focus-management",
+          "name": "Focus Management",
+          "category": "accessibility",
+          "description": "Controlling focus for dynamic interfaces",
+          "complexity": "complex",
+          "tags": ["focus", "spa", "dynamic"],
+          "whenToUse": [
+            "Single page apps",
+            "Dynamic content updates",
+            "Modal dialogs",
+            "Route changes"
+          ],
+          "whenNotToUse": [
+            "Static content",
+            "Simple page loads"
+          ],
+          "bestPractices": [
+            "Focus new content",
+            "Restore focus on close",
+            "Trap focus in modals",
+            "Announce changes"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Programmatic focus management",
+              "Focus restoration",
+              "Focus trapping when needed"
+            ]
+          },
+          "relatedPatterns": ["keyboard-navigation", "live-regions"],
+          "codeExample": "focus-management.tsx"
+        },
+        {
+          "id": "responsive-design",
+          "name": "Responsive Design",
+          "category": "accessibility",
+          "description": "Adaptive layouts for all screen sizes",
+          "complexity": "moderate",
+          "tags": ["mobile", "tablet", "desktop"],
+          "whenToUse": [
+            "All modern web apps",
+            "Multi-device support",
+            "Mobile-first design",
+            "Progressive enhancement"
+          ],
+          "whenNotToUse": [
+            "Single device apps",
+            "Embedded widgets"
+          ],
+          "bestPractices": [
+            "Mobile-first approach",
+            "Flexible grids",
+            "Touch-friendly targets",
+            "Performance optimization"
+          ],
+          "accessibility": {
+            "wcagLevel": "AA",
+            "requirements": [
+              "Content reflows to viewport",
+              "No horizontal scroll",
+              "Touch targets 44x44px min"
+            ]
+          },
+          "relatedPatterns": ["breakpoints", "fluid-typography"],
+          "codeExample": "responsive.tsx"
+        }
+      ]
+    }
+  ],
+  "decisionTrees": {
+    "navigation": {
+      "startNode": "navigation-type",
+      "nodes": {
+        "navigation-type": {
+          "question": "What type of navigation do you need?",
+          "options": [
+            { "label": "Show location in hierarchy", "next": "hierarchy-depth" },
+            { "label": "Navigate between peers", "next": "peer-count" },
+            { "label": "Return to previous", "result": "back-link" }
+          ]
+        },
+        "hierarchy-depth": {
+          "question": "How deep is the hierarchy?",
+          "options": [
+            { "label": "2-5 levels", "result": "breadcrumb" },
+            { "label": "More than 5", "result": "breadcrumb-truncated" },
+            { "label": "Variable depth", "result": "breadcrumb-collapsible" }
+          ]
+        },
+        "peer-count": {
+          "question": "How many peer items?",
+          "options": [
+            { "label": "2-7 items", "result": "tabs" },
+            { "label": "More than 7", "result": "side-navigation" }
+          ]
+        }
+      }
+    }
+  },
+  "integrations": {
+    "storybook": {
+      "name": "Storybook",
+      "description": "Component documentation and playground",
+      "setup": [
+        "Install Storybook for React",
+        "Create stories for each pattern",
+        "Add accessibility addon",
+        "Configure controls for variants"
+      ],
+      "benefits": [
+        "Interactive component playground",
+        "Visual regression testing",
+        "Accessibility checks",
+        "Design system documentation"
+      ]
+    },
+    "docusaurus": {
+      "name": "Docusaurus",
+      "description": "Documentation website generator",
+      "setup": [
+        "Initialize Docusaurus project",
+        "Import pattern markdown files",
+        "Configure navigation",
+        "Add search functionality"
+      ],
+      "benefits": [
+        "Markdown-based documentation",
+        "Version control",
+        "Search functionality",
+        "Easy deployment"
+      ]
+    },
+    "zeroheight": {
+      "name": "Zeroheight",
+      "description": "Design system documentation platform",
+      "setup": [
+        "Create Zeroheight styleguide",
+        "Sync with design tools",
+        "Import coded components",
+        "Set up team access"
+      ],
+      "benefits": [
+        "Design-dev collaboration",
+        "Figma/Sketch sync",
+        "Version management",
+        "Team workflows"
+      ]
+    }
+  }
+}

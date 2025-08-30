@@ -1,0 +1,55 @@
+/* Theme-specific font overrides using data-theme attribute */
+
+/* Font size and spacing tokens - applied globally */
+:root {
+  /* Font sizes from design tokens */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+
+  /* Font weights from design tokens */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Line heights from design tokens */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Letter spacing from design tokens */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+}
+
+/* Caution Tape theme font styles - ONLY font families, keeping original sizes */
+[data-theme='caution-tape'] h1,
+[data-theme='caution-tape'] h2 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* H3-H6 use sans font as per design tokens */
+[data-theme='caution-tape'] h3,
+[data-theme='caution-tape'] h4,
+[data-theme='caution-tape'] h5,
+[data-theme='caution-tape'] h6 {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+}

@@ -1,0 +1,50 @@
+{
+  "card": {
+    "padding": {
+      "sm": {
+        "value": "{spacing.4}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{spacing.6}",
+        "type": "dimension"
+      },
+      "lg": {
+        "value": "{spacing.8}",
+        "type": "dimension"
+      }
+    },
+    "background": {
+      "value": "{color.background.primary}",
+      "type": "color"
+    },
+    "border": {
+      "color": {
+        "value": "{color.border.default}",
+        "type": "color"
+      },
+      "width": {
+        "value": "{border.width.thin}",
+        "type": "borderWidth"
+      },
+      "radius": {
+        "value": "{border.radius.lg}",
+        "type": "borderRadius"
+      }
+    },
+    "shadow": {
+      "default": {
+        "value": "{shadow.base}",
+        "type": "boxShadow"
+      },
+      "hover": {
+        "value": "{shadow.md}",
+        "type": "boxShadow"
+      }
+    },
+    "transition": {
+      "value": "box-shadow {motion.duration.fast} {motion.easing.ease-out}",
+      "type": "other"
+    }
+  }
+}

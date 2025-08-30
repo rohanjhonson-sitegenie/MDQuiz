@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=xjeydtdtqfxwzceuadpr"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_f455c8bac919ce67247d1e28bcd99917fe0f41c7"
+      }
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "ct-devmcp": {
+      "type": "http",
+      "url": "https://devmcp.ct839.com/mcp"
+    }
+  }
+}

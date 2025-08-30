@@ -1,0 +1,11 @@
+email,password,display_name,given_name,family_name,role,avatar_seed
+admin1@example.com,admin123,Admin One,Admin,One,admin,1
+admin2@example.com,admin123,Admin Two,Admin,Two,admin,2
+user1@example.com,password123,User One,User,One,user,3
+user2@example.com,password123,User Two,User,Two,user,4
+user3@example.com,password123,User Three,User,Three,user,5
+user4@example.com,password123,User Four,User,Four,user,6
+user5@example.com,password123,User Five,User,Five,user,7
+user6@example.com,password123,User Six,User,Six,user,8
+user7@example.com,password123,User Seven,User,Seven,user,9
+user8@example.com,password123,User Eight,User,Eight,user,10

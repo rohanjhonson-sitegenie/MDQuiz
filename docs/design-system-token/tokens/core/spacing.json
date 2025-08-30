@@ -1,0 +1,126 @@
+{
+  "spacing": {
+    "0": {
+      "value": "0",
+      "type": "dimension",
+      "description": "No spacing"
+    },
+    "1": {
+      "value": "0.25rem",
+      "type": "dimension",
+      "description": "4px spacing"
+    },
+    "2": {
+      "value": "0.5rem",
+      "type": "dimension",
+      "description": "8px spacing - base unit"
+    },
+    "3": {
+      "value": "0.75rem",
+      "type": "dimension",
+      "description": "12px spacing"
+    },
+    "4": {
+      "value": "1rem",
+      "type": "dimension",
+      "description": "16px spacing"
+    },
+    "5": {
+      "value": "1.25rem",
+      "type": "dimension",
+      "description": "20px spacing"
+    },
+    "6": {
+      "value": "1.5rem",
+      "type": "dimension",
+      "description": "24px spacing"
+    },
+    "7": {
+      "value": "1.75rem",
+      "type": "dimension",
+      "description": "28px spacing"
+    },
+    "8": {
+      "value": "2rem",
+      "type": "dimension",
+      "description": "32px spacing"
+    },
+    "10": {
+      "value": "2.5rem",
+      "type": "dimension",
+      "description": "40px spacing"
+    },
+    "12": {
+      "value": "3rem",
+      "type": "dimension",
+      "description": "48px spacing"
+    },
+    "16": {
+      "value": "4rem",
+      "type": "dimension",
+      "description": "64px spacing"
+    },
+    "20": {
+      "value": "5rem",
+      "type": "dimension",
+      "description": "80px spacing"
+    },
+    "24": {
+      "value": "6rem",
+      "type": "dimension",
+      "description": "96px spacing"
+    },
+    "32": {
+      "value": "8rem",
+      "type": "dimension",
+      "description": "128px spacing"
+    },
+    "40": {
+      "value": "10rem",
+      "type": "dimension",
+      "description": "160px spacing"
+    },
+    "48": {
+      "value": "12rem",
+      "type": "dimension",
+      "description": "192px spacing"
+    },
+    "56": {
+      "value": "14rem",
+      "type": "dimension",
+      "description": "224px spacing"
+    },
+    "64": {
+      "value": "16rem",
+      "type": "dimension",
+      "description": "256px spacing"
+    }
+  },
+  "sizing": {
+    "full": {
+      "value": "100%",
+      "type": "dimension",
+      "description": "Full width/height"
+    },
+    "screen": {
+      "value": "100vh",
+      "type": "dimension",
+      "description": "Full viewport height"
+    },
+    "min": {
+      "value": "min-content",
+      "type": "other",
+      "description": "Minimum content size"
+    },
+    "max": {
+      "value": "max-content",
+      "type": "other",
+      "description": "Maximum content size"
+    },
+    "fit": {
+      "value": "fit-content",
+      "type": "other",
+      "description": "Fit to content size"
+    }
+  }
+}

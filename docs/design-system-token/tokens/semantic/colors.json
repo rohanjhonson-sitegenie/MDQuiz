@@ -1,0 +1,191 @@
+{
+  "color": {
+    "background": {
+      "primary": {
+        "value": "{color.core.neutral.white}",
+        "type": "color",
+        "description": "Primary background color"
+      },
+      "secondary": {
+        "value": "{color.core.black.100}",
+        "type": "color",
+        "description": "Secondary background color"
+      },
+      "tertiary": {
+        "value": "{color.core.black.200}",
+        "type": "color",
+        "description": "Tertiary background color"
+      },
+      "inverse": {
+        "value": "{color.core.black.800}",
+        "type": "color",
+        "description": "Inverse background color"
+      },
+      "brand": {
+        "value": "{color.core.yellow.500}",
+        "type": "color",
+        "description": "Brand background color"
+      },
+      "brand-subtle": {
+        "value": "{color.core.yellow.100}",
+        "type": "color",
+        "description": "Subtle brand background"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "{color.core.black.800}",
+        "type": "color",
+        "description": "Primary text color"
+      },
+      "secondary": {
+        "value": "{color.core.black.600}",
+        "type": "color",
+        "description": "Secondary text color"
+      },
+      "tertiary": {
+        "value": "{color.core.black.500}",
+        "type": "color",
+        "description": "Tertiary text color"
+      },
+      "disabled": {
+        "value": "{color.core.black.400}",
+        "type": "color",
+        "description": "Disabled text color"
+      },
+      "inverse": {
+        "value": "{color.core.neutral.white}",
+        "type": "color",
+        "description": "Inverse text color"
+      },
+      "brand": {
+        "value": "{color.core.yellow.600}",
+        "type": "color",
+        "description": "Brand text color"
+      },
+      "link": {
+        "value": "{color.core.semantic.info}",
+        "type": "color",
+        "description": "Link text color"
+      },
+      "error": {
+        "value": "{color.core.semantic.error}",
+        "type": "color",
+        "description": "Error text color"
+      },
+      "success": {
+        "value": "{color.core.semantic.success}",
+        "type": "color",
+        "description": "Success text color"
+      },
+      "warning": {
+        "value": "{color.core.semantic.warning}",
+        "type": "color",
+        "description": "Warning text color"
+      },
+      "info": {
+        "value": "{color.core.semantic.info}",
+        "type": "color",
+        "description": "Info text color"
+      }
+    },
+    "border": {
+      "default": {
+        "value": "{color.core.black.300}",
+        "type": "color",
+        "description": "Default border color"
+      },
+      "subtle": {
+        "value": "{color.core.black.200}",
+        "type": "color",
+        "description": "Subtle border color"
+      },
+      "strong": {
+        "value": "{color.core.black.500}",
+        "type": "color",
+        "description": "Strong border color"
+      },
+      "brand": {
+        "value": "{color.core.yellow.500}",
+        "type": "color",
+        "description": "Brand border color"
+      },
+      "error": {
+        "value": "{color.core.semantic.error}",
+        "type": "color",
+        "description": "Error border color"
+      },
+      "success": {
+        "value": "{color.core.semantic.success}",
+        "type": "color",
+        "description": "Success border color"
+      },
+      "warning": {
+        "value": "{color.core.semantic.warning}",
+        "type": "color",
+        "description": "Warning border color"
+      },
+      "info": {
+        "value": "{color.core.semantic.info}",
+        "type": "color",
+        "description": "Info border color"
+      },
+      "focus": {
+        "value": "{color.core.yellow.500}",
+        "type": "color",
+        "description": "Focus border color for accessibility"
+      }
+    },
+    "surface": {
+      "error": {
+        "value": "#FEF2F2",
+        "type": "color",
+        "description": "Error surface color"
+      },
+      "success": {
+        "value": "#F0FDF4",
+        "type": "color",
+        "description": "Success surface color"
+      },
+      "warning": {
+        "value": "#FFFBEB",
+        "type": "color",
+        "description": "Warning surface color"
+      },
+      "info": {
+        "value": "#EFF6FF",
+        "type": "color",
+        "description": "Info surface color"
+      }
+    },
+    "interactive": {
+      "hover": {
+        "value": "rgba(0, 0, 0, 0.05)",
+        "type": "color",
+        "description": "Hover state overlay"
+      },
+      "active": {
+        "value": "rgba(0, 0, 0, 0.1)",
+        "type": "color",
+        "description": "Active/pressed state overlay"
+      },
+      "disabled": {
+        "value": "rgba(0, 0, 0, 0.38)",
+        "type": "color",
+        "description": "Disabled state overlay"
+      }
+    },
+    "overlay": {
+      "backdrop": {
+        "value": "rgba(0, 0, 0, 0.5)",
+        "type": "color",
+        "description": "Modal/dialog backdrop"
+      },
+      "loading": {
+        "value": "rgba(255, 255, 255, 0.9)",
+        "type": "color",
+        "description": "Loading overlay"
+      }
+    }
+  }
+}

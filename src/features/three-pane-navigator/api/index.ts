@@ -1,0 +1,11 @@
+// Public API exports for three-pane-navigator feature
+export { CoursePane } from '../components/CoursePane'
+export { CourseDetailPane } from '../components/CourseDetailPane'
+export { CourseHeader } from '../components/CourseHeader'
+export { ProgramPane } from '../components/ProgramPane'
+export { NavigationBreadcrumb } from '../components/NavigationBreadcrumb'
+export { useKeyboardNavigation } from '../hooks/useKeyboardNavigation'
+export { usePaneNavigation } from '../hooks/usePaneNavigation'
+export { usePaneResize } from '../hooks/usePaneResize'
+export { useResponsivePanes } from '../hooks/useResponsivePanes'
+export type { Course, Program, NavigationState } from '../types/course.types'

@@ -1,0 +1,16 @@
+{
+  "nav.features": "功能特性",
+  "nav.services": "服务项目",
+  "nav.pricing": "价格方案",
+  "nav.about": "关于我们",
+  "nav.faq": "常见问题",
+  "nav.blogs": "博客文章",
+  "nav.badges": "徽章组件",
+  "nav.videoWall": "视频墙",
+  "auth.signIn": "登录",
+  "auth.getStarted": "开始使用",
+  "auth.adminPortal": "管理门户",
+  "auth.userPortal": "用户门户",
+  "language.english": "English",
+  "language.chinese": "简体中文"
+}

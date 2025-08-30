@@ -1,0 +1,6 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" fill="#F3F4F6"/>
+  <rect x="350" y="187.5" width="100" height="75" rx="37.5" fill="#E5E7EB"/>
+  <path d="M390 209.688C390 207.5 392.5 206.25 394.375 207.344L415.938 219.656C417.812 220.75 417.812 223.25 415.938 224.344L394.375 236.656C392.5 237.75 390 236.5 390 234.312V209.688Z" fill="#9CA3AF"/>
+  <text x="400" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#6B7280">Video Embed</text>
+</svg>

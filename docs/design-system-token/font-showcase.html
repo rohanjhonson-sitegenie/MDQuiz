@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRC Font Recommendations - Interactive Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Load all font options -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600&family=Sora:wght@300;400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&family=Cascadia+Code&family=Lexend:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-yellow: #FFD500;
+            --color-black: #1A1A1A;
+            --color-gray-100: #F5F5F5;
+            --color-gray-200: #E0E0E0;
+            --color-gray-300: #B3B3B3;
+            --color-gray-600: #333333;
+            --color-gray-800: #1A1A1A;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-12: 3rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-gray-100);
+            color: var(--color-black);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background-color: var(--color-black);
+            color: white;
+            padding: var(--spacing-8) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: repeating-linear-gradient(
+                45deg,
+                var(--color-yellow),
+                var(--color-yellow) 10px,
+                var(--color-black) 10px,
+                var(--color-black) 20px
+            );
+            opacity: 0.1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-6);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-2);
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        
+        .font-option {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .font-option:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .recommended {
+            border: 2px solid var(--color-yellow);
+        }
+        
+        .recommended::before {
+            content: 'RECOMMENDED';
+            position: absolute;
+            top: var(--spacing-3);
+            right: var(--spacing-3);
+            background-color: var(--color-yellow);
+            color: var(--color-black);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .font-title {
+            font-size: 1.75rem;
+            margin-bottom: var(--spacing-2);
+            color: var(--color-gray-800);
+        }
+        
+        .font-description {
+            color: var(--color-gray-600);
+            margin-bottom: var(--spacing-6);
+            font-size: 1rem;
+        }
+        
+        .font-showcase {
+            display: grid;
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .showcase-section {
+            padding: var(--spacing-4);
+            background-color: var(--color-gray-100);
+            border-radius: var(--radius-md);
+        }
+        
+        .showcase-label {
+            font-size: 0.875rem;
+            color: var(--color-gray-600);
+            margin-bottom: var(--spacing-2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .display-text {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .heading-text {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .body-text {
+            font-size: 1.125rem;
+            line-height: 1.75;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .code-sample {
+            font-size: 0.875rem;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: var(--spacing-4);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .font-stack {
+            font-family: monospace;
+            font-size: 0.875rem;
+            background-color: var(--color-gray-200);
+            padding: var(--spacing-3);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-4);
+            overflow-x: auto;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-4);
+            margin-top: var(--spacing-6);
+        }
+        
+        .metric {
+            text-align: center;
+            padding: var(--spacing-4);
+            background-color: var(--color-gray-100);
+            border-radius: var(--radius-md);
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--color-gray-600);
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-yellow);
+        }
+        
+        .interactive-demo {
+            margin-top: var(--spacing-8);
+            padding: var(--spacing-6);
+            background-color: var(--color-gray-100);
+            border-radius: var(--radius-lg);
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        select, input[type="range"] {
+            width: 100%;
+            padding: var(--spacing-2);
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+        
+        #demo-text {
+            min-height: 200px;
+            padding: var(--spacing-4);
+            background-color: white;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        
+        .robotics-example {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            padding: var(--spacing-6);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-6);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .terminal-header {
+            color: var(--color-yellow);
+            margin-bottom: var(--spacing-3);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Caution Tape Robotics</h1>
+            <p class="subtitle">Modern Font Recommendations for STEM Education</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Option 1: Space Grotesk + Inter -->
+        <div class="font-option recommended">
+            <h2 class="font-title">Option 1: Space Grotesk + Inter + JetBrains Mono</h2>
+            <p class="font-description">
+                Modern tech aesthetic with excellent readability. Space Grotesk brings a technical, engineering feel perfect for robotics, 
+                while Inter provides exceptional readability for educational content.
+            </p>
+            
+            <div class="font-showcase">
+                <div class="showcase-section">
+                    <div class="showcase-label">Display / Hero Text</div>
+                    <div class="display-text" style="font-family: 'Space Grotesk', sans-serif;">
+                        BUILD THE FUTURE WITH ROBOTICS
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Heading</div>
+                    <div class="heading-text" style="font-family: 'Space Grotesk', sans-serif;">
+                        Introduction to Machine Learning
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Body Text</div>
+                    <div class="body-text" style="font-family: 'Inter', sans-serif;">
+                        Welcome to Caution Tape Robotics, where students learn cutting-edge robotics, artificial intelligence, 
+                        and STEM concepts through hands-on projects and collaborative learning experiences.
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Code</div>
+                    <pre class="code-sample" style="font-family: 'JetBrains Mono', monospace;"><span style="color: #569cd6;">class</span> <span style="color: #4ec9b0;">Robot</span>:
+    <span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">__init__</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">name</span>):
+        <span style="color: #9cdcfe;">self</span>.name = <span style="color: #9cdcfe;">name</span>
+        <span style="color: #9cdcfe;">self</span>.sensors = []
+    
+    <span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">move_forward</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">distance</span>):
+        <span style="color: #c586c0;">return</span> <span style="color: #ce9178;">f"Moving {distance} units"</span></pre>
+                </div>
+            </div>
+            
+            <div class="font-stack">
+                --font-display: 'Space Grotesk', sans-serif;<br>
+                --font-body: 'Inter', -apple-system, sans-serif;<br>
+                --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            </div>
+            
+            <div class="comparison-grid">
+                <div class="metric">
+                    <div class="metric-label">Readability Score</div>
+                    <div class="metric-value">9.5/10</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Tech Appeal</div>
+                    <div class="metric-value">10/10</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Student Friendly</div>
+                    <div class="metric-value">9/10</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Option 2: Outfit + Plus Jakarta Sans -->
+        <div class="font-option">
+            <h2 class="font-title">Option 2: Outfit + Plus Jakarta Sans + Fira Code</h2>
+            <p class="font-description">
+                Friendly yet professional aesthetic. Outfit's geometric design with rounded edges makes it approachable for students, 
+                while Plus Jakarta Sans ensures comfortable extended reading.
+            </p>
+            
+            <div class="font-showcase">
+                <div class="showcase-section">
+                    <div class="showcase-label">Display / Hero Text</div>
+                    <div class="display-text" style="font-family: 'Outfit', sans-serif;">
+                        LEARN BY BUILDING
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Heading</div>
+                    <div class="heading-text" style="font-family: 'Outfit', sans-serif;">
+                        Robotics Workshop Series
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Body Text</div>
+                    <div class="body-text" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        Join our hands-on workshops where you'll build real robots, program AI algorithms, 
+                        and collaborate with fellow students passionate about technology and innovation.
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Code</div>
+                    <pre class="code-sample" style="font-family: 'Fira Code', monospace;"><span style="color: #569cd6;">const</span> <span style="color: #9cdcfe;">sensorData</span> = {
+    <span style="color: #9cdcfe;">ultrasonic</span>: <span style="color: #b5cea8;">45</span>,
+    <span style="color: #9cdcfe;">infrared</span>: <span style="color: #569cd6;">true</span>,
+    <span style="color: #9cdcfe;">temperature</span>: <span style="color: #b5cea8;">23.5</span>
+};
+
+<span style="color: #569cd6;">if</span> (<span style="color: #9cdcfe;">sensorData</span>.<span style="color: #9cdcfe;">ultrasonic</span> < <span style="color: #b5cea8;">50</span>) {
+    <span style="color: #dcdcaa;">avoidObstacle</span>();
+}</pre>
+                </div>
+            </div>
+            
+            <div class="font-stack">
+                --font-display: 'Outfit', sans-serif;<br>
+                --font-body: 'Plus Jakarta Sans', sans-serif;<br>
+                --font-mono: 'Fira Code', 'Cascadia Code', monospace;
+            </div>
+        </div>
+        
+        <!-- Option 3: Sora + Work Sans -->
+        <div class="font-option">
+            <h2 class="font-title">Option 3: Sora + Work Sans + Cascadia Code</h2>
+            <p class="font-description">
+                Futuristic tech education platform. Sora's modern design conveys innovation and forward-thinking, 
+                perfect for AI and robotics education.
+            </p>
+            
+            <div class="font-showcase">
+                <div class="showcase-section">
+                    <div class="showcase-label">Display / Hero Text</div>
+                    <div class="display-text" style="font-family: 'Sora', sans-serif;">
+                        INNOVATE WITH AI
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Heading</div>
+                    <div class="heading-text" style="font-family: 'Sora', sans-serif;">
+                        Neural Networks Fundamentals
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Body Text</div>
+                    <div class="body-text" style="font-family: 'Work Sans', sans-serif;">
+                        Explore the fascinating world of artificial intelligence through practical projects. 
+                        From computer vision to natural language processing, master the technologies shaping our future.
+                    </div>
+                </div>
+                
+                <div class="showcase-section">
+                    <div class="showcase-label">Code</div>
+                    <pre class="code-sample" style="font-family: 'Cascadia Code', monospace;"><span style="color: #c586c0;">import</span> <span style="color: #9cdcfe;">tensorflow</span> <span style="color: #c586c0;">as</span> <span style="color: #9cdcfe;">tf</span>
+<span style="color: #c586c0;">import</span> <span style="color: #9cdcfe;">numpy</span> <span style="color: #c586c0;">as</span> <span style="color: #9cdcfe;">np</span>
+
+<span style="color: #6a9955;"># Build neural network</span>
+<span style="color: #9cdcfe;">model</span> = <span style="color: #9cdcfe;">tf</span>.<span style="color: #9cdcfe;">keras</span>.<span style="color: #dcdcaa;">Sequential</span>([
+    <span style="color: #9cdcfe;">tf</span>.<span style="color: #9cdcfe;">keras</span>.<span style="color: #9cdcfe;">layers</span>.<span style="color: #dcdcaa;">Dense</span>(<span style="color: #b5cea8;">128</span>, <span style="color: #9cdcfe;">activation</span>=<span style="color: #ce9178;">'relu'</span>),
+    <span style="color: #9cdcfe;">tf</span>.<span style="color: #9cdcfe;">keras</span>.<span style="color: #9cdcfe;">layers</span>.<span style="color: #dcdcaa;">Dense</span>(<span style="color: #b5cea8;">10</span>, <span style="color: #9cdcfe;">activation</span>=<span style="color: #ce9178;">'softmax'</span>)
+])</pre>
+                </div>
+            </div>
+            
+            <div class="font-stack">
+                --font-display: 'Sora', sans-serif;<br>
+                --font-body: 'Work Sans', sans-serif;<br>
+                --font-mono: 'Cascadia Code', 'JetBrains Mono', monospace;
+            </div>
+        </div>
+        
+        <!-- Interactive Demo -->
+        <div class="interactive-demo">
+            <h2 style="margin-bottom: var(--spacing-4);">Interactive Font Tester</h2>
+            
+            <div class="demo-controls">
+                <div class="control-group">
+                    <label class="control-label" for="font-select">Choose Font Combination:</label>
+                    <select id="font-select" onchange="updateDemo()">
+                        <option value="space">Space Grotesk + Inter</option>
+                        <option value="outfit">Outfit + Plus Jakarta Sans</option>
+                        <option value="sora">Sora + Work Sans</option>
+                        <option value="manrope">Manrope + DM Sans</option>
+                        <option value="lexend">Lexend + Rubik</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="size-select">Font Size:</label>
+                    <input type="range" id="size-select" min="12" max="24" value="16" onchange="updateDemo()">
+                    <span id="size-value">16px</span>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="weight-select">Font Weight:</label>
+                    <select id="weight-select" onchange="updateDemo()">
+                        <option value="400">Regular</option>
+                        <option value="500">Medium</option>
+                        <option value="600">Semibold</option>
+                        <option value="700">Bold</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="demo-text">
+                <h3 style="margin-bottom: var(--spacing-3);">Welcome to Caution Tape Robotics</h3>
+                <p style="margin-bottom: var(--spacing-3);">
+                    Our mission is to inspire and educate the next generation of robotics engineers, AI researchers, 
+                    and STEM innovators through hands-on learning experiences.
+                </p>
+                <p>
+                    Join us as we explore machine learning, computer vision, autonomous systems, and the cutting-edge 
+                    technologies that are shaping our future.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Special Use Cases -->
+        <div class="robotics-example">
+            <h3 class="terminal-header" style="font-family: 'Orbitron', sans-serif;">
+                ROBOT CONTROL TERMINAL v2.0
+            </h3>
+            <pre style="font-family: 'JetBrains Mono', monospace;">&gt; Initializing robot systems...
+&gt; Motor controllers: <span style="color: var(--color-yellow);">ONLINE</span>
+&gt; Sensors array: <span style="color: var(--color-yellow);">ACTIVE</span>
+&gt; AI module: <span style="color: var(--color-yellow);">READY</span>
+&gt; 
+&gt; <span style="color: #00ff00;">$</span> robot.execute_mission("autonomous_navigation")
+&gt; Path planning initiated...
+&gt; Obstacle detected at 45cm
+&gt; Recalculating route...
+&gt; Mission status: <span style="color: var(--color-yellow);">IN PROGRESS</span></pre>
+        </div>
+    </div>
+    
+    <script>
+        function updateDemo() {
+            const fontSelect = document.getElementById('font-select').value;
+            const sizeSelect = document.getElementById('size-select').value;
+            const weightSelect = document.getElementById('weight-select').value;
+            const demoText = document.getElementById('demo-text');
+            
+            document.getElementById('size-value').textContent = sizeSelect + 'px';
+            
+            let displayFont, bodyFont;
+            
+            switch(fontSelect) {
+                case 'space':
+                    displayFont = "'Space Grotesk', sans-serif";
+                    bodyFont = "'Inter', sans-serif";
+                    break;
+                case 'outfit':
+                    displayFont = "'Outfit', sans-serif";
+                    bodyFont = "'Plus Jakarta Sans', sans-serif";
+                    break;
+                case 'sora':
+                    displayFont = "'Sora', sans-serif";
+                    bodyFont = "'Work Sans', sans-serif";
+                    break;
+                case 'manrope':
+                    displayFont = "'Manrope', sans-serif";
+                    bodyFont = "'DM Sans', sans-serif";
+                    break;
+                case 'lexend':
+                    displayFont = "'Lexend', sans-serif";
+                    bodyFont = "'Rubik', sans-serif";
+                    break;
+            }
+            
+            demoText.querySelector('h3').style.fontFamily = displayFont;
+            demoText.querySelector('h3').style.fontWeight = '600';
+            
+            demoText.querySelectorAll('p').forEach(p => {
+                p.style.fontFamily = bodyFont;
+                p.style.fontSize = sizeSelect + 'px';
+                p.style.fontWeight = weightSelect;
+            });
+        }
+        
+        // Initialize demo
+        updateDemo();
+    </script>
+</body>
+</html>

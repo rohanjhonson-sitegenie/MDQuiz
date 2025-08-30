@@ -1,0 +1,58 @@
+/* Navbar reverse theme styles */
+.navbar-reverse-theme {
+  /* Override Tailwind CSS variables for reversed navbar */
+  --tw-bg-opacity: 1;
+  --tw-text-opacity: 1;
+  --tw-border-opacity: 1;
+
+  /* Ensure background color is applied */
+  background-color: var(--navbar-background) !important;
+}
+
+/* When navbar is in reversed theme mode, override text and background colors */
+.navbar-reverse-theme * {
+  color: var(--navbar-foreground) !important;
+}
+
+.navbar-reverse-theme .text-foreground\/60 {
+  color: hsl(var(--navbar-muted-foreground)) !important;
+}
+
+.navbar-reverse-theme .text-foreground\/70 {
+  color: hsl(var(--navbar-muted-foreground)) !important;
+}
+
+.navbar-reverse-theme .hover\:text-foreground:hover {
+  color: var(--navbar-foreground) !important;
+}
+
+.navbar-reverse-theme .hover\:bg-accent\/50:hover {
+  background-color: hsl(var(--navbar-accent) / 0.5) !important;
+}
+
+.navbar-reverse-theme .text-primary {
+  color: var(--navbar-primary) !important;
+}
+
+.navbar-reverse-theme .bg-muted\/30 {
+  background-color: hsl(var(--navbar-muted) / 0.3) !important;
+}
+
+.navbar-reverse-theme .border-b {
+  border-color: var(--navbar-border) !important;
+}
+
+/* Button styles for reversed theme */
+.navbar-reverse-theme .focus-visible\:bg-accent\/50:focus-visible {
+  background-color: hsl(var(--navbar-accent) / 0.5) !important;
+}
+
+.navbar-reverse-theme .hover\:bg-accent\/50:hover {
+  background-color: hsl(var(--navbar-accent) / 0.5) !important;
+}
+
+/* Sheet/Mobile menu styles */
+.navbar-reverse-theme [data-radix-popper-content-wrapper] {
+  --navbar-background: var(--navbar-background);
+  --navbar-foreground: var(--navbar-foreground);
+}

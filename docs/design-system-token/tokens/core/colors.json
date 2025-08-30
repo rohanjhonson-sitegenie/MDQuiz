@@ -1,0 +1,134 @@
+{
+  "color": {
+    "core": {
+      "yellow": {
+        "100": {
+          "value": "#FFF9E6",
+          "type": "color",
+          "description": "Lightest yellow shade"
+        },
+        "200": {
+          "value": "#FFF3CC",
+          "type": "color",
+          "description": "Very light yellow"
+        },
+        "300": {
+          "value": "#FFE799",
+          "type": "color",
+          "description": "Light yellow"
+        },
+        "400": {
+          "value": "#FFDC66",
+          "type": "color",
+          "description": "Medium light yellow"
+        },
+        "500": {
+          "value": "#F9D900",
+          "type": "color",
+          "description": "Primary brand yellow - Caution Tape Robotics"
+        },
+        "600": {
+          "value": "#E0B800",
+          "type": "color",
+          "description": "Medium dark yellow"
+        },
+        "700": {
+          "value": "#B39500",
+          "type": "color",
+          "description": "Dark yellow"
+        },
+        "800": {
+          "value": "#806A00",
+          "type": "color",
+          "description": "Very dark yellow"
+        },
+        "900": {
+          "value": "#4D4000",
+          "type": "color",
+          "description": "Darkest yellow shade"
+        }
+      },
+      "black": {
+        "100": {
+          "value": "#F5F5F5",
+          "type": "color",
+          "description": "Near white"
+        },
+        "200": {
+          "value": "#E0E0E0",
+          "type": "color",
+          "description": "Very light gray"
+        },
+        "300": {
+          "value": "#B3B3B3",
+          "type": "color",
+          "description": "Light gray"
+        },
+        "400": {
+          "value": "#808080",
+          "type": "color",
+          "description": "Medium gray"
+        },
+        "500": {
+          "value": "#4D4D4D",
+          "type": "color",
+          "description": "Dark gray"
+        },
+        "600": {
+          "value": "#333333",
+          "type": "color",
+          "description": "Very dark gray"
+        },
+        "700": {
+          "value": "#262626",
+          "type": "color",
+          "description": "Near black"
+        },
+        "800": {
+          "value": "#1A1A1A",
+          "type": "color",
+          "description": "Primary brand black - Caution Tape Robotics"
+        },
+        "900": {
+          "value": "#0D0D0D",
+          "type": "color",
+          "description": "Deepest black"
+        }
+      },
+      "neutral": {
+        "white": {
+          "value": "#FFFFFF",
+          "type": "color",
+          "description": "Pure white"
+        },
+        "black": {
+          "value": "#000000",
+          "type": "color",
+          "description": "Pure black"
+        }
+      },
+      "semantic": {
+        "success": {
+          "value": "#10B981",
+          "type": "color",
+          "description": "Success state color"
+        },
+        "warning": {
+          "value": "#F59E0B",
+          "type": "color",
+          "description": "Warning state color"
+        },
+        "error": {
+          "value": "#EF4444",
+          "type": "color",
+          "description": "Error state color"
+        },
+        "info": {
+          "value": "#3B82F6",
+          "type": "color",
+          "description": "Information state color"
+        }
+      }
+    }
+  }
+}

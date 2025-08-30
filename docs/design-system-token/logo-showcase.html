@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRC Logo System - Design Tokens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Logo Colors */
+            --logo-yellow: #F9D900;
+            --logo-yellow-gradient-start: #F9D900;
+            --logo-yellow-gradient-end: #F7EF72;
+            --logo-black: #231F20;
+            --logo-white: #FFFFFF;
+            
+            /* Brand Colors */
+            --color-yellow-500: #FFD500;
+            --color-black-800: #1A1A1A;
+            --color-black-100: #F5F5F5;
+            --color-black-200: #E0E0E0;
+            --color-black-300: #B3B3B3;
+            --color-black-600: #333333;
+            --color-black-900: #0D0D0D;
+            
+            /* Typography */
+            --font-family-display: 'Space Grotesk', sans-serif;
+            --font-family-sans: 'Inter', sans-serif;
+            --font-family-mono: 'JetBrains Mono', monospace;
+            
+            /* Spacing */
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-12: 3rem;
+            
+            /* Other */
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-black-100);
+            color: var(--color-black-800);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background-color: var(--color-black-800);
+            color: white;
+            padding: var(--spacing-8) 0;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-6);
+        }
+        
+        h1 {
+            font-family: var(--font-family-display);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        h2 {
+            font-family: var(--font-family-display);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-4);
+            color: var(--color-black-800);
+        }
+        
+        h3 {
+            font-family: var(--font-family-sans);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-3);
+            color: var(--color-black-600);
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .logo-card {
+            border: 1px solid var(--color-black-200);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .logo-display {
+            padding: var(--spacing-8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        .logo-display.light {
+            background-color: white;
+        }
+        
+        .logo-display.dark {
+            background-color: var(--color-black-900);
+        }
+        
+        .logo-display.brand {
+            background-color: var(--logo-yellow);
+        }
+        
+        .logo-display.grid {
+            background-image: 
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        .logo-info {
+            padding: var(--spacing-4);
+            background-color: var(--color-black-100);
+            border-top: 1px solid var(--color-black-200);
+        }
+        
+        .logo-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-black-600);
+            margin-bottom: var(--spacing-1);
+        }
+        
+        .logo-description {
+            font-size: 0.75rem;
+            color: var(--color-black-600);
+        }
+        
+        .logo-svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .size-demo {
+            display: flex;
+            align-items: flex-end;
+            gap: var(--spacing-6);
+            flex-wrap: wrap;
+            padding: var(--spacing-6);
+            background-color: var(--color-black-100);
+            border-radius: var(--radius-md);
+        }
+        
+        .size-item {
+            text-align: center;
+        }
+        
+        .size-label {
+            font-size: 0.75rem;
+            color: var(--color-black-600);
+            margin-top: var(--spacing-2);
+            font-family: var(--font-family-mono);
+        }
+        
+        .clear-space-demo {
+            display: inline-block;
+            position: relative;
+            margin: var(--spacing-8);
+        }
+        
+        .clear-space-guide {
+            position: absolute;
+            border: 2px dashed var(--logo-yellow);
+            inset: -16px;
+            pointer-events: none;
+        }
+        
+        .color-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-4);
+            margin-top: var(--spacing-4);
+        }
+        
+        .color-spec {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+        
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-black-200);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-gradient {
+            background: linear-gradient(135deg, var(--logo-yellow-gradient-start) 0%, var(--logo-yellow-gradient-end) 100%);
+        }
+        
+        .color-details {
+            flex: 1;
+        }
+        
+        .color-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-1);
+        }
+        
+        .color-value {
+            font-family: var(--font-family-mono);
+            font-size: 0.75rem;
+            color: var(--color-black-600);
+        }
+        
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-4);
+            margin-top: var(--spacing-4);
+        }
+        
+        .usage-item {
+            padding: var(--spacing-4);
+            background-color: var(--color-black-100);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .usage-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .usage-detail {
+            font-size: 0.875rem;
+            color: var(--color-black-600);
+        }
+        
+        .code-block {
+            background-color: var(--color-black-900);
+            color: #d4d4d4;
+            padding: var(--spacing-4);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            font-family: var(--font-family-mono);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-top: var(--spacing-4);
+        }
+        
+        .token-tag {
+            color: #569cd6;
+        }
+        
+        .token-value {
+            color: #ce9178;
+        }
+        
+        /* Logo Animation */
+        @keyframes stripe-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(20px); }
+        }
+        
+        .animated-stripes {
+            animation: stripe-move 2s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Caution Tape Robotics</h1>
+            <p class="subtitle">Logo System & Brand Guidelines</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <!-- Logo Variants -->
+        <section class="section">
+            <h2>Logo Variants</h2>
+            <p style="margin-bottom: var(--spacing-6); color: var(--color-black-600);">
+                The CTRC logo system includes multiple variants optimized for different use cases and backgrounds.
+            </p>
+            
+            <h3>Primary Logos</h3>
+            <div class="logo-grid" style="margin-bottom: var(--spacing-8);">
+                <!-- Full Color on Light -->
+                <div class="logo-card">
+                    <div class="logo-display light">
+                        <img src="logos/primary/ctrc-logo-full-color.svg" alt="CTRC Full Color Logo" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">Full Color - Light Background</div>
+                        <div class="logo-description">Primary logo for light backgrounds</div>
+                    </div>
+                </div>
+                
+                <!-- White on Dark -->
+                <div class="logo-card">
+                    <div class="logo-display dark">
+                        <img src="logos/primary/ctrc-logo-white.svg" alt="CTRC White Logo" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">White - Dark Background</div>
+                        <div class="logo-description">For dark backgrounds and overlays</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Single Color Variants</h3>
+            <div class="logo-grid">
+                <!-- Black Single Color -->
+                <div class="logo-card">
+                    <div class="logo-display light">
+                        <img src="logos/single-color/ctrc-logo-black.svg" alt="CTRC Black Logo" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">Black - Single Color</div>
+                        <div class="logo-description">For single color printing</div>
+                    </div>
+                </div>
+                
+                <!-- White Single Color -->
+                <div class="logo-card">
+                    <div class="logo-display dark">
+                        <img src="logos/single-color/ctrc-logo-white-mono.svg" alt="CTRC White Mono Logo" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">White - Single Color</div>
+                        <div class="logo-description">For dark backgrounds, single color</div>
+                    </div>
+                </div>
+                
+                <!-- On Brand Yellow -->
+                <div class="logo-card">
+                    <div class="logo-display brand">
+                        <img src="logos/single-color/ctrc-logo-black.svg" alt="CTRC Logo on Brand" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">On Brand Yellow</div>
+                        <div class="logo-description">Special brand applications</div>
+                    </div>
+                </div>
+                
+                <!-- Transparent Background -->
+                <div class="logo-card">
+                    <div class="logo-display grid">
+                        <img src="logos/primary/ctrc-logo-full-color.svg" alt="CTRC Logo Transparent" class="logo-svg" style="height: 60px;">
+                    </div>
+                    <div class="logo-info">
+                        <div class="logo-label">Transparent Background</div>
+                        <div class="logo-description">For varied backgrounds</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Logo Anatomy -->
+        <section class="section">
+            <h2>Logo Anatomy</h2>
+            <p style="margin-bottom: var(--spacing-6); color: var(--color-black-600);">
+                The CTRC logo consists of three key elements that work together to create a cohesive brand identity.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-8); align-items: center;">
+                <div>
+                    <h3>1. Icon Mark</h3>
+                    <p style="margin-bottom: var(--spacing-4);">
+                        The hexagonal brackets with forward slashes represent code, precision, and the technical nature of robotics.
+                    </p>
+                    
+                    <h3>2. Typography</h3>
+                    <p style="margin-bottom: var(--spacing-4);">
+                        Bold, industrial letterforms convey strength and authority in STEM education.
+                    </p>
+                    
+                    <h3>3. Caution Stripes</h3>
+                    <p>
+                        The signature yellow diagonal stripes reinforce the "Caution Tape" brand identity with a gradient from #F9D900 to #F7EF72.
+                    </p>
+                </div>
+                <div style="background-color: var(--color-black-100); padding: var(--spacing-8); border-radius: var(--radius-lg); text-align: center;">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="Logo Anatomy" style="width: 100%; max-width: 400px;">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Color Specifications -->
+        <section class="section">
+            <h2>Color Specifications</h2>
+            <p style="margin-bottom: var(--spacing-6); color: var(--color-black-600);">
+                Precise color values ensure consistent brand representation across all media.
+            </p>
+            
+            <div class="color-specs">
+                <div class="color-spec">
+                    <div class="color-swatch" style="background-color: var(--logo-yellow);"></div>
+                    <div class="color-details">
+                        <div class="color-name">Logo Yellow</div>
+                        <div class="color-value">#F9D900</div>
+                        <div class="color-value">RGB(249, 217, 0)</div>
+                    </div>
+                </div>
+                
+                <div class="color-spec">
+                    <div class="color-swatch color-gradient"></div>
+                    <div class="color-details">
+                        <div class="color-name">Gradient Stripes</div>
+                        <div class="color-value">#F9D900 → #F7EF72</div>
+                        <div class="color-value">135° angle</div>
+                    </div>
+                </div>
+                
+                <div class="color-spec">
+                    <div class="color-swatch" style="background-color: var(--logo-black);"></div>
+                    <div class="color-details">
+                        <div class="color-name">Logo Black</div>
+                        <div class="color-value">#231F20</div>
+                        <div class="color-value">RGB(35, 31, 32)</div>
+                    </div>
+                </div>
+                
+                <div class="color-spec">
+                    <div class="color-swatch" style="background-color: var(--logo-white);"></div>
+                    <div class="color-details">
+                        <div class="color-name">Logo White</div>
+                        <div class="color-value">#FFFFFF</div>
+                        <div class="color-value">RGB(255, 255, 255)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Size & Spacing -->
+        <section class="section">
+            <h2>Size & Spacing Guidelines</h2>
+            
+            <h3>Minimum Sizes</h3>
+            <div class="size-demo">
+                <div class="size-item">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="Small Logo" style="height: 30px;">
+                    <div class="size-label">Small: 30px</div>
+                </div>
+                <div class="size-item">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="Medium Logo" style="height: 50px;">
+                    <div class="size-label">Medium: 50px</div>
+                </div>
+                <div class="size-item">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="Large Logo" style="height: 70px;">
+                    <div class="size-label">Large: 70px</div>
+                </div>
+                <div class="size-item">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="XL Logo" style="height: 100px;">
+                    <div class="size-label">XL: 100px</div>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: var(--spacing-8);">Clear Space</h3>
+            <p style="margin-bottom: var(--spacing-4); color: var(--color-black-600);">
+                Maintain minimum clear space around the logo equal to the height of the letter "C" in the wordmark.
+            </p>
+            <div style="text-align: center;">
+                <div class="clear-space-demo">
+                    <img src="logos/primary/ctrc-logo-full-color.svg" alt="Clear Space Demo" style="height: 60px;">
+                    <div class="clear-space-guide"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Usage Guidelines -->
+        <section class="section">
+            <h2>Usage Guidelines</h2>
+            
+            <div class="usage-grid">
+                <div class="usage-item">
+                    <div class="usage-title">Website Header</div>
+                    <div class="usage-detail">Full color, medium size</div>
+                    <div class="usage-detail">Height: 50px</div>
+                </div>
+                
+                <div class="usage-item">
+                    <div class="usage-title">Mobile App</div>
+                    <div class="usage-detail">Icon mark only</div>
+                    <div class="usage-detail">Square format</div>
+                </div>
+                
+                <div class="usage-item">
+                    <div class="usage-title">Social Media</div>
+                    <div class="usage-detail">Full color, large size</div>
+                    <div class="usage-detail">Centered layout</div>
+                </div>
+                
+                <div class="usage-item">
+                    <div class="usage-title">Print Materials</div>
+                    <div class="usage-detail">High resolution vectors</div>
+                    <div class="usage-detail">CMYK conversion</div>
+                </div>
+                
+                <div class="usage-item">
+                    <div class="usage-title">Merchandise</div>
+                    <div class="usage-detail">Single color options</div>
+                    <div class="usage-detail">Simplified versions</div>
+                </div>
+                
+                <div class="usage-item">
+                    <div class="usage-title">Video Overlays</div>
+                    <div class="usage-detail">White version</div>
+                    <div class="usage-detail">With transparency</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Implementation -->
+        <section class="section">
+            <h2>Token Implementation</h2>
+            <p style="margin-bottom: var(--spacing-4); color: var(--color-black-600);">
+                Use these design tokens to implement the logo consistently across platforms.
+            </p>
+            
+            <div class="code-block">
+<span class="token-tag">// Logo Colors</span>
+--logo-yellow: <span class="token-value">#F9D900</span>;
+--logo-yellow-gradient-start: <span class="token-value">#F9D900</span>;
+--logo-yellow-gradient-end: <span class="token-value">#F7EF72</span>;
+--logo-black: <span class="token-value">#231F20</span>;
+--logo-white: <span class="token-value">#FFFFFF</span>;
+
+<span class="token-tag">// Logo Sizes</span>
+--logo-height-sm: <span class="token-value">30px</span>;
+--logo-height-md: <span class="token-value">50px</span>;
+--logo-height-lg: <span class="token-value">70px</span>;
+--logo-height-xl: <span class="token-value">100px</span>;
+
+<span class="token-tag">// Logo Spacing</span>
+--logo-clear-space: <span class="token-value">16px</span>;
+--logo-icon-gap: <span class="token-value">12px</span>;
+
+<span class="token-tag">// Aspect Ratios</span>
+--logo-aspect-full: <span class="token-value">4.33</span>;  <span class="token-tag">// 260:60</span>
+--logo-aspect-mark: <span class="token-value">1.42</span>;  <span class="token-tag">// 85:60</span>
+            </div>
+            
+            <h3 style="margin-top: var(--spacing-6);">React Component Example</h3>
+            <div class="code-block">
+<span class="token-tag">import</span> { ReactComponent <span class="token-tag">as</span> LogoFull } <span class="token-tag">from</span> <span class="token-value">'./logos/primary/ctrc-logo-full-color.svg'</span>;
+<span class="token-tag">import</span> { ReactComponent <span class="token-tag">as</span> LogoWhite } <span class="token-tag">from</span> <span class="token-value">'./logos/primary/ctrc-logo-white.svg'</span>;
+
+<span class="token-tag">const</span> Logo = ({ variant = <span class="token-value">'color'</span>, size = <span class="token-value">'md'</span>, ...props }) => {
+  <span class="token-tag">const</span> heights = {
+    sm: <span class="token-value">30</span>,
+    md: <span class="token-value">50</span>,
+    lg: <span class="token-value">70</span>,
+    xl: <span class="token-value">100</span>
+  };
+  
+  <span class="token-tag">const</span> LogoComponent = variant === <span class="token-value">'white'</span> ? LogoWhite : LogoFull;
+  
+  <span class="token-tag">return</span> &lt;LogoComponent height={heights[size]} {...props} /&gt;;
+};
+            </div>
+        </section>
+    </main>
+</body>
+</html>
