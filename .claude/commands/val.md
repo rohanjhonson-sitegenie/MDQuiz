@@ -1,0 +1,1 @@
+Run `npm run check:all` and list all problems. For each, propose and apply a fix directly in the codebase.

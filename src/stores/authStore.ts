@@ -1,8 +1,8 @@
 import Cookies from 'js-cookie'
 import { create } from 'zustand'
-import { supabase } from '@/lib/supabase'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN = 'ctid_access_token'
+const USER_DATA = 'ctid_user_data'
 
 interface AuthUser {
   accountNo: string
@@ -12,6 +12,7 @@ interface AuthUser {
   displayName?: string
   avatarUrl?: string
   userRole?: string
+  userProfile?: string
 }
 
 interface AuthState {
@@ -22,67 +23,33 @@ interface AuthState {
     setAccessToken: (accessToken: string) => void
     resetAccessToken: () => void
     reset: () => void
-    signInWithGoogle: () => Promise<void>
   }
 }
 
-export const useAuthStore = create<AuthState>()((set, get) => {
-  const cookieState = Cookies.get(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
+export const useAuthStore = create<AuthState>()((set, _get) => {
+  // Initialize from cookies
+  const cookieToken = Cookies.get(ACCESS_TOKEN)
+  const cookieUser = Cookies.get(USER_DATA)
 
-  // Initialize auth state listener
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (
-      (event === 'SIGNED_IN' ||
-        event === 'TOKEN_REFRESHED' ||
-        event === 'INITIAL_SESSION') &&
-      session?.user
-    ) {
-      // Decode JWT to get user_role
-      let userRole = 'user'
-      if (session.access_token) {
-        try {
-          const parts = session.access_token.split('.')
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]))
-            userRole = payload.user_role || 'user'
-          }
-        } catch {
-          // Default to 'user' if decoding fails
-        }
-      }
-
-      const authUser: AuthUser = {
-        accountNo: session.user.id,
-        email: session.user.email || '',
-        role: [userRole],
-        userRole: userRole,
-        exp: session.expires_at || 0,
-        displayName:
-          session.user.user_metadata?.display_name ||
-          session.user.user_metadata?.name,
-        avatarUrl:
-          session.user.user_metadata?.avatar_url ||
-          session.user.user_metadata?.picture,
-      }
-      get().auth.setUser(authUser)
-      if (session.access_token) {
-        get().auth.setAccessToken(session.access_token)
-      }
-    } else if (event === 'SIGNED_OUT' || !session) {
-      get().auth.reset()
-    }
-  })
+  const initToken = cookieToken ? JSON.parse(cookieToken) : ''
+  const initUser = cookieUser ? JSON.parse(cookieUser) : null
 
   return {
     auth: {
-      user: null,
+      user: initUser,
       setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
+        set((state) => {
+          if (user) {
+            Cookies.set(USER_DATA, JSON.stringify(user), { expires: 7 }) // 7 days
+          } else {
+            Cookies.remove(USER_DATA)
+          }
+          return { ...state, auth: { ...state.auth, user } }
+        }),
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
+          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken), { expires: 7 }) // 7 days
           return { ...state, auth: { ...state.auth, accessToken } }
         }),
       resetAccessToken: () =>
@@ -93,23 +60,12 @@ export const useAuthStore = create<AuthState>()((set, get) => {
       reset: () =>
         set((state) => {
           Cookies.remove(ACCESS_TOKEN)
+          Cookies.remove(USER_DATA)
           return {
             ...state,
             auth: { ...state.auth, user: null, accessToken: '' },
           }
         }),
-      signInWithGoogle: async () => {
-        const redirectUrl = `${window.location.origin}/auth/callback`
-
-        await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: redirectUrl,
-            // Add skipBrowserRedirect for debugging if needed
-            // skipBrowserRedirect: true,
-          },
-        })
-      },
     },
   }
 })

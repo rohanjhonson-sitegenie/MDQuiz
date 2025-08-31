@@ -1,6 +1,6 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/authStore'
-import { supabase } from '@/lib/supabase'
+import { logoutWithCentralId } from '@/lib/auth-utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,17 +15,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ProfileDropdown() {
-  const navigate = useNavigate()
   const { user, reset } = useAuthStore((state) => state.auth)
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut()
-      reset()
-      navigate({ to: '/' })
-    } catch (_error) {
-      // Handle sign out error silently or with toast notification
-    }
+  const handleSignOut = () => {
+    // Clear local auth state before redirecting to central logout
+    reset()
+    // Redirect to central ID service for global logout
+    logoutWithCentralId()
   }
 
   const userName = user?.displayName || user?.email?.split('@')[0] || 'User'

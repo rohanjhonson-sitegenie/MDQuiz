@@ -55,8 +55,12 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/auth/sign-in', search: { redirect } })
+          // Redirect to CTID service for re-authentication
+          const returnTo = `${window.location.origin}/auth/ready?next=${encodeURIComponent(router.history.location.href)}`
+          const idServiceUrl =
+            import.meta.env.VITE_ID_SERVICE_URL || 'https://devid.ctedu.ca'
+          const url = `${idServiceUrl}/login?return_to=${encodeURIComponent(returnTo)}`
+          window.location.assign(url)
         }
         if (error.response?.status === 500) {
           toast.error('Internal Server Error!')

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
   BadgeCheck,
   Bell,
@@ -8,7 +8,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { supabase } from '@/lib/supabase'
+import { logoutWithCentralId } from '@/lib/auth-utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -36,17 +36,13 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const navigate = useNavigate()
   const { reset } = useAuthStore((state) => state.auth)
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut()
-      reset()
-      navigate({ to: '/' })
-    } catch (_error) {
-      // Handle sign out error silently or with toast notification
-    }
+  const handleSignOut = () => {
+    // Clear local auth state before redirecting to central logout
+    reset()
+    // Redirect to central ID service for global logout
+    logoutWithCentralId()
   }
 
   return (

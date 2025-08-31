@@ -33,41 +33,72 @@ export default defineConfig({
     include: ['buffer'],
   },
   build: {
-    // Set chunk size warning limit to a more realistic value after optimization
-    chunkSizeWarningLimit: 600,
+    // Set chunk size warning limit to a more realistic value for feature-rich admin dashboard
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Blog/Markdown processing libraries are now lazy-loaded
-          // Remove manual chunking to allow automatic code splitting
+          // Core React libraries
+          if (
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/')
+          ) {
+            return 'react-vendor'
+          }
 
-          // Radix UI components
+          // Radix UI components - split into smaller chunks
+          if (
+            id.includes('@radix-ui/react-dialog') ||
+            id.includes('@radix-ui/react-dropdown-menu')
+          ) {
+            return 'radix-overlays'
+          }
+          if (
+            id.includes('@radix-ui/react-form') ||
+            id.includes('@radix-ui/react-select')
+          ) {
+            return 'radix-forms'
+          }
           if (id.includes('@radix-ui')) {
             return 'radix-ui'
           }
 
           // TanStack libraries
+          if (id.includes('@tanstack/react-router')) {
+            return 'tanstack-router'
+          }
           if (
-            id.includes('@tanstack/react-router') ||
             id.includes('@tanstack/react-query') ||
+            id.includes('@tanstack/query-core')
+          ) {
+            return 'tanstack-query'
+          }
+          if (
             id.includes('@tanstack/react-table') ||
             id.includes('@tanstack/react-virtual')
           ) {
-            return 'tanstack'
+            return 'tanstack-table'
           }
 
-          // Tabler icons
+          // Tabler icons - separate from other icons
           if (id.includes('@tabler/icons-react')) {
-            return 'icons'
+            return 'tabler-icons'
+          }
+
+          // Lucide icons
+          if (id.includes('lucide-react')) {
+            return 'lucide-icons'
           }
 
           // Form libraries
           if (
             id.includes('react-hook-form') ||
-            id.includes('@hookform/resolvers') ||
-            id.includes('zod')
+            id.includes('@hookform/resolvers')
           ) {
-            return 'forms'
+            return 'form-libs'
+          }
+          if (id.includes('zod')) {
+            return 'validation'
           }
 
           // Date utilities
@@ -78,6 +109,30 @@ export default defineConfig({
           // Charts and visualization
           if (id.includes('recharts')) {
             return 'charts'
+          }
+
+          // Markdown processing (if not lazy loaded)
+          if (
+            id.includes('remark') ||
+            id.includes('rehype') ||
+            id.includes('unified')
+          ) {
+            return 'markdown-processing'
+          }
+
+          // Large utility libraries
+          if (id.includes('lodash') || id.includes('ramda')) {
+            return 'utilities'
+          }
+
+          // Accessibility libraries
+          if (id.includes('@floating-ui') || id.includes('focus-trap')) {
+            return 'accessibility'
+          }
+
+          // Animation libraries
+          if (id.includes('framer-motion') || id.includes('@dnd-kit')) {
+            return 'animations'
           }
         },
       },

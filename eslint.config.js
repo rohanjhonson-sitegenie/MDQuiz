@@ -96,6 +96,20 @@ export default tseslint.config(
           ],
         },
       ],
+      // Prevent mixed authentication patterns - requireAuth has been removed
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/lib/auth-guards',
+              importNames: ['requireAuth'],
+              message:
+                'requireAuth has been removed. Use requireRole instead for consistent authentication.',
+            },
+          ],
+        },
+      ],
     },
   }
 )

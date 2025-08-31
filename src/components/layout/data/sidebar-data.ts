@@ -6,7 +6,6 @@ import {
   IconHelp,
   IconLayoutDashboard,
   IconLock,
-  IconLockAccess,
   IconMessages,
   IconNotification,
   IconPackages,
@@ -110,32 +109,6 @@ const adminSidebarData: SidebarData = {
     {
       title: 'Pages',
       items: [
-        {
-          title: 'Auth',
-          icon: IconLockAccess,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/auth/sign-in',
-            },
-            {
-              title: 'Sign In (2 Col)',
-              url: '/auth/sign-in-2',
-            },
-            {
-              title: 'Sign Up',
-              url: '/auth/sign-up',
-            },
-            {
-              title: 'Forgot Password',
-              url: '/auth/forgot-password',
-            },
-            {
-              title: 'OTP',
-              url: '/auth/otp',
-            },
-          ],
-        },
         {
           title: 'Errors',
           icon: IconBug,
@@ -284,5 +257,6 @@ const userSidebarData: SidebarData = {
 export const sidebarData = adminSidebarData
 
 export function getSidebarDataForRole(role: string): SidebarData {
-  return role === 'admin' ? adminSidebarData : userSidebarData
+  const adminRoles = ['admin', 'superadmin']
+  return adminRoles.includes(role) ? adminSidebarData : userSidebarData
 }

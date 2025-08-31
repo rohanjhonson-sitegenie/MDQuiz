@@ -35,8 +35,10 @@ function AuthCallback() {
           const userRole = decodedToken?.user_role || 'user'
 
           // Redirect based on role
-          if (userRole === 'admin') {
+          if (userRole === 'superadmin' || userRole === 'admin') {
             navigate({ to: '/admin' })
+          } else if (['student', 'parent', 'teacher'].includes(userRole)) {
+            navigate({ to: '/user' })
           } else {
             navigate({ to: '/user' })
           }
@@ -52,8 +54,10 @@ function AuthCallback() {
         const userRole = decodedToken?.user_role || 'user'
 
         // Redirect based on role
-        if (userRole === 'admin') {
+        if (userRole === 'superadmin' || userRole === 'admin') {
           navigate({ to: '/admin' })
+        } else if (['student', 'parent', 'teacher'].includes(userRole)) {
+          navigate({ to: '/user' })
         } else {
           navigate({ to: '/user' })
         }

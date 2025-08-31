@@ -102,8 +102,12 @@
       "Bash(time npm run lint)",
       "Bash(time npm run arch:check)",
       "WebSearch",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__ct-devmcp__do_fix",
+      "Bash(tasklist)",
+      "Bash(tasklist:*)",
+      "mcp__ct-devmcp__do_val"
     ],
     "deny": []
   },

@@ -18,11 +18,7 @@ import { Route as DocsRouteRouteImport } from './routes/docs/route'
 import { Route as BlogsIndexRouteImport } from './routes/blogs/index'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
 import { Route as BlogsSlugRouteImport } from './routes/blogs/$slug'
-import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as AuthSignIn2RouteImport } from './routes/auth/sign-in-2'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthOtpRouteImport } from './routes/auth/otp'
-import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AuthReadyRouteImport } from './routes/auth/ready'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as publicVideoWallCinematicRouteImport } from './routes/(public)/video-wall-cinematic'
 import { Route as publicVideoWallRouteImport } from './routes/(public)/video-wall'
@@ -129,29 +125,9 @@ const BlogsSlugRoute = BlogsSlugRouteImport.update({
   path: '/blogs/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthSignUpRoute = AuthSignUpRouteImport.update({
-  id: '/auth/sign-up',
-  path: '/auth/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignIn2Route = AuthSignIn2RouteImport.update({
-  id: '/auth/sign-in-2',
-  path: '/auth/sign-in-2',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthOtpRoute = AuthOtpRouteImport.update({
-  id: '/auth/otp',
-  path: '/auth/otp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/auth/forgot-password',
-  path: '/auth/forgot-password',
+const AuthReadyRoute = AuthReadyRouteImport.update({
+  id: '/auth/ready',
+  path: '/auth/ready',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -394,11 +370,7 @@ export interface FileRoutesByFullPath {
   '/video-wall': typeof publicVideoWallRoute
   '/video-wall-cinematic': typeof publicVideoWallCinematicRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/otp': typeof AuthOtpRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-in-2': typeof AuthSignIn2Route
-  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/': typeof publicIndexRoute
@@ -449,11 +421,7 @@ export interface FileRoutesByTo {
   '/video-wall': typeof publicVideoWallRoute
   '/video-wall-cinematic': typeof publicVideoWallCinematicRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/otp': typeof AuthOtpRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-in-2': typeof AuthSignIn2Route
-  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/': typeof publicIndexRoute
@@ -504,11 +472,7 @@ export interface FileRoutesById {
   '/(public)/video-wall': typeof publicVideoWallRoute
   '/(public)/video-wall-cinematic': typeof publicVideoWallCinematicRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/otp': typeof AuthOtpRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-in-2': typeof AuthSignIn2Route
-  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/(public)/': typeof publicIndexRoute
@@ -561,11 +525,7 @@ export interface FileRouteTypes {
     | '/video-wall'
     | '/video-wall-cinematic'
     | '/auth/callback'
-    | '/auth/forgot-password'
-    | '/auth/otp'
-    | '/auth/sign-in'
-    | '/auth/sign-in-2'
-    | '/auth/sign-up'
+    | '/auth/ready'
     | '/blogs/$slug'
     | '/design-system/badges'
     | '/'
@@ -616,11 +576,7 @@ export interface FileRouteTypes {
     | '/video-wall'
     | '/video-wall-cinematic'
     | '/auth/callback'
-    | '/auth/forgot-password'
-    | '/auth/otp'
-    | '/auth/sign-in'
-    | '/auth/sign-in-2'
-    | '/auth/sign-up'
+    | '/auth/ready'
     | '/blogs/$slug'
     | '/design-system/badges'
     | '/'
@@ -670,11 +626,7 @@ export interface FileRouteTypes {
     | '/(public)/video-wall'
     | '/(public)/video-wall-cinematic'
     | '/auth/callback'
-    | '/auth/forgot-password'
-    | '/auth/otp'
-    | '/auth/sign-in'
-    | '/auth/sign-in-2'
-    | '/auth/sign-up'
+    | '/auth/ready'
     | '/blogs/$slug'
     | '/design-system/badges'
     | '/(public)/'
@@ -726,11 +678,7 @@ export interface RootRouteChildren {
   publicVideoWallRoute: typeof publicVideoWallRoute
   publicVideoWallCinematicRoute: typeof publicVideoWallCinematicRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthOtpRoute: typeof AuthOtpRoute
-  AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignIn2Route: typeof AuthSignIn2Route
-  AuthSignUpRoute: typeof AuthSignUpRoute
+  AuthReadyRoute: typeof AuthReadyRoute
   BlogsSlugRoute: typeof BlogsSlugRoute
   DesignSystemBadgesLazyRoute: typeof DesignSystemBadgesLazyRoute
   publicIndexRoute: typeof publicIndexRoute
@@ -819,39 +767,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/sign-up': {
-      id: '/auth/sign-up'
-      path: '/auth/sign-up'
-      fullPath: '/auth/sign-up'
-      preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in-2': {
-      id: '/auth/sign-in-2'
-      path: '/auth/sign-in-2'
-      fullPath: '/auth/sign-in-2'
-      preLoaderRoute: typeof AuthSignIn2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/otp': {
-      id: '/auth/otp'
-      path: '/auth/otp'
-      fullPath: '/auth/otp'
-      preLoaderRoute: typeof AuthOtpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/auth/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+    '/auth/ready': {
+      id: '/auth/ready'
+      path: '/auth/ready'
+      fullPath: '/auth/ready'
+      preLoaderRoute: typeof AuthReadyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -1294,11 +1214,7 @@ const rootRouteChildren: RootRouteChildren = {
   publicVideoWallRoute: publicVideoWallRoute,
   publicVideoWallCinematicRoute: publicVideoWallCinematicRoute,
   AuthCallbackRoute: AuthCallbackRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthOtpRoute: AuthOtpRoute,
-  AuthSignInRoute: AuthSignInRoute,
-  AuthSignIn2Route: AuthSignIn2Route,
-  AuthSignUpRoute: AuthSignUpRoute,
+  AuthReadyRoute: AuthReadyRoute,
   BlogsSlugRoute: BlogsSlugRoute,
   DesignSystemBadgesLazyRoute: DesignSystemBadgesLazyRoute,
   publicIndexRoute: publicIndexRoute,

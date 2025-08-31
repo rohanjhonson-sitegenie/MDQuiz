@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { IconLoader } from '@tabler/icons-react'
-import { requireAuth } from '@/lib/auth-guards'
+import { requireRole } from '@/lib/auth-guards'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
 const Settings = React.lazy(() => import('@/features/settings'))
@@ -22,7 +22,13 @@ const SettingsWithSuspense = () => (
 )
 
 export const Route = createFileRoute('/me/_authenticated')({
-  beforeLoad: requireAuth,
+  beforeLoad: requireRole([
+    'superadmin',
+    'admin',
+    'student',
+    'parent',
+    'teacher',
+  ]),
   component: () => (
     <AuthenticatedLayout>
       <SettingsWithSuspense />
