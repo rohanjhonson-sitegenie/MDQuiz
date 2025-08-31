@@ -1,4 +1,12 @@
 // Quiz system types for frontend use
+import { Database } from './database.types'
+
+// Re-export database types for convenience
+export type QuizCategoryRow =
+  Database['public']['Tables']['quiz_categories']['Row']
+export type QuizRow = Database['public']['Tables']['quizzes']['Row']
+export type QuestionRow = Database['public']['Tables']['questions']['Row']
+export type ResponseRow = Database['public']['Tables']['responses']['Row']
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'text_input'
 export type SessionStatus = 'in_progress' | 'completed' | 'abandoned'
@@ -83,7 +91,10 @@ export interface TextInputOptions {
   case_sensitive?: boolean
 }
 
-export type QuestionOptions = MultipleChoiceOptions | TrueFalseOptions | TextInputOptions
+export type QuestionOptions =
+  | MultipleChoiceOptions
+  | TrueFalseOptions
+  | TextInputOptions
 
 // Answer validation and feedback
 export interface AnswerFeedback {
@@ -138,7 +149,7 @@ export interface QuestionResponse {
   id: string
   session_id: string
   question_id: string
-  answer_data: Record<string, any> // Flexible answer structure
+  answer_data: Record<string, unknown> // Flexible answer structure
   response_time: number | null // milliseconds
   submitted_at: string
   // Populated relations
@@ -177,7 +188,7 @@ export interface CreateQuizDto {
   published?: boolean
 }
 
-export interface UpdateQuizDto extends Partial<CreateQuizDto> {}
+export type UpdateQuizDto = Partial<CreateQuizDto>
 
 export interface CreateQuestionDto {
   quiz_id: string
@@ -189,7 +200,7 @@ export interface CreateQuestionDto {
   order_index?: number
 }
 
-export interface UpdateQuestionDto extends Partial<Omit<CreateQuestionDto, 'quiz_id'>> {}
+export type UpdateQuestionDto = Partial<Omit<CreateQuestionDto, 'quiz_id'>>
 
 export interface CreateSessionDto {
   quiz_id: string
@@ -199,7 +210,7 @@ export interface CreateSessionDto {
 export interface SubmitResponseDto {
   session_token: string
   question_id: string
-  answer_data: Record<string, any>
+  answer_data: Record<string, unknown>
   response_time?: number
 }
 

@@ -39,6 +39,8 @@ CREATE TABLE responses (
     quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
     session_id TEXT NOT NULL, -- Simple client-generated identifier
     answers JSONB NOT NULL, -- All answers for the quiz attempt
+    respondent_name TEXT, -- Optional name of quiz respondent
+    respondent_email TEXT, -- Optional email of quiz respondent
     submitted_at TIMESTAMPTZ DEFAULT NOW()
 );
 
