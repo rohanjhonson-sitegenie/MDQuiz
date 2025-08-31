@@ -107,7 +107,8 @@
       "mcp__ct-devmcp__do_fix",
       "Bash(tasklist)",
       "Bash(tasklist:*)",
-      "mcp__ct-devmcp__do_val"
+      "mcp__ct-devmcp__do_val",
+      "Bash(tree:*)"
     ],
     "deny": []
   },
