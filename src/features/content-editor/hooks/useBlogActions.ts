@@ -43,12 +43,37 @@ export function useBlogActions() {
       const post = await blogsRepository.findById(id)
       return blogsRepository.create({
         title: `${post.title} (Copy)`,
-        content: post.content,
-        excerpt: post.excerpt,
+        content: post.content || '',
+        excerpt: post.excerpt || '',
         author: post.author,
-        tags: post.metadata?.tags || [],
+        tags: [], // Tags will need to be handled separately
         draft: true,
         featuredImage: undefined, // Don't copy the featured image
+        seo: post.seo
+          ? {
+              title: (
+                post.seo as {
+                  title?: string
+                  description?: string
+                  keywords?: string[]
+                }
+              )?.title,
+              description: (
+                post.seo as {
+                  title?: string
+                  description?: string
+                  keywords?: string[]
+                }
+              )?.description,
+              keywords: (
+                post.seo as {
+                  title?: string
+                  description?: string
+                  keywords?: string[]
+                }
+              )?.keywords,
+            }
+          : undefined,
       })
     },
     onSuccess: (newPost) => {

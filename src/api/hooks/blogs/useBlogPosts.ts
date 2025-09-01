@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import type { BlogFilters } from '@/types/app.types'
 import { blogsRepository } from '@/api/repositories'
-import type { BlogFilters } from '@/api/types'
 
 export const useBlogPosts = (filters?: BlogFilters) => {
   return useQuery({

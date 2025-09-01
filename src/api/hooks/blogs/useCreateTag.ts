@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { BlogTag } from '@/types/app.types'
 import { blogsRepository } from '@/api/repositories'
-import type { BlogTag } from '@/api/types'
 
 export function useCreateTag() {
   const queryClient = useQueryClient()

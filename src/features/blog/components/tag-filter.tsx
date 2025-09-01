@@ -1,5 +1,5 @@
 import React from 'react'
-import type { BlogTag } from '@/api/types'
+import type { BlogTag } from '@/types/app.types'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 

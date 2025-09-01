@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { Link } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import { BlogListItem } from '@/api/types'
+import { BlogListItem } from '@/types/app.types'
 import { Badge } from '@/components/ui/badge'
 import { DataTableColumnHeader } from '@/components/ui/data-table'
 

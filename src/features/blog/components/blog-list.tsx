@@ -1,5 +1,5 @@
 import React from 'react'
-import type { BlogListItem } from '@/api/types'
+import type { BlogListItem } from '@/types/app.types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BlogCard } from './blog-card'
 

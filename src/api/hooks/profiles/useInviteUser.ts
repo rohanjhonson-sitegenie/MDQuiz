@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { InviteUserDto } from '@/types/app.types'
 import { toast } from 'sonner'
 import { profilesRepository } from '@/api/repositories'
-import type { InviteUserDto } from '@/api/types'
 
 export const useInviteUser = () => {
   const queryClient = useQueryClient()

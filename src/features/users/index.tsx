@@ -1,6 +1,6 @@
 import { useState } from 'react'
+import type { ProfileFilters } from '@/types/app.types'
 import { useProfiles } from '@/api/hooks'
-import type { ProfileFilters } from '@/api/types'
 import { AsyncDataWrapper, DataTableSkeleton } from '@/components/ui/data-table'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'

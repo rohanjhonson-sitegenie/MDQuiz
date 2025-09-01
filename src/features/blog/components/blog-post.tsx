@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import type { BlogPost as BlogPostType, BlogListItem } from '@/types/app.types'
 import {
   CalendarIcon,
   ClockIcon,
@@ -10,8 +11,6 @@ import {
   ArrowLeftIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { BlogPost as BlogPostType, BlogListItem } from '@/api/types'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { Separator } from '@/components/ui/separator'
@@ -73,7 +72,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post, relatedPosts }) => {
 
   const handleShare = async (platform: 'twitter' | 'linkedin' | 'copy') => {
     const url = window.location.href
-    const title = post.metadata?.title || post.title
+    const title = post.title
 
     switch (platform) {
       case 'twitter':
@@ -118,19 +117,17 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post, relatedPosts }) => {
         {/* Header */}
         <header className='mb-8 space-y-4'>
           <h1 className='text-4xl font-bold tracking-tight lg:text-5xl'>
-            {post.metadata?.title || post.title}
+            {post.title}
           </h1>
 
-          {post.metadata?.excerpt && (
-            <p className='text-muted-foreground text-xl'>
-              {post.metadata?.excerpt}
-            </p>
+          {post.excerpt && (
+            <p className='text-muted-foreground text-xl'>{post.excerpt}</p>
           )}
 
           <div className='text-muted-foreground flex flex-wrap items-center gap-4 text-sm'>
             <div className='flex items-center gap-1'>
               <UserIcon className='h-4 w-4' />
-              <span>{post.metadata?.author || post.author}</span>
+              <span>{post.author}</span>
             </div>
             <div className='flex items-center gap-1'>
               <CalendarIcon className='h-4 w-4' />
@@ -144,22 +141,14 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post, relatedPosts }) => {
             )}
           </div>
 
-          {post.metadata?.tags && post.metadata.tags.length > 0 && (
-            <div className='flex flex-wrap gap-2'>
-              {post.metadata?.tags?.map((tag) => (
-                <Badge key={tag} variant='secondary'>
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
+          {/* Tags section removed - tags should be loaded separately as they're not part of the core BlogPost entity */}
         </header>
 
-        {post.metadata?.featuredImage && (
+        {post.featured_image && (
           <div className='mb-8 aspect-[16/9] overflow-hidden rounded-lg shadow-lg'>
             <OptimizedImage
-              path={post.metadata.featuredImage}
-              alt={post.metadata?.title || post.title}
+              path={post.featured_image as string}
+              alt={post.title}
               context={{ type: 'hero', priority: 'high' }}
               className='h-full w-full object-cover'
             />
@@ -170,7 +159,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post, relatedPosts }) => {
         <div className='flex gap-8'>
           <div className='flex-1'>
             <div className='prose prose-neutral dark:prose-invert max-w-none'>
-              <MarkdownContentWrapper content={post.content} />
+              <MarkdownContentWrapper content={post.content || ''} />
             </div>
 
             <Separator className='my-8' />

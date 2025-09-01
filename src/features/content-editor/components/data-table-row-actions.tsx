@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Row } from '@tanstack/react-table'
+import { BlogListItem } from '@/types/app.types'
 import { MoreHorizontal, Edit, Copy, Trash, Eye } from 'lucide-react'
-import { BlogListItem } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

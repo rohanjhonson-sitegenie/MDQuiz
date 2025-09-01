@@ -1,8 +1,13 @@
 import { z } from 'zod'
+import type { Profile } from '@/types/app.types'
+
+// Re-export the Profile type for backwards compatibility
+export type { Profile } from '@/types/app.types'
 
 const profileRoleSchema = z.union([z.literal('user'), z.literal('admin')])
 export type ProfileRole = z.infer<typeof profileRoleSchema>
 
+// Use the generated Profile type for validation schema
 const profileSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -13,7 +18,6 @@ const profileSchema = z.object({
   role: profileRoleSchema,
   created_at: z.string(),
   updated_at: z.string(),
-})
-export type Profile = z.infer<typeof profileSchema>
+}) satisfies z.ZodType<Profile>
 
 export const profileListSchema = z.array(profileSchema)

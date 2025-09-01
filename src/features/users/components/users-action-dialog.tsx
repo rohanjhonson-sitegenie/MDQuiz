@@ -40,7 +40,9 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role: currentRow?.role || 'user',
+      role: (currentRow?.role === 'admin' ? 'admin' : 'user') as
+        | 'user'
+        | 'admin',
     },
   })
 

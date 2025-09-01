@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { UseFormWatch } from 'react-hook-form'
 import { useMutation } from '@tanstack/react-query'
+import { UpdateBlogPostDto } from '@/types/app.types'
 import { toast } from 'sonner'
 import { blogsRepository } from '@/api/repositories'
-import { UpdateBlogPostDto } from '@/api/types'
 import { BlogPostFormData } from '../schemas/content-editor.schema'
 
 interface UseAutoSaveProps {
@@ -69,12 +69,20 @@ export function useAutoSave({
                   typeof tag === 'string' && tag !== undefined
               ) || [],
             draft: data.draft ?? true,
-            seo_title: data.seoTitle,
-            seo_description: data.seoDescription,
-            seo_keywords:
-              data.seoKeywords?.filter(
-                (kw): kw is string => typeof kw === 'string' && kw !== undefined
-              ) || [],
+            seo:
+              data.seoTitle ||
+              data.seoDescription ||
+              (data.seoKeywords && data.seoKeywords.length > 0)
+                ? {
+                    title: data.seoTitle,
+                    description: data.seoDescription,
+                    keywords:
+                      data.seoKeywords?.filter(
+                        (kw): kw is string =>
+                          typeof kw === 'string' && kw !== undefined
+                      ) || [],
+                  }
+                : undefined,
           }
 
           mutate({ id: postId, data: saveData })

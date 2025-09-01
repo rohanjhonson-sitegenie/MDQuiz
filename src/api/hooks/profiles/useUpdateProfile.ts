@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { UpdateProfileDto } from '@/types/app.types'
 import { toast } from 'sonner'
 import { profilesRepository } from '@/api/repositories'
-import type { UpdateProfileDto } from '@/api/types'
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient()

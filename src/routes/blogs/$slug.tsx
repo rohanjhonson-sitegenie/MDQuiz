@@ -29,8 +29,8 @@ function BlogPostPage() {
   const { data: relatedPosts } = useRelatedPosts(blogPost?.id || '', 3)
 
   // Set document title and meta tags
-  const pageTitle = blogPost?.metadata?.title || blogPost?.title || 'Loading...'
-  const pageDescription = blogPost?.metadata?.excerpt || blogPost?.excerpt || ''
+  const pageTitle = blogPost?.title || 'Loading...'
+  const pageDescription = blogPost?.excerpt || ''
 
   if (typeof document !== 'undefined' && blogPost) {
     document.title = `${pageTitle} - Blog`
@@ -52,8 +52,8 @@ function BlogPostPage() {
     updateMetaTag('og:description', pageDescription)
     updateMetaTag('og:type', 'article')
     updateMetaTag('og:url', window.location.href)
-    if (blogPost.metadata?.featuredImage) {
-      updateMetaTag('og:image', blogPost.metadata?.featuredImage || '')
+    if (blogPost.featured_image) {
+      updateMetaTag('og:image', blogPost.featured_image || '')
     }
 
     // Update description meta tag

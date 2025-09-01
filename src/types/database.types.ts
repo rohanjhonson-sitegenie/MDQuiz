@@ -10,10 +10,76 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '13.0.4'
+    PostgrestVersion: '12.2.12 (cd3cf9e)'
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          cover_letter_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          portfolio_url: string | null
+          position_type: string
+          question_1: string | null
+          question_2: string | null
+          question_3: string | null
+          resume_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cover_letter_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          position_type?: string
+          question_1?: string | null
+          question_2?: string | null
+          question_3?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cover_letter_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          position_type?: string
+          question_1?: string | null
+          question_2?: string | null
+          question_3?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       blog_post_tags: {
         Row: {
           post_id: string
@@ -158,156 +224,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      questions: {
-        Row: {
-          answer_data: Json | null
-          created_at: string | null
-          id: string
-          options: Json | null
-          order_index: number
-          question_content: Json | null
-          question_text: string
-          question_type: string
-          quiz_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          answer_data?: Json | null
-          created_at?: string | null
-          id?: string
-          options?: Json | null
-          order_index?: number
-          question_content?: Json | null
-          question_text: string
-          question_type: string
-          quiz_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          answer_data?: Json | null
-          created_at?: string | null
-          id?: string
-          options?: Json | null
-          order_index?: number
-          question_content?: Json | null
-          question_text?: string
-          question_type?: string
-          quiz_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'questions_quiz_id_fkey'
-            columns: ['quiz_id']
-            isOneToOne: false
-            referencedRelation: 'quizzes'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      quiz_categories: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      quizzes: {
-        Row: {
-          category_id: string | null
-          created_at: string | null
-          description: string | null
-          id: string
-          published: boolean | null
-          settings: Json | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          published?: boolean | null
-          settings?: Json | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          published?: boolean | null
-          settings?: Json | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'quizzes_category_id_fkey'
-            columns: ['category_id']
-            isOneToOne: false
-            referencedRelation: 'quiz_categories'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      responses: {
-        Row: {
-          answers: Json
-          id: string
-          quiz_id: string | null
-          respondent_email: string | null
-          respondent_name: string | null
-          session_id: string
-          submitted_at: string | null
-        }
-        Insert: {
-          answers: Json
-          id?: string
-          quiz_id?: string | null
-          respondent_email?: string | null
-          respondent_name?: string | null
-          session_id: string
-          submitted_at?: string | null
-        }
-        Update: {
-          answers?: Json
-          id?: string
-          quiz_id?: string | null
-          respondent_email?: string | null
-          respondent_name?: string | null
-          session_id?: string
-          submitted_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'responses_quiz_id_fkey'
-            columns: ['quiz_id']
-            isOneToOne: false
-            referencedRelation: 'quizzes'
-            referencedColumns: ['id']
-          },
-        ]
       }
     }
     Views: {

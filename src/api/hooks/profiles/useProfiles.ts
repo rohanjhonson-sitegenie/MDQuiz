@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import type { ProfileFilters } from '@/types/app.types'
 import { profilesRepository } from '@/api/repositories'
-import type { ProfileFilters } from '@/api/types'
 
 interface UseProfilesOptions extends ProfileFilters {
   page?: number

@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
+import { CreateBlogPostDto, UpdateBlogPostDto } from '@/types/app.types'
 import { toast } from 'sonner'
 import { blogsRepository } from '@/api/repositories'
-import { CreateBlogPostDto, UpdateBlogPostDto } from '@/api/types'
 import { useAuthStore } from '@/stores/authStore'
 import {
   blogPostSchema,
@@ -63,14 +63,35 @@ export function useBlogEditor() {
         content: existingPost.content || '',
         excerpt: existingPost.excerpt || '',
         author: existingPost.author || '',
-        tags: existingPost.metadata?.tags || [],
+        tags: [], // Tags will need to be loaded separately
         draft: existingPost.draft ?? false,
         publishedAt: existingPost.published_at
           ? new Date(existingPost.published_at)
           : undefined,
-        seoTitle: existingPost.seo_title || '',
-        seoDescription: existingPost.seo_description || '',
-        seoKeywords: existingPost.seo_keywords || [],
+        seoTitle:
+          (
+            existingPost.seo as {
+              title?: string
+              description?: string
+              keywords?: string[]
+            }
+          )?.title || '',
+        seoDescription:
+          (
+            existingPost.seo as {
+              title?: string
+              description?: string
+              keywords?: string[]
+            }
+          )?.description || '',
+        seoKeywords:
+          (
+            existingPost.seo as {
+              title?: string
+              description?: string
+              keywords?: string[]
+            }
+          )?.keywords || [],
         featuredImage: existingPost.featured_image || null,
       })
     }

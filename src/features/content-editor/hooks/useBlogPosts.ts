@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { BlogFilters } from '@/types/app.types'
 import { blogsRepository } from '@/api/repositories'
-import { BlogFilters } from '@/api/types'
 
 interface UseBlogPostsOptions extends BlogFilters {
   page?: number

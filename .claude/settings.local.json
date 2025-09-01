@@ -108,7 +108,8 @@
       "Bash(tasklist)",
       "Bash(tasklist:*)",
       "mcp__ct-devmcp__do_val",
-      "Bash(tree:*)"
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql"
     ],
     "deny": []
   },

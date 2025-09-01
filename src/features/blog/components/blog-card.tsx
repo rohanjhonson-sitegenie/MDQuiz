@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
+import type { BlogListItem } from '@/types/app.types'
 import { CalendarIcon, ClockIcon, UserIcon } from 'lucide-react'
-import type { BlogListItem } from '@/api/types'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,

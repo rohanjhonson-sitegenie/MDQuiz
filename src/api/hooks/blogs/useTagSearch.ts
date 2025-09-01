@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import type { BlogTag } from '@/types/app.types'
 import { blogsRepository } from '@/api/repositories'
-import type { BlogTag } from '@/api/types'
 
 interface UseTagSearchOptions {
   query: string

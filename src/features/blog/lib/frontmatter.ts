@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { BlogMetadata } from '@/api/types'
+import type { BlogMetadata } from '@/types/app.types'
 
 const blogMetadataSchema = z.object({
   title: z.string(),

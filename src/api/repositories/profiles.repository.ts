@@ -3,7 +3,7 @@ import type {
   ProfileFilters,
   UpdateProfileDto,
   InviteUserDto,
-} from '@/api/types'
+} from '@/types/app.types'
 import { supabase } from '@/lib/supabase'
 import { BaseRepository } from './base.repository'
 
