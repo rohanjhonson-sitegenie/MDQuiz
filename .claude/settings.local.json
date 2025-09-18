@@ -109,7 +109,10 @@
       "Bash(tasklist:*)",
       "mcp__ct-devmcp__do_val",
       "mcp__supabase__list_tables",
-      "mcp__supabase__execute_sql"
+      "mcp__supabase__execute_sql",
+      "Bash(supabase status:*)",
+      "mcp__supabase__get_logs",
+      "mcp__supabase__apply_migration"
     ],
     "deny": []
   },

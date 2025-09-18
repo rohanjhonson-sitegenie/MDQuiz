@@ -65,6 +65,9 @@ const AdminRouteImport = createFileRoute('/admin')()
 const DesignSystemBadgesLazyRouteImport = createFileRoute(
   '/design-system/badges',
 )()
+const AdminAuthenticatedQuizManagementLazyRouteImport = createFileRoute(
+  '/admin/_authenticated/quiz-management',
+)()
 const AdminAuthenticatedDemosThreePaneNavigatorLazyRouteImport =
   createFileRoute('/admin/_authenticated/demos/three-pane-navigator')()
 
@@ -203,6 +206,16 @@ const AdminAuthenticatedIndexRoute = AdminAuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAuthenticatedRouteRoute,
 } as any)
+const AdminAuthenticatedQuizManagementLazyRoute =
+  AdminAuthenticatedQuizManagementLazyRouteImport.update({
+    id: '/quiz-management',
+    path: '/quiz-management',
+    getParentRoute: () => AdminAuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/admin/_authenticated/quiz-management.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const DocsUxGuidelinesOverlaysRoute =
   DocsUxGuidelinesOverlaysRouteImport.update({
     id: '/ux-guidelines/overlays',
@@ -385,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/docs/ux-guidelines/layout-flows': typeof DocsUxGuidelinesLayoutFlowsRoute
   '/docs/ux-guidelines/navigation': typeof DocsUxGuidelinesNavigationRoute
   '/docs/ux-guidelines/overlays': typeof DocsUxGuidelinesOverlaysRoute
+  '/admin/quiz-management': typeof AdminAuthenticatedQuizManagementLazyRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
   '/docs/ux-guidelines': typeof DocsUxGuidelinesIndexRoute
   '/me/': typeof MeAuthenticatedIndexRoute
@@ -435,6 +449,7 @@ export interface FileRoutesByTo {
   '/docs/ux-guidelines/layout-flows': typeof DocsUxGuidelinesLayoutFlowsRoute
   '/docs/ux-guidelines/navigation': typeof DocsUxGuidelinesNavigationRoute
   '/docs/ux-guidelines/overlays': typeof DocsUxGuidelinesOverlaysRoute
+  '/admin/quiz-management': typeof AdminAuthenticatedQuizManagementLazyRoute
   '/docs/ux-guidelines': typeof DocsUxGuidelinesIndexRoute
   '/admin/blogs/new': typeof AdminAuthenticatedBlogsNewRoute
   '/admin/demos/three-pane-navigator': typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
@@ -487,6 +502,7 @@ export interface FileRoutesById {
   '/docs/ux-guidelines/layout-flows': typeof DocsUxGuidelinesLayoutFlowsRoute
   '/docs/ux-guidelines/navigation': typeof DocsUxGuidelinesNavigationRoute
   '/docs/ux-guidelines/overlays': typeof DocsUxGuidelinesOverlaysRoute
+  '/admin/_authenticated/quiz-management': typeof AdminAuthenticatedQuizManagementLazyRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
   '/docs/ux-guidelines/': typeof DocsUxGuidelinesIndexRoute
   '/me/_authenticated/': typeof MeAuthenticatedIndexRoute
@@ -540,6 +556,7 @@ export interface FileRouteTypes {
     | '/docs/ux-guidelines/layout-flows'
     | '/docs/ux-guidelines/navigation'
     | '/docs/ux-guidelines/overlays'
+    | '/admin/quiz-management'
     | '/admin/'
     | '/docs/ux-guidelines'
     | '/me/'
@@ -590,6 +607,7 @@ export interface FileRouteTypes {
     | '/docs/ux-guidelines/layout-flows'
     | '/docs/ux-guidelines/navigation'
     | '/docs/ux-guidelines/overlays'
+    | '/admin/quiz-management'
     | '/docs/ux-guidelines'
     | '/admin/blogs/new'
     | '/admin/demos/three-pane-navigator'
@@ -641,6 +659,7 @@ export interface FileRouteTypes {
     | '/docs/ux-guidelines/layout-flows'
     | '/docs/ux-guidelines/navigation'
     | '/docs/ux-guidelines/overlays'
+    | '/admin/_authenticated/quiz-management'
     | '/admin/_authenticated/'
     | '/docs/ux-guidelines/'
     | '/me/_authenticated/'
@@ -879,6 +898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedIndexRouteImport
       parentRoute: typeof AdminAuthenticatedRouteRoute
     }
+    '/admin/_authenticated/quiz-management': {
+      id: '/admin/_authenticated/quiz-management'
+      path: '/quiz-management'
+      fullPath: '/admin/quiz-management'
+      preLoaderRoute: typeof AdminAuthenticatedQuizManagementLazyRouteImport
+      parentRoute: typeof AdminAuthenticatedRouteRoute
+    }
     '/docs/ux-guidelines/overlays': {
       id: '/docs/ux-guidelines/overlays'
       path: '/ux-guidelines/overlays'
@@ -1101,6 +1127,7 @@ const AdminAuthenticatedBlogsRouteRouteWithChildren =
 
 interface AdminAuthenticatedRouteRouteChildren {
   AdminAuthenticatedBlogsRouteRoute: typeof AdminAuthenticatedBlogsRouteRouteWithChildren
+  AdminAuthenticatedQuizManagementLazyRoute: typeof AdminAuthenticatedQuizManagementLazyRoute
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
   AdminAuthenticatedDemosThreePaneNavigatorLazyRoute: typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
   AdminAuthenticatedAppsIndexRoute: typeof AdminAuthenticatedAppsIndexRoute
@@ -1116,6 +1143,8 @@ const AdminAuthenticatedRouteRouteChildren: AdminAuthenticatedRouteRouteChildren
   {
     AdminAuthenticatedBlogsRouteRoute:
       AdminAuthenticatedBlogsRouteRouteWithChildren,
+    AdminAuthenticatedQuizManagementLazyRoute:
+      AdminAuthenticatedQuizManagementLazyRoute,
     AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
     AdminAuthenticatedDemosThreePaneNavigatorLazyRoute:
       AdminAuthenticatedDemosThreePaneNavigatorLazyRoute,

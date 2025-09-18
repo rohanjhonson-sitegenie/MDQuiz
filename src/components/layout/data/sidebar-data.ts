@@ -19,6 +19,7 @@ import {
   IconArticle,
   IconCalendar,
   IconLayoutKanban,
+  IconQuestionMark,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -92,6 +93,11 @@ const adminSidebarData: SidebarData = {
           url: '/admin/calendar',
           icon: IconCalendar,
           badge: 'New',
+        },
+        {
+          title: 'Quiz Management',
+          url: '/admin/quiz-management',
+          icon: IconQuestionMark,
         },
       ],
     },
