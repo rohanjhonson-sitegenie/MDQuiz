@@ -4,6 +4,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useQuizStore } from '@/stores/quizStore'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ResizeHandle } from '@/features/three-pane-navigator/components/ResizeHandle'
 import { QuizListPane } from './QuizListPane'
 import { QuizEditorPane } from './QuizEditorPane'
@@ -13,7 +15,7 @@ interface QuizManagementProps {
 }
 
 export function QuizManagement({ className }: QuizManagementProps) {
-  const { paneWidths, setPaneWidth } = useQuizStore()
+  const { paneWidths, setPaneWidth, quizPanelCollapsed, toggleQuizPanel } = useQuizStore()
   const quizListRef = useRef<HTMLDivElement>(null)
   
   // Custom resize logic for quiz list pane (adapted from three-pane patterns)
@@ -22,9 +24,16 @@ export function QuizManagement({ className }: QuizManagementProps) {
   const startWidth = useRef(0)
   const minWidth = 250
   const maxWidth = 500
+  const collapsedWidth = 48
+
+  // Calculate actual width based on collapsed state
+  const actualQuizListWidth = quizPanelCollapsed ? collapsedWidth : paneWidths.quizList
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // Prevent resizing when collapsed
+      if (quizPanelCollapsed) return
+
       isResizing.current = true
       startX.current = e.clientX
       startWidth.current = paneWidths.quizList
@@ -34,7 +43,7 @@ export function QuizManagement({ className }: QuizManagementProps) {
 
       e.preventDefault()
     },
-    [paneWidths.quizList]
+    [paneWidths.quizList, quizPanelCollapsed]
   )
 
   const handleMouseMove = useCallback(
@@ -78,17 +87,39 @@ export function QuizManagement({ className }: QuizManagementProps) {
       {/* Left pane - Quiz List */}
       <div
         ref={quizListRef}
-        className='flex-shrink-0 border-r border-border bg-card'
-        style={{ width: `${paneWidths.quizList}px` }}
+        className='flex-shrink-0 border-r border-border bg-card relative transition-all duration-300'
+        style={{ width: `${actualQuizListWidth}px` }}
       >
-        <QuizListPane />
+        {/* Collapse Toggle Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleQuizPanel}
+          className="absolute top-2 right-2 z-10 h-6 w-6 p-0 hover:bg-accent"
+        >
+          {quizPanelCollapsed ? (
+            <ChevronRight className="h-3 w-3" />
+          ) : (
+            <ChevronLeft className="h-3 w-3" />
+          )}
+        </Button>
+
+        {/* Quiz List Content */}
+        <div className={cn(
+          "h-full transition-opacity duration-300",
+          quizPanelCollapsed ? "opacity-0 overflow-hidden" : "opacity-100"
+        )}>
+          <QuizListPane />
+        </div>
       </div>
 
       {/* Resize Handle between quiz list and editor */}
-      <ResizeHandle 
-        onMouseDown={handleMouseDown}
-        className='hover:bg-primary/20'
-      />
+      {!quizPanelCollapsed && (
+        <ResizeHandle
+          onMouseDown={handleMouseDown}
+          className='hover:bg-primary/20'
+        />
+      )}
 
       {/* Right pane - Quiz Editor (with internal split) */}
       <div className='flex-1 min-w-0 bg-background'>

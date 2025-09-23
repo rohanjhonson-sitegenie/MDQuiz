@@ -17,6 +17,7 @@ import { Route as BlogSitemapDotxmlRouteImport } from './routes/blog-sitemap[.]x
 import { Route as DocsRouteRouteImport } from './routes/docs/route'
 import { Route as BlogsIndexRouteImport } from './routes/blogs/index'
 import { Route as publicIndexRouteImport } from './routes/(public)/index'
+import { Route as QuizQuizSlugRouteImport } from './routes/quiz/$quizSlug'
 import { Route as BlogsSlugRouteImport } from './routes/blogs/$slug'
 import { Route as AuthReadyRouteImport } from './routes/auth/ready'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -50,6 +51,7 @@ import { Route as MeAuthenticatedAppearanceIndexRouteImport } from './routes/me/
 import { Route as MeAuthenticatedAccountIndexRouteImport } from './routes/me/_authenticated/account/index'
 import { Route as AdminAuthenticatedUsersIndexRouteImport } from './routes/admin/_authenticated/users/index'
 import { Route as AdminAuthenticatedTasksIndexRouteImport } from './routes/admin/_authenticated/tasks/index'
+import { Route as AdminAuthenticatedQuizAnalyticsIndexRouteImport } from './routes/admin/_authenticated/quiz-analytics/index'
 import { Route as AdminAuthenticatedKanbanIndexRouteImport } from './routes/admin/_authenticated/kanban/index'
 import { Route as AdminAuthenticatedHelpCenterIndexRouteImport } from './routes/admin/_authenticated/help-center/index'
 import { Route as AdminAuthenticatedChatsIndexRouteImport } from './routes/admin/_authenticated/chats/index'
@@ -123,6 +125,11 @@ const DesignSystemBadgesLazyRoute = DesignSystemBadgesLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/design-system/badges.lazy').then((d) => d.Route),
 )
+const QuizQuizSlugRoute = QuizQuizSlugRouteImport.update({
+  id: '/quiz/$quizSlug',
+  path: '/quiz/$quizSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogsSlugRoute = BlogsSlugRouteImport.update({
   id: '/blogs/$slug',
   path: '/blogs/$slug',
@@ -308,6 +315,12 @@ const AdminAuthenticatedTasksIndexRoute =
     path: '/tasks/',
     getParentRoute: () => AdminAuthenticatedRouteRoute,
   } as any)
+const AdminAuthenticatedQuizAnalyticsIndexRoute =
+  AdminAuthenticatedQuizAnalyticsIndexRouteImport.update({
+    id: '/quiz-analytics/',
+    path: '/quiz-analytics/',
+    getParentRoute: () => AdminAuthenticatedRouteRoute,
+  } as any)
 const AdminAuthenticatedKanbanIndexRoute =
   AdminAuthenticatedKanbanIndexRouteImport.update({
     id: '/kanban/',
@@ -385,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
+  '/quiz/$quizSlug': typeof QuizQuizSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/': typeof publicIndexRoute
   '/blogs': typeof BlogsIndexRoute
@@ -411,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/admin/chats': typeof AdminAuthenticatedChatsIndexRoute
   '/admin/help-center': typeof AdminAuthenticatedHelpCenterIndexRoute
   '/admin/kanban': typeof AdminAuthenticatedKanbanIndexRoute
+  '/admin/quiz-analytics': typeof AdminAuthenticatedQuizAnalyticsIndexRoute
   '/admin/tasks': typeof AdminAuthenticatedTasksIndexRoute
   '/admin/users': typeof AdminAuthenticatedUsersIndexRoute
   '/me/account': typeof MeAuthenticatedAccountIndexRoute
@@ -437,6 +452,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
+  '/quiz/$quizSlug': typeof QuizQuizSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/': typeof publicIndexRoute
   '/blogs': typeof BlogsIndexRoute
@@ -459,6 +475,7 @@ export interface FileRoutesByTo {
   '/admin/chats': typeof AdminAuthenticatedChatsIndexRoute
   '/admin/help-center': typeof AdminAuthenticatedHelpCenterIndexRoute
   '/admin/kanban': typeof AdminAuthenticatedKanbanIndexRoute
+  '/admin/quiz-analytics': typeof AdminAuthenticatedQuizAnalyticsIndexRoute
   '/admin/tasks': typeof AdminAuthenticatedTasksIndexRoute
   '/admin/users': typeof AdminAuthenticatedUsersIndexRoute
   '/me/account': typeof MeAuthenticatedAccountIndexRoute
@@ -489,6 +506,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/ready': typeof AuthReadyRoute
   '/blogs/$slug': typeof BlogsSlugRoute
+  '/quiz/$quizSlug': typeof QuizQuizSlugRoute
   '/design-system/badges': typeof DesignSystemBadgesLazyRoute
   '/(public)/': typeof publicIndexRoute
   '/blogs/': typeof BlogsIndexRoute
@@ -515,6 +533,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/chats/': typeof AdminAuthenticatedChatsIndexRoute
   '/admin/_authenticated/help-center/': typeof AdminAuthenticatedHelpCenterIndexRoute
   '/admin/_authenticated/kanban/': typeof AdminAuthenticatedKanbanIndexRoute
+  '/admin/_authenticated/quiz-analytics/': typeof AdminAuthenticatedQuizAnalyticsIndexRoute
   '/admin/_authenticated/tasks/': typeof AdminAuthenticatedTasksIndexRoute
   '/admin/_authenticated/users/': typeof AdminAuthenticatedUsersIndexRoute
   '/me/_authenticated/account/': typeof MeAuthenticatedAccountIndexRoute
@@ -543,6 +562,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/ready'
     | '/blogs/$slug'
+    | '/quiz/$quizSlug'
     | '/design-system/badges'
     | '/'
     | '/blogs'
@@ -569,6 +589,7 @@ export interface FileRouteTypes {
     | '/admin/chats'
     | '/admin/help-center'
     | '/admin/kanban'
+    | '/admin/quiz-analytics'
     | '/admin/tasks'
     | '/admin/users'
     | '/me/account'
@@ -595,6 +616,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/ready'
     | '/blogs/$slug'
+    | '/quiz/$quizSlug'
     | '/design-system/badges'
     | '/'
     | '/blogs'
@@ -617,6 +639,7 @@ export interface FileRouteTypes {
     | '/admin/chats'
     | '/admin/help-center'
     | '/admin/kanban'
+    | '/admin/quiz-analytics'
     | '/admin/tasks'
     | '/admin/users'
     | '/me/account'
@@ -646,6 +669,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/ready'
     | '/blogs/$slug'
+    | '/quiz/$quizSlug'
     | '/design-system/badges'
     | '/(public)/'
     | '/blogs/'
@@ -672,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/chats/'
     | '/admin/_authenticated/help-center/'
     | '/admin/_authenticated/kanban/'
+    | '/admin/_authenticated/quiz-analytics/'
     | '/admin/_authenticated/tasks/'
     | '/admin/_authenticated/users/'
     | '/me/_authenticated/account/'
@@ -699,6 +724,7 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthReadyRoute: typeof AuthReadyRoute
   BlogsSlugRoute: typeof BlogsSlugRoute
+  QuizQuizSlugRoute: typeof QuizQuizSlugRoute
   DesignSystemBadgesLazyRoute: typeof DesignSystemBadgesLazyRoute
   publicIndexRoute: typeof publicIndexRoute
   BlogsIndexRoute: typeof BlogsIndexRoute
@@ -777,6 +803,13 @@ declare module '@tanstack/react-router' {
       path: '/design-system/badges'
       fullPath: '/design-system/badges'
       preLoaderRoute: typeof DesignSystemBadgesLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/$quizSlug': {
+      id: '/quiz/$quizSlug'
+      path: '/quiz/$quizSlug'
+      fullPath: '/quiz/$quizSlug'
+      preLoaderRoute: typeof QuizQuizSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blogs/$slug': {
@@ -1017,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedTasksIndexRouteImport
       parentRoute: typeof AdminAuthenticatedRouteRoute
     }
+    '/admin/_authenticated/quiz-analytics/': {
+      id: '/admin/_authenticated/quiz-analytics/'
+      path: '/quiz-analytics'
+      fullPath: '/admin/quiz-analytics'
+      preLoaderRoute: typeof AdminAuthenticatedQuizAnalyticsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRouteRoute
+    }
     '/admin/_authenticated/kanban/': {
       id: '/admin/_authenticated/kanban/'
       path: '/kanban'
@@ -1135,6 +1175,7 @@ interface AdminAuthenticatedRouteRouteChildren {
   AdminAuthenticatedChatsIndexRoute: typeof AdminAuthenticatedChatsIndexRoute
   AdminAuthenticatedHelpCenterIndexRoute: typeof AdminAuthenticatedHelpCenterIndexRoute
   AdminAuthenticatedKanbanIndexRoute: typeof AdminAuthenticatedKanbanIndexRoute
+  AdminAuthenticatedQuizAnalyticsIndexRoute: typeof AdminAuthenticatedQuizAnalyticsIndexRoute
   AdminAuthenticatedTasksIndexRoute: typeof AdminAuthenticatedTasksIndexRoute
   AdminAuthenticatedUsersIndexRoute: typeof AdminAuthenticatedUsersIndexRoute
 }
@@ -1154,6 +1195,8 @@ const AdminAuthenticatedRouteRouteChildren: AdminAuthenticatedRouteRouteChildren
     AdminAuthenticatedHelpCenterIndexRoute:
       AdminAuthenticatedHelpCenterIndexRoute,
     AdminAuthenticatedKanbanIndexRoute: AdminAuthenticatedKanbanIndexRoute,
+    AdminAuthenticatedQuizAnalyticsIndexRoute:
+      AdminAuthenticatedQuizAnalyticsIndexRoute,
     AdminAuthenticatedTasksIndexRoute: AdminAuthenticatedTasksIndexRoute,
     AdminAuthenticatedUsersIndexRoute: AdminAuthenticatedUsersIndexRoute,
   }
@@ -1245,6 +1288,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   AuthReadyRoute: AuthReadyRoute,
   BlogsSlugRoute: BlogsSlugRoute,
+  QuizQuizSlugRoute: QuizQuizSlugRoute,
   DesignSystemBadgesLazyRoute: DesignSystemBadgesLazyRoute,
   publicIndexRoute: publicIndexRoute,
   BlogsIndexRoute: BlogsIndexRoute,

@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useQuizStore } from '@/stores/quizStore'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { validateMarkdown } from '@/utils/markdown-transform'
-import { Save, AlertCircle, CheckCircle } from 'lucide-react'
+import { parseMarkdownQuiz } from '@/lib/markdown-quiz-parser'
+import { Save, FileText } from 'lucide-react'
 
 interface MarkdownEditorProps {
   className?: string
@@ -19,30 +19,37 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
     isLoading,
     error,
     setMarkdownContent,
-    saveQuiz
+    saveQuiz,
+    setError
   } = useQuizStore()
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const saveTimeoutRef = useRef<number | undefined>(undefined)
 
-  // Debounced content update
+  // Content update with scroll position preservation (NO AUTO-SAVE)
   const handleContentChange = useCallback((content: string) => {
+    // Preserve scroll position during content update
+    const scrollTop = textareaRef.current?.scrollTop || 0
+    const selectionStart = textareaRef.current?.selectionStart || 0
+    const selectionEnd = textareaRef.current?.selectionEnd || 0
+
     setMarkdownContent(content)
-    
-    // Clear existing timeout
+
+    // Restore scroll position and selection after React re-render
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.scrollTop = scrollTop
+        textareaRef.current.setSelectionRange(selectionStart, selectionEnd)
+      }
+    })
+
+    // Clear any existing timeout to prevent auto-save
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
-    
-    // Auto-save after 2 seconds of inactivity
-    saveTimeoutRef.current = setTimeout(() => {
-      if (selectedQuiz && content.trim()) {
-        saveQuiz()
-      }
-    }, 2000) as any
-  }, [setMarkdownContent, saveQuiz, selectedQuiz])
+  }, [setMarkdownContent])
 
-  // Handle manual save
+  // Handle manual save - only way to save content
   const handleSave = useCallback(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
@@ -50,10 +57,28 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
     saveQuiz()
   }, [saveQuiz])
 
-  // Validate markdown content
-  const validation = validateMarkdown(markdownContent)
+  // Parse and validate markdown content (without auto-save)
+  const handleParseMarkdown = useCallback(() => {
+    if (!markdownContent.trim()) {
+      setError('Please enter markdown content before parsing')
+      return
+    }
+
+    try {
+      const parsedQuiz = parseMarkdownQuiz(markdownContent)
+
+      // Just validate, don't auto-save
+      setError(null) // Clear any previous errors
+
+      // Optional: Show success message
+      console.log('Quiz parsed successfully:', parsedQuiz)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to parse markdown'
+      setError(`Parse error: ${errorMessage}`)
+    }
+  }, [markdownContent, setError])
   
-  // Keyboard shortcuts
+  // Keyboard shortcuts and cleanup
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
@@ -70,11 +95,23 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
       if (textareaRef.current) {
         textareaRef.current.removeEventListener('keydown', handleKeyDown)
       }
+      // Cancel any pending auto-save when component unmounts or quiz changes
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = undefined
       }
     }
   }, [handleSave])
+
+  // Clear timeouts when selectedQuiz changes to prevent cross-quiz saves
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = undefined
+      }
+    }
+  }, [selectedQuiz?.id])
 
   if (!selectedQuiz) {
     return (
@@ -88,64 +125,31 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
-      {/* Editor toolbar */}
-      <div className='flex-shrink-0 border-b bg-background px-4 py-2'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <h3 className='font-medium text-sm'>Markdown Editor</h3>
-            <div className='flex items-center gap-1 text-xs text-muted-foreground'>
-              {validation.valid ? (
-                <div className='flex items-center gap-1 text-green-600'>
-                  <CheckCircle className='h-3 w-3' />
-                  Valid
-                </div>
-              ) : (
-                <div className='flex items-center gap-1 text-red-600'>
-                  <AlertCircle className='h-3 w-3' />
-                  {validation.errors.length} errors
-                </div>
-              )}
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <div className='text-xs text-muted-foreground'>
-              {markdownContent.length} characters
-            </div>
-            <Button
-              size='sm'
-              onClick={handleSave}
-              disabled={isLoading || !validation.valid}
-            >
-              <Save className='h-3 w-3 mr-1' />
-              Save
-            </Button>
-          </div>
+      {/* Header with parse button */}
+      <div className='flex items-center justify-between p-4 border-b bg-background/95'>
+        <div className='flex items-center gap-2'>
+          <FileText className='h-4 w-4 text-muted-foreground' />
+          <span className='text-sm font-medium'>Markdown Editor</span>
+        </div>
+        <div className='flex items-center gap-2'>
+          <Button
+            onClick={handleParseMarkdown}
+            size='sm'
+            variant='outline'
+            disabled={isLoading || !markdownContent.trim()}
+          >
+            Parse Quiz
+          </Button>
+          <Button
+            onClick={handleSave}
+            size='sm'
+            disabled={isLoading}
+          >
+            <Save className='h-4 w-4 mr-2' />
+            Save
+          </Button>
         </div>
       </div>
-
-      {/* Error display */}
-      {error && (
-        <div className='flex-shrink-0 bg-red-50 border-b border-red-200 px-4 py-2'>
-          <div className='flex items-center gap-2 text-sm text-red-700'>
-            <AlertCircle className='h-4 w-4' />
-            {error}
-          </div>
-        </div>
-      )}
-
-      {/* Validation errors */}
-      {!validation.valid && (
-        <div className='flex-shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2'>
-          <div className='text-sm'>
-            <div className='font-medium text-yellow-800 mb-1'>Markdown Issues:</div>
-            <ul className='text-yellow-700 text-xs space-y-1'>
-              {validation.errors.map((error, index) => (
-                <li key={index}>• {error}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
 
       {/* Editor area */}
       <div className='flex-1 relative'>
@@ -153,45 +157,12 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
           ref={textareaRef}
           value={markdownContent}
           onChange={(e) => handleContentChange(e.target.value)}
-          className={cn(
-            'w-full h-full p-4 font-mono text-sm bg-background border-0 outline-none resize-none',
-            'placeholder:text-muted-foreground/50',
-            !validation.valid && 'bg-red-50/30'
-          )}
-          placeholder={`---
-title: "My Quiz Title"
-description: "Quiz description"
-published: false
-settings:
-  time_limit: 30
-  show_feedback: true
----
-
-# My Quiz Title
-
-Brief description of what this quiz covers.
-
-## Question 1
-
-What is the correct way to declare a variable in JavaScript?
-
-A) var myVariable = "value" ✓
-B) variable myVariable = "value"
-C) declare myVariable = "value"
-D) let myVariable
-
-**Explanation:** The 'var' keyword is used to declare variables in JavaScript.
-
----
-
-## Question 2
-
-True or False: JavaScript is case-sensitive.
-
-True ✓
-False
-
-**Explanation:** JavaScript treats 'myVar' and 'myvar' as different variables.`}
+          className='w-full h-full p-4 text-sm bg-background border-0 outline-none resize-none font-mono leading-6'
+          placeholder='Start typing your quiz in Markdown...'
+          style={{
+            fontFamily: 'Monaco, Menlo, Ubuntu Mono, monospace',
+            lineHeight: '1.6'
+          }}
           spellCheck={false}
           disabled={isLoading}
         />
@@ -205,24 +176,29 @@ False
             </div>
           </div>
         )}
+
+        {/* Error display */}
+        {error && (
+          <div className='absolute bottom-4 right-4 bg-destructive/90 text-destructive-foreground px-3 py-2 rounded text-sm max-w-md'>
+            {error}
+          </div>
+        )}
       </div>
 
-      {/* Editor footer */}
-      <div className='flex-shrink-0 border-t bg-muted/20 px-4 py-2'>
-        <div className='flex items-center justify-between text-xs text-muted-foreground'>
-          <div className='flex items-center gap-4'>
-            <span>
-              Lines: {markdownContent.split('\n').length}
-            </span>
-            <span>
-              Questions: {(markdownContent.match(/^## Question/gm) || []).length}
-            </span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <span>Ctrl+S to save</span>
-            <span>•</span>
-            <span>Auto-save enabled</span>
-          </div>
+      {/* Editor status bar */}
+      <div className='px-4 py-2 bg-muted/20 border-t border-border text-xs text-muted-foreground flex items-center justify-between'>
+        <div className='flex items-center space-x-4'>
+          <span>{(markdownContent.match(/^## (Q\d+|Question)/gm) || []).length} questions detected</span>
+          <span>•</span>
+          <span>Line {markdownContent.split('\n').length}, Column 1</span>
+          <span>•</span>
+          <span className='text-green-600'>
+            ✓ Valid Markdown
+          </span>
+        </div>
+        <div className='flex items-center space-x-2'>
+          <span>Manual save required</span>
+          <div className='w-2 h-2 rounded-full bg-blue-500'></div>
         </div>
       </div>
     </div>

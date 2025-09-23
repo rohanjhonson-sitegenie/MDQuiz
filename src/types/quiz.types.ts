@@ -21,11 +21,13 @@ export interface Quiz {
   updated_at: string
   category?: QuizCategory // Optional joined data
   questions?: Question[] // Optional joined data
+  sections?: QuizSection[] // Optional joined data
 }
 
 export interface Question {
   id: string
   quiz_id: string
+  section_id?: string // Optional reference to quiz section
   question_text: string
   question_type: QuestionType
   question_content: QuestionContent
@@ -34,6 +36,7 @@ export interface Question {
   order_index: number
   created_at: string
   updated_at: string
+  section?: QuizSection // Optional joined data
 }
 
 export interface Response {
@@ -46,6 +49,19 @@ export interface Response {
   submitted_at: string
 }
 
+// New Quiz Section interface
+export interface QuizSection {
+  id: string
+  quiz_id: string
+  title: string
+  description?: string
+  order_index: number
+  settings: SectionSettings
+  created_at: string
+  updated_at: string
+  questions?: Question[] // Optional joined data
+}
+
 // JSONB field type definitions
 
 export interface QuizSettings {
@@ -54,6 +70,36 @@ export interface QuizSettings {
   show_feedback?: boolean
   passing_score?: number
   allow_retakes?: boolean
+
+  // Section-based settings
+  structure_type?: 'mixed' | 'sectioned'
+  section_navigation?: 'linear' | 'free'
+  section_summary_enabled?: boolean
+  global_time_distribution?: 'equal' | 'weighted' | 'custom'
+
+  [key: string]: any // Allow additional settings
+}
+
+export interface SectionSettings {
+  // Question Type Constraints
+  allowed_question_types?: QuestionType[]
+  question_count_limit?: number
+
+  // Timing & Navigation
+  time_limit_minutes?: number
+  allow_backward_navigation?: boolean
+  require_completion_before_next?: boolean
+
+  // Scoring & Feedback
+  points_per_question?: number
+  show_section_feedback?: boolean
+  passing_threshold?: number
+
+  // Display Options
+  shuffle_questions?: boolean
+  questions_per_page?: number
+  show_progress_bar?: boolean
+
   [key: string]: any // Allow additional settings
 }
 
@@ -110,14 +156,17 @@ export interface NavigationState {
 export interface QuizStore extends NavigationState {
   quizzes: Quiz[]
   categories: QuizCategory[]
+  sections: QuizSection[]
   selectedQuiz: Quiz | null
+  selectedSectionId: string | null
   markdownContent: string
   isLoading: boolean
   error: string | null
-  
+
   // Actions
   setSelectedQuiz: (quizId: string | null) => void
   setSelectedCategory: (categoryId: string | null) => void
+  setSelectedSection: (sectionId: string | null) => void
   setPaneWidth: (pane: 'quizList' | 'editor', width: number) => void
   setActivePane: (pane: 'list' | 'editor') => void
   setMarkdownContent: (content: string) => void
@@ -129,6 +178,22 @@ export interface QuizStore extends NavigationState {
   saveQuiz: () => Promise<void>
   createQuiz: () => Promise<void>
   deleteQuiz: (quizId: string) => Promise<void>
+  publishQuiz: (quizId?: string) => Promise<void>
+
+  // Section actions
+  loadSections: (quizId: string) => Promise<void>
+  createSection: (quizId: string, title: string) => Promise<void>
+  updateSection: (sectionId: string, updates: Partial<QuizSection>) => Promise<void>
+  deleteSection: (sectionId: string) => Promise<void>
+  reorderSections: (sectionOrders: { id: string; order_index: number }[]) => Promise<void>
+  moveQuestionToSection: (questionId: string, sectionId: string | null) => Promise<void>
+  toggleQuizStructure: (quizId: string, structureType: 'mixed' | 'sectioned') => Promise<void>
+
+  // Question actions
+  createQuestion: (question: Omit<Question, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  updateQuestion: (questionId: string, updates: Partial<Question>) => Promise<void>
+  deleteQuestion: (questionId: string) => Promise<void>
+  reorderQuestions: (questionOrders: { id: string; order_index: number }[]) => Promise<void>
 }
 
 // Repository interfaces
@@ -141,4 +206,23 @@ export interface QuizRepository {
   deleteQuiz(id: string): Promise<void>
   getCategories(): Promise<QuizCategory[]>
   createCategory(category: Omit<QuizCategory, 'id' | 'created_at'>): Promise<QuizCategory>
+
+  // Section management
+  getSectionsByQuizId(quizId: string): Promise<QuizSection[]>
+  createSection(section: Omit<QuizSection, 'id' | 'created_at' | 'updated_at'>): Promise<QuizSection>
+  updateSection(id: string, updates: Partial<QuizSection>): Promise<QuizSection>
+  deleteSection(id: string): Promise<void>
+  reorderSections(quizId: string, sectionOrders: { id: string; order_index: number }[]): Promise<void>
+
+  // Question management
+  createQuestion(question: Omit<Question, 'id' | 'created_at' | 'updated_at'>): Promise<Question>
+  updateQuestion(id: string, updates: Partial<Question>): Promise<Question>
+  deleteQuestion(id: string): Promise<void>
+  reorderQuestions(questionOrders: { id: string; order_index: number }[]): Promise<void>
+  getQuestionsBySection(sectionId: string): Promise<Question[]>
+
+  // Question-section assignment
+  moveQuestionToSection(questionId: string, sectionId: string | null): Promise<void>
+  getQuestionsWithSections(quizId: string): Promise<Question[]>
+  getQuizWithSections(quizId: string): Promise<Quiz | null>
 }

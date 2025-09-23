@@ -3,11 +3,12 @@
 
 import { useMemo } from 'react'
 import { useQuizStore } from '@/stores/quizStore'
-import { parseMarkdownToQuiz } from '@/utils/markdown-transform'
+import { parseMarkdownQuiz, generateQuizSlug } from '@/lib/markdown-quiz-parser'
+import { useQuizValidation } from '@/hooks/useQuizValidation'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Circle, Clock, FileQuestion, AlertCircle } from 'lucide-react'
+import { CheckCircle, Circle, Clock, FileQuestion, AlertCircle, ExternalLink, AlertTriangle } from 'lucide-react'
 
 interface QuizPreviewProps {
   className?: string
@@ -15,21 +16,40 @@ interface QuizPreviewProps {
 
 export function QuizPreview({ className }: QuizPreviewProps) {
   const { markdownContent, selectedQuiz } = useQuizStore()
+  const { validation, canPublish, hasErrors } = useQuizValidation(markdownContent)
 
   // Parse markdown to quiz structure for preview
   const previewQuiz = useMemo(() => {
     if (!markdownContent.trim()) return null
-    
+
     try {
-      const parsed = parseMarkdownToQuiz(markdownContent)
+      const parsed = parseMarkdownQuiz(markdownContent)
+
+      // Flatten questions from sections for preview display
+      let questionsForPreview = parsed.questions || []
+      if (parsed.structure_type === 'sectioned' && parsed.sections.length > 0) {
+        questionsForPreview = parsed.sections.flatMap(section =>
+          (section.questions || []).map(q => ({ ...q, section_title: section.title }))
+        )
+      }
+
       return {
         ...selectedQuiz,
-        ...parsed
+        ...parsed,
+        questions: questionsForPreview
       }
-    } catch (error) {
+    } catch (_error) {
       return null
     }
   }, [markdownContent, selectedQuiz])
+
+  const handleViewLiveQuiz = () => {
+    if (previewQuiz?.published && previewQuiz?.title) {
+      const slug = generateQuizSlug(previewQuiz.title)
+      const quizUrl = `/quiz/${slug}`
+      window.open(quizUrl, '_blank')
+    }
+  }
 
   if (!selectedQuiz) {
     return (
@@ -55,29 +75,8 @@ export function QuizPreview({ className }: QuizPreviewProps) {
 
   return (
     <div className={cn('flex flex-col h-full bg-background', className)}>
-      {/* Preview toolbar */}
-      <div className='flex-shrink-0 border-b bg-muted/20 px-4 py-2'>
-        <div className='flex items-center justify-between'>
-          <h3 className='font-medium text-sm'>Live Preview</h3>
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            {previewQuiz.questions && (
-              <div className='flex items-center gap-1'>
-                <FileQuestion className='h-3 w-3' />
-                {previewQuiz.questions.length} questions
-              </div>
-            )}
-            {previewQuiz.settings?.time_limit && (
-              <div className='flex items-center gap-1'>
-                <Clock className='h-3 w-3' />
-                {previewQuiz.settings.time_limit} minutes
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Quiz preview content */}
-      <div className='flex-1 overflow-y-auto p-6 bg-gradient-to-b from-background to-muted/10'>
+      <div className='flex-1 overflow-y-auto p-6'>
         <div className='max-w-3xl mx-auto space-y-6'>
           {/* Quiz header */}
           <div className='text-center space-y-3 pb-6 border-b'>
@@ -92,9 +91,22 @@ export function QuizPreview({ className }: QuizPreviewProps) {
             )}
 
             <div className='flex items-center justify-center gap-4 text-sm'>
-              <Badge variant={previewQuiz.published ? 'default' : 'secondary'}>
-                {previewQuiz.published ? 'Published' : 'Draft'}
-              </Badge>
+              {previewQuiz.published ? (
+                <button
+                  onClick={handleViewLiveQuiz}
+                  className='hover:scale-105 transition-transform'
+                  title='Click to view live quiz'
+                >
+                  <Badge variant='default' className='cursor-pointer hover:bg-primary/80 flex items-center gap-1'>
+                    Published
+                    <ExternalLink className='h-3 w-3' />
+                  </Badge>
+                </button>
+              ) : (
+                <Badge variant='secondary'>
+                  Draft
+                </Badge>
+              )}
               
               {previewQuiz.category?.name && (
                 <Badge variant='outline'>
@@ -111,14 +123,72 @@ export function QuizPreview({ className }: QuizPreviewProps) {
             </div>
           </div>
 
+          {/* Validation Status */}
+          {hasErrors && (
+            <div className='bg-orange-50 border border-orange-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <AlertTriangle className='h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5' />
+                <div className='flex-1'>
+                  <h3 className='font-medium text-orange-900 mb-2'>
+                    Quiz Validation Issues ({validation.errors.length})
+                  </h3>
+                  <ul className='space-y-1 text-sm text-orange-800'>
+                    {validation.errors.map((error, index) => (
+                      <li key={index} className='flex items-start gap-2'>
+                        <span className='text-orange-600 mt-1'>•</span>
+                        <span>{error}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {!canPublish && (
+                    <div className='mt-3 p-2 bg-orange-100 rounded text-sm text-orange-900'>
+                      <strong>Cannot publish:</strong> Fix the issues above before publishing this quiz.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!hasErrors && validation.questionErrors.length > 0 && (
+            <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
+              <div className='flex items-center gap-2'>
+                <CheckCircle className='h-5 w-5 text-green-600' />
+                <span className='font-medium text-green-900'>
+                  Quiz validation passed - ready to publish
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Questions */}
           {previewQuiz.questions && previewQuiz.questions.length > 0 ? (
             <div className='space-y-8'>
-              {previewQuiz.questions.map((question, index) => (
-                <div
-                  key={index}
-                  className='bg-card border rounded-lg p-6 shadow-sm'
-                >
+              {previewQuiz.questions.map((question, index) => {
+                const questionValidation = validation.questionErrors.find(q => q.questionIndex === index)
+                const hasQuestionErrors = questionValidation && !questionValidation.isValid
+                const showSectionHeader = question.section_title && (index === 0 || previewQuiz.questions[index - 1].section_title !== question.section_title)
+
+                return (
+                  <div key={index}>
+                    {/* Section Header for sectioned quizzes */}
+                    {showSectionHeader && (
+                      <div className='mb-6 pb-3 border-b border-border'>
+                        <h2 className='text-xl font-semibold text-foreground flex items-center gap-2'>
+                          <div className='w-6 h-6 bg-primary/10 text-primary rounded flex items-center justify-center text-xs font-bold'>
+                            S
+                          </div>
+                          {question.section_title}
+                        </h2>
+                      </div>
+                    )}
+
+                    <div
+                    className={cn(
+                      'bg-card border rounded-lg p-6 shadow-sm',
+                      hasQuestionErrors && 'border-red-200 bg-red-50/30'
+                    )}
+                  >
                   {/* Question header */}
                   <div className='flex items-start justify-between mb-4'>
                     <div className='flex items-center gap-3'>
@@ -131,10 +201,37 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                         </h3>
                       </div>
                     </div>
-                    <Badge variant='outline' className='text-xs'>
-                      {question.question_type.replace('_', ' ')}
-                    </Badge>
+                    <div className='flex items-center gap-2'>
+                      <Badge variant='outline' className='text-xs'>
+                        {question.question_type.replace('_', ' ')}
+                      </Badge>
+                      {hasQuestionErrors && (
+                        <Badge variant='destructive' className='text-xs'>
+                          <AlertTriangle className='h-3 w-3 mr-1' />
+                          Issues
+                        </Badge>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Question validation errors */}
+                  {hasQuestionErrors && questionValidation && (
+                    <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg'>
+                      <div className='flex items-start gap-2'>
+                        <AlertTriangle className='h-4 w-4 text-red-600 flex-shrink-0 mt-0.5' />
+                        <div className='flex-1'>
+                          <p className='text-sm font-medium text-red-900 mb-1'>Question Issues:</p>
+                          <ul className='space-y-1'>
+                            {questionValidation.errors.map((error, errorIndex) => (
+                              <li key={errorIndex} className='text-sm text-red-800'>
+                                • {error}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Question content */}
                   {question.question_content?.additional_context && (
@@ -147,29 +244,39 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                   <div className='space-y-3'>
                     {question.question_type === 'multiple_choice' && question.options.choices && (
                       <div className='space-y-2'>
-                        {question.options.choices.map((choice, choiceIndex) => {
-                          const isCorrect = question.options.correct_index === choiceIndex
-                          return (
-                            <div
-                              key={choiceIndex}
-                              className={cn(
-                                'flex items-center gap-3 p-3 rounded-lg border',
-                                isCorrect 
-                                  ? 'bg-green-50 border-green-200 text-green-900'
-                                  : 'bg-background border-border'
-                              )}
-                            >
-                              {isCorrect ? (
-                                <CheckCircle className='h-4 w-4 text-green-600' />
-                              ) : (
-                                <Circle className='h-4 w-4 text-muted-foreground' />
-                              )}
-                              <span className='flex-1'>
-                                <span className='font-medium mr-2'>
-                                  {String.fromCharCode(65 + choiceIndex)})
+                        {(() => {
+                          // Handle both string[] and object[] formats for backward compatibility
+                          const choices = question.options.choices as string[] | Array<{ id: number; text: string }>
+
+                          return choices.map((choice, choiceIndex) => {
+                            // Normalize choice data
+                            const choiceData = typeof choice === 'string'
+                              ? { id: choiceIndex, text: choice }
+                              : choice
+
+                            const correctIndex = (question.options as { correct_index?: number }).correct_index
+                            const isCorrect = correctIndex === choiceData.id
+                            return (
+                              <div
+                                key={choiceData.id}
+                                className={cn(
+                                  'flex items-center gap-3 p-3 rounded-lg border',
+                                  isCorrect
+                                    ? 'bg-green-50 border-green-200 text-green-900'
+                                    : 'bg-background border-border'
+                                )}
+                              >
+                                {isCorrect ? (
+                                  <CheckCircle className='h-4 w-4 text-green-600' />
+                                ) : (
+                                  <Circle className='h-4 w-4 text-muted-foreground' />
+                                )}
+                                <span className='flex-1'>
+                                  <span className='font-medium mr-2'>
+                                    {String.fromCharCode(65 + choiceIndex)})
+                                  </span>
+                                  {choiceData.text}
                                 </span>
-                                {choice}
-                              </span>
                               {isCorrect && (
                                 <Badge variant='secondary' className='text-xs bg-green-100 text-green-700'>
                                   Correct
@@ -177,38 +284,50 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                               )}
                             </div>
                           )
-                        })}
+                          })
+                        })()}
                       </div>
                     )}
 
-                    {question.question_type === 'true_false' && (
+                    {question.question_type === 'true_false' && question.options.choices && (
                       <div className='space-y-2'>
-                        {['True', 'False'].map((option) => {
-                          const isCorrect = question.answer_data.correct_answer === option.toLowerCase()
-                          return (
-                            <div
-                              key={option}
-                              className={cn(
-                                'flex items-center gap-3 p-3 rounded-lg border',
-                                isCorrect 
-                                  ? 'bg-green-50 border-green-200 text-green-900'
-                                  : 'bg-background border-border'
-                              )}
-                            >
-                              {isCorrect ? (
-                                <CheckCircle className='h-4 w-4 text-green-600' />
-                              ) : (
-                                <Circle className='h-4 w-4 text-muted-foreground' />
-                              )}
-                              <span className='flex-1'>{option}</span>
-                              {isCorrect && (
-                                <Badge variant='secondary' className='text-xs bg-green-100 text-green-700'>
-                                  Correct
-                                </Badge>
-                              )}
-                            </div>
-                          )
-                        })}
+                        {(() => {
+                          // Handle both string[] and object[] formats for backward compatibility
+                          const choices = question.options.choices as string[] | Array<{ id: number; text: string }>
+
+                          return choices.map((choice, choiceIndex) => {
+                            // Normalize choice data
+                            const choiceData = typeof choice === 'string'
+                              ? { id: choiceIndex, text: choice }
+                              : choice
+
+                            const correctAnswer = (question.answer_data as { correct_answer?: boolean }).correct_answer
+                            const isCorrect = (correctAnswer === true && choiceData.id === 0) || (correctAnswer === false && choiceData.id === 1)
+                            return (
+                              <div
+                                key={choiceData.id}
+                                className={cn(
+                                  'flex items-center gap-3 p-3 rounded-lg border',
+                                  isCorrect
+                                    ? 'bg-green-50 border-green-200 text-green-900'
+                                    : 'bg-background border-border'
+                                )}
+                              >
+                                {isCorrect ? (
+                                  <CheckCircle className='h-4 w-4 text-green-600' />
+                                ) : (
+                                  <Circle className='h-4 w-4 text-muted-foreground' />
+                                )}
+                                <span className='flex-1'>{choiceData.text}</span>
+                                {isCorrect && (
+                                  <Badge variant='secondary' className='text-xs bg-green-100 text-green-700'>
+                                    Correct
+                                  </Badge>
+                                )}
+                              </div>
+                            )
+                          })
+                        })()}
                       </div>
                     )}
 
@@ -217,7 +336,7 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                         <div className='p-3 bg-muted/50 rounded-lg border-2 border-dashed'>
                           <p className='text-sm text-muted-foreground mb-2'>Expected Answer:</p>
                           <p className='font-mono text-sm bg-background px-2 py-1 rounded border'>
-                            {question.answer_data.correct_answer}
+                            {(question.answer_data as { correct_answer?: string }).correct_answer || 'No answer provided'}
                           </p>
                         </div>
                       </div>
@@ -241,7 +360,9 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                     </div>
                   )}
                 </div>
-              ))}
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div className='text-center py-12 text-muted-foreground'>

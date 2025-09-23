@@ -112,7 +112,13 @@
       "mcp__supabase__execute_sql",
       "Bash(supabase status:*)",
       "mcp__supabase__get_logs",
-      "mcp__supabase__apply_migration"
+      "mcp__supabase__apply_migration",
+      "Bash(findstr:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(del test-sectioned-quiz-save.js)",
+      "mcp__ct-devmcp__do_imp",
+      "Read(//c/Users/rohan/Downloads/**)"
     ],
     "deny": []
   },
