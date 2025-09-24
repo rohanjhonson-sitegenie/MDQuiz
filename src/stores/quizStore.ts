@@ -501,6 +501,32 @@ export const useQuizStore = create<QuizStore>()(
           }
         },
 
+        updateContactRequirement: async (quizId: string, contactRequirement: 'none' | 'optional' | 'required') => {
+          try {
+            set({ isLoading: true, error: null })
+
+            const quiz = await repository.getQuizById(quizId)
+            if (!quiz) {
+              throw new Error('Quiz not found')
+            }
+
+            const updatedSettings = {
+              ...quiz.settings,
+              contact_requirement: contactRequirement
+            }
+
+            await repository.updateQuiz(quizId, { settings: updatedSettings })
+
+            await get().loadQuizById(quizId)
+
+            set({ isLoading: false })
+          } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to update contact requirement'
+            set({ error: errorMessage, isLoading: false })
+            throw err
+          }
+        },
+
         toggleQuizStructure: async (quizId: string, structureType: 'mixed' | 'sectioned') => {
           try {
             set({ isLoading: true, error: null })

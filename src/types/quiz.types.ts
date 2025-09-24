@@ -77,6 +77,9 @@ export interface QuizSettings {
   section_summary_enabled?: boolean
   global_time_distribution?: 'equal' | 'weighted' | 'custom'
 
+  // Contact collection settings
+  contact_requirement?: 'none' | 'optional' | 'required' // 'none': anonymous, 'optional': can skip, 'required': mandatory (default: 'optional')
+
   [key: string]: any // Allow additional settings
 }
 
@@ -188,6 +191,7 @@ export interface QuizStore extends NavigationState {
   reorderSections: (sectionOrders: { id: string; order_index: number }[]) => Promise<void>
   moveQuestionToSection: (questionId: string, sectionId: string | null) => Promise<void>
   toggleQuizStructure: (quizId: string, structureType: 'mixed' | 'sectioned') => Promise<void>
+  updateContactRequirement: (quizId: string, contactRequirement: 'none' | 'optional' | 'required') => Promise<void>
 
   // Question actions
   createQuestion: (question: Omit<Question, 'id' | 'created_at' | 'updated_at'>) => Promise<void>

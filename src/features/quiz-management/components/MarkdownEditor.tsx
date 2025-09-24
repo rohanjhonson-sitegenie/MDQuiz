@@ -124,7 +124,7 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
   }
 
   return (
-    <div className={cn('flex flex-col h-full', className)}>
+    <div className={cn('flex flex-col', className)}>
       {/* Header with parse button */}
       <div className='flex items-center justify-between p-4 border-b bg-background/95'>
         <div className='flex items-center gap-2'>
@@ -152,12 +152,12 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
       </div>
 
       {/* Editor area */}
-      <div className='flex-1 relative'>
+      <div className='relative min-h-[600px]'>
         <textarea
           ref={textareaRef}
           value={markdownContent}
           onChange={(e) => handleContentChange(e.target.value)}
-          className='w-full h-full p-4 text-sm bg-background border-0 outline-none resize-none font-mono leading-6'
+          className='w-full min-h-[600px] p-4 text-sm bg-background border-0 outline-none resize-none font-mono leading-6'
           placeholder='Start typing your quiz in Markdown...'
           style={{
             fontFamily: 'Monaco, Menlo, Ubuntu Mono, monospace',

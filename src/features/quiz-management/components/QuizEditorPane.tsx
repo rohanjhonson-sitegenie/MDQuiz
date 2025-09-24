@@ -9,6 +9,7 @@ import { ResizeHandle } from '@/features/three-pane-navigator/components/ResizeH
 import { MarkdownEditor } from './MarkdownEditor'
 import { QuizPreview } from './QuizPreview'
 import { QuizStructureToggle } from './QuizStructureToggle'
+import { ContactRequirementSettings } from './ContactRequirementSettings'
 
 interface QuizEditorPaneProps {
   className?: string
@@ -22,6 +23,7 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
     setPaneWidth,
     loadSections,
     toggleQuizStructure,
+    updateContactRequirement,
     isLoading
   } = useQuizStore()
 
@@ -91,7 +93,14 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
     }
   }
 
+  const handleContactRequirementChange = (contactRequirement: 'none' | 'optional' | 'required') => {
+    if (selectedQuiz?.id) {
+      updateContactRequirement(selectedQuiz.id, contactRequirement)
+    }
+  }
+
   const currentStructureType = selectedQuiz?.settings?.structure_type || 'mixed'
+  const currentContactRequirement = selectedQuiz?.settings?.contact_requirement || 'optional'
 
   if (!selectedQuiz) {
     return (
@@ -130,10 +139,10 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
     <div className={cn('flex h-full', className)}>
       {/* Left Panel - Markdown Editor (50% width) */}
       <div
-        className='flex-1 border-r border-border bg-card flex flex-col min-h-0'
+        className='flex-1 border-r border-border bg-card flex flex-col min-h-0 overflow-y-auto'
       >
-        {/* Quiz Structure Toggle */}
-        <div className='px-4 py-3 border-b border-border flex-shrink-0'>
+        {/* Quiz Settings */}
+        <div className='px-4 py-3 border-b border-border flex-shrink-0 space-y-4'>
           <QuizStructureToggle
             currentMode={currentStructureType}
             onModeChange={handleToggleStructure}
@@ -141,11 +150,16 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
             sectionCount={sections.length}
             isLoading={isLoading}
           />
+
+          <ContactRequirementSettings
+            value={currentContactRequirement}
+            onChange={handleContactRequirementChange}
+          />
         </div>
 
 
         {/* Unified Markdown Editor */}
-        <div className='flex-1 flex flex-col min-h-0'>
+        <div className='flex-shrink-0 flex flex-col'>
           <div className='flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0'>
             <h3 className='text-sm font-semibold text-foreground'>
               Markdown Editor
@@ -176,7 +190,7 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
               </Button>
             </div>
           </div>
-          <MarkdownEditor className='flex-1' />
+          <MarkdownEditor className='flex-shrink-0' />
         </div>
       </div>
 

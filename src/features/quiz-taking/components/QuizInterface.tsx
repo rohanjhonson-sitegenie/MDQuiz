@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { QuestionRenderer } from './QuestionRenderer'
 import { QuizResults } from './QuizResults'
+import { PreQuizContactForm } from './PreQuizContactForm'
 import { useQuizData, PublicQuiz } from '@/hooks/useQuizData'
 import { ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Loader2, Clock } from 'lucide-react'
 
@@ -26,6 +27,11 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+
+  // Contact form state
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [hasProvidedContact, setHasProvidedContact] = useState(false)
+  const [contactData, setContactData] = useState<{ email: string; name?: string } | null>(null)
 
   // Section-based timer state
   const [sectionTimeLeft, setSectionTimeLeft] = useState<number | null>(null)
@@ -54,6 +60,12 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
         }
 
         setQuiz(quizData)
+
+        // Check contact requirement and show form if needed
+        const contactRequirement = quizData.settings?.contact_requirement || 'optional'
+        if (contactRequirement === 'required' || contactRequirement === 'optional') {
+          setShowContactForm(true)
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load quiz'
         setLoadError(errorMessage)
@@ -174,7 +186,13 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
 
     try {
       console.log('Calling submitQuizResponse with quiz.id:', quiz.id)
-      const result = await submitQuizResponse(quiz.id, answers, sessionId)
+      const result = await submitQuizResponse(
+        quiz.id,
+        answers,
+        sessionId,
+        contactData?.email,
+        contactData?.name
+      )
       console.log('Submit result:', result)
 
       if (result.success) {
@@ -192,7 +210,20 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
       console.log('Submit process finished, setting isSubmitting to false')
       setIsSubmitting(false)
     }
-  }, [quiz, sessionId, answers, submitQuizResponse])
+  }, [quiz, sessionId, answers, contactData, submitQuizResponse])
+
+  // Handle contact form submission
+  const handleContactSubmit = useCallback((data: { email: string; name?: string }) => {
+    setContactData(data)
+    setHasProvidedContact(true)
+    setShowContactForm(false)
+  }, [])
+
+  // Handle contact form skip
+  const handleContactSkip = useCallback(() => {
+    setHasProvidedContact(true)
+    setShowContactForm(false)
+  }, [])
 
   // Handle timer expiration
   const handleTimerExpired = useCallback(() => {
@@ -371,6 +402,9 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     return <QuizResults quiz={quiz} answers={answers} />
   }
 
+  const contactRequirement = quiz.settings?.contact_requirement || 'optional'
+  const isContactRequired = contactRequirement === 'required'
+
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
   const currentQ = quiz.questions[currentQuestion]
 
@@ -399,7 +433,19 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
   const hasAnswer = answers[currentQ.id] !== undefined
 
   return (
-    <div className='container max-w-4xl mx-auto py-8 px-4'>
+    <>
+      {/* Pre-Quiz Contact Form */}
+      {showContactForm && (
+        <PreQuizContactForm
+          isOpen={showContactForm}
+          isRequired={isContactRequired}
+          quizTitle={quiz.title}
+          onSubmit={handleContactSubmit}
+          onSkip={contactRequirement === 'optional' ? handleContactSkip : undefined}
+        />
+      )}
+
+      <div className='container max-w-4xl mx-auto py-8 px-4'>
       {/* Quiz Header */}
       <Card className='mb-6'>
         <CardHeader>
@@ -515,6 +561,7 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
