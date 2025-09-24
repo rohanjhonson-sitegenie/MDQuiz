@@ -130,10 +130,10 @@ export function QuizMetricsCards({ quizId }: QuizMetricsCardsProps) {
         </CardHeader>
         <CardContent>
           <div className='text-2xl font-bold'>
-            {analytics.averageScore > 0 ? analytics.averageScore.toFixed(1) : 'N/A'}
+            {analytics.averageScore > 0 ? `${analytics.averageScore.toFixed(1)}%` : 'N/A'}
           </div>
           <p className='text-xs text-muted-foreground'>
-            Auto-scoring not implemented
+            {analytics.averageScore > 0 ? 'Across all responses' : 'No scored responses yet'}
           </p>
         </CardContent>
       </Card>

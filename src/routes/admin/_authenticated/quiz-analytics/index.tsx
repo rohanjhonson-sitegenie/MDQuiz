@@ -80,9 +80,9 @@ function QuizAnalyticsIndex() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quizzes.map((quiz) => (
-            <Card key={quiz.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
+            <Card key={quiz.id} className="hover:shadow-lg transition-shadow flex flex-col">
+              <CardHeader className="flex-1">
+                <div className="flex items-center justify-between mb-2">
                   <CardTitle className="text-lg">{quiz.title}</CardTitle>
                   <Badge variant={quiz.published ? 'default' : 'secondary'}>
                     {quiz.published ? 'Published' : 'Draft'}
@@ -94,7 +94,7 @@ function QuizAnalyticsIndex() {
                   </p>
                 )}
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />

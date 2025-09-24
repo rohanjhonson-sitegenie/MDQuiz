@@ -156,17 +156,17 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
           <div className="space-y-2 max-w-2xl">
-            {Object.entries(response.answers).map(([questionId, userAnswer]) => {
-              const question = questions.find(q => q.id === questionId)
-              if (!question) return null
-
+            {questions
+              .filter(q => response.answers[q.id] !== undefined)
+              .map((question) => {
+              const userAnswer = response.answers[question.id]
               const correct = isAnswerCorrect(question, userAnswer)
               const userAnswerText = getAnswerText(question, userAnswer)
               const correctAnswerText = getCorrectAnswerText(question)
 
               return (
                 <div
-                  key={questionId}
+                  key={question.id}
                   className={cn(
                     "p-3 rounded-lg border text-sm",
                     correct ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"

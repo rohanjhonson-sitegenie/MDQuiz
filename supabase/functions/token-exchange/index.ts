@@ -102,7 +102,7 @@ function fallbackTokenValidation(token: string): CtidTokenPayload {
       }
     }
   } catch (_decodeError) {
-    console.info('Token is not a JWT, treating as opaque token')
+    // Token is not a JWT, treating as opaque token
   }
 
   // Fallback for non-JWT tokens
@@ -147,8 +147,6 @@ async function provisionUser(ctidPayload: CtidTokenPayload): Promise<void> {
     }
 
     if (!existingUser?.user) {
-      console.log(`Creating new user in auth.users for CTID sub: ${ctidPayload.sub}`)
-
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         id: ctidPayload.sub,
         email: ctidPayload.email,
@@ -173,13 +171,9 @@ async function provisionUser(ctidPayload: CtidTokenPayload): Promise<void> {
       })
 
       if (error) {
-        console.error('Failed to create user:', error)
         throw new Error(`User provisioning failed: ${error.message}`)
       }
-
-      console.log(`Successfully created user: ${data.user?.id}`)
     } else {
-      console.log(`User already exists: ${existingUser.user.id}`)
 
       // Update existing user data with latest CTID info including profile fields
       const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(ctidPayload.sub, {
@@ -205,7 +199,6 @@ async function provisionUser(ctidPayload: CtidTokenPayload): Promise<void> {
     // This ensures satellite database stays synchronized with Central ID changes
     try {
       const centralIdRole = validateCentralIdRole(ctidPayload.user_role)
-      console.log(`Synchronizing profile: Central ID "${ctidPayload.user_role}" -> Database "${centralIdRole}"`)
 
       // Prepare profile update object with all Central ID fields
       const profileUpdate: {
@@ -229,17 +222,12 @@ async function provisionUser(ctidPayload: CtidTokenPayload): Promise<void> {
 
       if (profileUpdateError) {
         console.warn('Failed to update profile:', profileUpdateError.message)
-      } else {
-        console.log(`✅ Profile synchronized with Central ID data`)
       }
     } catch (roleUpdateError) {
       console.warn('Role synchronization failed:', roleUpdateError)
     }
   } catch (error) {
     console.error('User provisioning error:', error)
-    // Don't throw - allow token exchange to continue even if provisioning fails
-    // The user can still access the system, though some profile-dependent features may not work
-    console.warn('Continuing with token exchange despite provisioning failure')
   }
 }
 
@@ -260,7 +248,6 @@ async function validateCtidToken(token: string): Promise<CtidTokenPayload> {
   // Call Central ID API for validation with timeout and error handling
   try {
     const validateUrl = `${ctidApiBaseUrl}/api/v1/auth/validate`
-    console.log(`Validating token with CTID API: ${validateUrl}`)
 
     // Create AbortController for timeout handling
     const controller = new AbortController()
@@ -281,7 +268,6 @@ async function validateCtidToken(token: string): Promise<CtidTokenPayload> {
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      console.error(`CTID validation failed: ${response.status} ${response.statusText}`)
 
       // For specific error codes, fall back to local validation
       if (response.status >= 500 || response.status === 408) {
@@ -293,7 +279,6 @@ async function validateCtidToken(token: string): Promise<CtidTokenPayload> {
     }
 
     const validationResult = await response.json()
-    console.info('CTID validation successful')
 
     // Handle different CTID API response formats
     let userData = validationResult
@@ -312,7 +297,6 @@ async function validateCtidToken(token: string): Promise<CtidTokenPayload> {
     const email = userData.email || userData.email_address
 
     if (!sub || !email) {
-      console.error('CTID validation response missing required fields. Full response:', JSON.stringify(validationResult))
       console.warn('CTID API returned unexpected format, falling back to local validation')
       return fallbackTokenValidation(token)
     }
@@ -368,7 +352,6 @@ async function validateCtidToken(token: string): Promise<CtidTokenPayload> {
   }
 }
 
-console.info("Token exchange function loaded");
 
 // Supabase JWT Token Exchange endpoint
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -444,12 +427,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Get JWT signing options from environment
     const jwtSigningKey = Deno.env.get('JWT_SIGNING_KEY')
     const jwtSecret = Deno.env.get('JWT_SECRET') // Legacy symmetric secret
-
-    // Debug: Log first/last 10 chars of secret (for troubleshooting)
-    if (jwtSecret) {
-      const secretPreview = jwtSecret.substring(0, 10) + '...' + jwtSecret.substring(jwtSecret.length - 10)
-      console.log(`🔑 Using JWT_SECRET: ${secretPreview} (length: ${jwtSecret.length})`)
-    }
 
     if (!jwtSigningKey && !jwtSecret) {
       console.error('JWT signing configuration not available')

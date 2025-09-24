@@ -9,6 +9,33 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { supabase } from '@/lib/supabase-client'
 import { BarChart3, Download, Users, TrendingUp, Calendar, Loader2, AlertCircle } from 'lucide-react'
 
+function normalizeAnswer(answer: string): string {
+  return answer
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\-_/\\,;:.]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function extractKeywords(text: string): string[] {
+  const stopWords = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'than', 'too', 'very', 'just', 'but', 'or', 'and', 'if', 'because', 'while', 'it', 'its', 'that', 'this', 'these', 'those'])
+
+  return normalizeAnswer(text)
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.has(word))
+}
+
+function calculateKeywordMatch(userAnswer: string, correctAnswer: string): number {
+  const userKeywords = new Set(extractKeywords(userAnswer))
+  const correctKeywords = extractKeywords(correctAnswer)
+
+  if (correctKeywords.length === 0) return 0
+
+  const matchedCount = correctKeywords.filter(keyword => userKeywords.has(keyword)).length
+  return matchedCount / correctKeywords.length
+}
+
 interface QuizAnalyticsData {
   totalResponses: number
   uniqueSessions: number
@@ -96,6 +123,21 @@ export function QuizAnalytics({ quizId, quizTitle }: QuizAnalyticsProps) {
           correctAnswers = responses?.filter(r => {
             const userAnswer = r.answers?.[question.id]
             const correctAnswer = question.answer_data.correct_answers?.[0]
+            if (typeof userAnswer === 'string' && typeof correctAnswer === 'string') {
+              const normalizedUser = normalizeAnswer(userAnswer)
+              const normalizedCorrect = normalizeAnswer(correctAnswer)
+
+              if (normalizedUser === normalizedCorrect) {
+                return true
+              }
+
+              if (correctAnswer.length > 50) {
+                const keywordMatchScore = calculateKeywordMatch(userAnswer, correctAnswer)
+                return keywordMatchScore >= 0.6
+              }
+
+              return false
+            }
             return userAnswer === correctAnswer
           }).length || 0
         }
@@ -322,9 +364,6 @@ export function QuizAnalytics({ quizId, quizTitle }: QuizAnalyticsProps) {
               <div key={question.questionId} className='flex items-center justify-between p-3 border rounded'>
                 <div className='flex-1'>
                   <p className='font-medium'>Q{index + 1}</p>
-                  <p className='text-sm text-muted-foreground truncate max-w-md'>
-                    {question.questionText}
-                  </p>
                 </div>
                 <div className='flex items-center gap-4'>
                   <div className='text-right'>

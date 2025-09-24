@@ -101,8 +101,6 @@ export class QuizRepository implements IQuizRepository {
    * Get quiz with sections and questions (comprehensive method for both mixed and sectioned)
    */
   async getQuizWithSections(id: string): Promise<Quiz | null> {
-    console.log('🔎 Repository: Fetching quiz with ID:', id)
-
     const { data, error } = await this.supabase
       .from('quizzes')
       .select(`
@@ -120,25 +118,15 @@ export class QuizRepository implements IQuizRepository {
       .order('order_index', { foreignTable: 'quiz_sections.questions', ascending: true })
       .single()
 
-    console.log('📊 Repository: Query result - data:', data, 'error:', error)
-
     if (error) {
-      if (error.code === 'PGRST116') { // No rows returned
-        console.warn('⚠️ Repository: No quiz found with ID:', id)
+      if (error.code === 'PGRST116') {
         return null
       }
-      console.error('❌ Repository: Error fetching quiz:', error)
       throw new Error(`Failed to fetch quiz with sections: ${error.message}`)
     }
 
     const quizData = extractSingleResult(data)
-
-    if (!quizData) {
-      console.warn('⚠️ Repository: No quiz data returned')
-      return null
-    }
-
-    console.log('📦 Repository: Normalized quiz data:', quizData)
+    if (!quizData) return null
 
     return normalizeQuiz({
       ...quizData,
@@ -155,7 +143,7 @@ export class QuizRepository implements IQuizRepository {
     const { questions, sections, ...quizData } = quiz
 
     // Insert quiz record
-    const { data: newQuiz, error: quizError } = await this.supabase
+    const { data, error: quizError } = await this.supabase
       .from('quizzes')
       .insert({
         title: quizData.title,
@@ -171,11 +159,16 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to create quiz: ${quizError.message}`)
     }
 
+    const newQuiz = extractSingleResult(data)
+    if (!newQuiz) {
+      throw new Error('Failed to create quiz: No data returned')
+    }
+
     try {
       // Handle sections if provided
       if (sections && sections.length > 0) {
         for (const section of sections) {
-          const { data: newSection, error: sectionError } = await this.supabase
+          const { data, error: sectionError } = await this.supabase
             .from('quiz_sections')
             .insert({
               quiz_id: newQuiz.id,
@@ -189,6 +182,11 @@ export class QuizRepository implements IQuizRepository {
 
           if (sectionError) {
             throw new Error(`Failed to create section "${section.title}": ${sectionError.message}`)
+          }
+
+          const newSection = extractSingleResult(data)
+          if (!newSection) {
+            throw new Error(`Failed to create section "${section.title}": No data returned`)
           }
 
           // Insert questions for this section
@@ -411,7 +409,12 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to create category: ${error.message}`)
     }
 
-    return data
+    const categoryData = extractSingleResult(data)
+    if (!categoryData) {
+      throw new Error('Failed to create category: No data returned')
+    }
+
+    return categoryData
   }
 
   /**
@@ -439,26 +442,31 @@ export class QuizRepository implements IQuizRepository {
     averageScore: number
     completionRate: number
   }> {
-    console.log('📊 Getting quiz stats for:', quizId)
+    // Fetch responses and questions together
+    const [responsesResult, questionsResult] = await Promise.all([
+      this.supabase
+        .from('responses')
+        .select('answers')
+        .eq('quiz_id', quizId),
+      this.supabase
+        .from('questions')
+        .select('id, question_type, options, answer_data')
+        .eq('quiz_id', quizId)
+    ])
 
-    // Get response data for calculations (fetch all instead of using count with head:true)
-    // Note: COUNT with head:true doesn't work properly with RLS policies
-    const { data: responses, error: responsesError } = await this.supabase
-      .from('responses')
-      .select('answers')
-      .eq('quiz_id', quizId)
-
-    console.log('📈 Response data result:', { count: responses?.length, error: responsesError })
-
-    if (responsesError) {
-      console.error('❌ Response fetch error:', responsesError)
-      throw new Error(`Failed to fetch responses: ${responsesError.message}`)
+    if (responsesResult.error) {
+      throw new Error(`Failed to fetch responses: ${responsesResult.error.message}`)
     }
 
+    if (questionsResult.error) {
+      throw new Error(`Failed to fetch questions: ${questionsResult.error.message}`)
+    }
+
+    const responses = responsesResult.data
+    const questions = questionsResult.data
     const totalResponses = responses?.length || 0
 
     if (totalResponses === 0) {
-      console.warn('⚠️ No responses found for quiz:', quizId)
       return {
         totalResponses: 0,
         averageScore: 0,
@@ -467,17 +475,105 @@ export class QuizRepository implements IQuizRepository {
     }
 
     // Calculate simple completion rate (responses with answers)
-    const completedResponses = responses?.filter(r => 
+    const completedResponses = responses?.filter(r =>
       r.answers && Object.keys(r.answers).length > 0
     ).length || 0
 
     const completionRate = totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0
 
+    // Calculate average score
+    let totalScore = 0
+    let scoredResponses = 0
+
+    responses?.forEach(response => {
+      if (!response.answers || Object.keys(response.answers).length === 0) return
+
+      let correctCount = 0
+      let answeredCount = 0
+
+      questions?.forEach(question => {
+        const userAnswer = response.answers[question.id]
+        if (userAnswer === undefined) return
+
+        answeredCount++
+        if (this.isAnswerCorrect(question, userAnswer)) {
+          correctCount++
+        }
+      })
+
+      if (answeredCount > 0) {
+        const score = (correctCount / answeredCount) * 100
+        totalScore += score
+        scoredResponses++
+      }
+    })
+
+    const averageScore = scoredResponses > 0 ? totalScore / scoredResponses : 0
+
     return {
       totalResponses: totalResponses || 0,
-      averageScore: 0, // Would need quiz scoring logic to calculate
+      averageScore,
       completionRate
     }
+  }
+
+  private normalizeAnswer(answer: string): string {
+    return answer
+      .toLowerCase()
+      .trim()
+      .replace(/[\s\-_/\\,;:.]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  private extractKeywords(text: string): string[] {
+    const stopWords = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'than', 'too', 'very', 'just', 'but', 'or', 'and', 'if', 'because', 'while', 'it', 'its', 'that', 'this', 'these', 'those'])
+
+    return this.normalizeAnswer(text)
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !stopWords.has(word))
+  }
+
+  private calculateKeywordMatch(userAnswer: string, correctAnswer: string): number {
+    const userKeywords = new Set(this.extractKeywords(userAnswer))
+    const correctKeywords = this.extractKeywords(correctAnswer)
+
+    if (correctKeywords.length === 0) return 0
+
+    const matchedCount = correctKeywords.filter(keyword => userKeywords.has(keyword)).length
+    return matchedCount / correctKeywords.length
+  }
+
+  private isAnswerCorrect(question: any, userAnswer: unknown): boolean {
+    if (question.question_type === 'multiple_choice') {
+      const options = question.options as { correct_index?: number }
+      return userAnswer === options.correct_index
+    }
+    if (question.question_type === 'true_false') {
+      const answerData = question.answer_data as { correct_answer?: boolean }
+      return userAnswer === answerData.correct_answer
+    }
+    if (question.question_type === 'text_input') {
+      const answerData = question.answer_data as { correct_answer?: string }
+      const options = question.options as { min_length?: number }
+      const userAnswerStr = String(userAnswer || '')
+      const correctAnswerStr = answerData.correct_answer || ''
+
+      const normalizedUser = this.normalizeAnswer(userAnswerStr)
+      const normalizedCorrect = this.normalizeAnswer(correctAnswerStr)
+
+      if (normalizedUser === normalizedCorrect) {
+        return true
+      }
+
+      if (correctAnswerStr.length > 50 || (options?.min_length && options.min_length > 30)) {
+        const keywordMatchScore = this.calculateKeywordMatch(userAnswerStr, correctAnswerStr)
+        return keywordMatchScore >= 0.6
+      }
+
+      return normalizedUser === normalizedCorrect
+    }
+    return false
   }
 
   // Section Management Methods
@@ -519,7 +615,12 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to create section: ${error.message}`)
     }
 
-    return data
+    const sectionData = extractSingleResult(data)
+    if (!sectionData) {
+      throw new Error('Failed to create section: No data returned')
+    }
+
+    return sectionData
   }
 
   /**
@@ -542,7 +643,12 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to update section: ${error.message}`)
     }
 
-    return data
+    const sectionData = extractSingleResult(data)
+    if (!sectionData) {
+      throw new Error('Failed to update section: No data returned')
+    }
+
+    return sectionData
   }
 
   /**
@@ -651,7 +757,12 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to create question: ${error.message}`)
     }
 
-    return data
+    const questionData = extractSingleResult(data)
+    if (!questionData) {
+      throw new Error('Failed to create question: No data returned')
+    }
+
+    return questionData
   }
 
   /**
@@ -677,7 +788,12 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to update question: ${error.message}`)
     }
 
-    return data
+    const questionData = extractSingleResult(data)
+    if (!questionData) {
+      throw new Error('Failed to update question: No data returned')
+    }
+
+    return questionData
   }
 
   /**

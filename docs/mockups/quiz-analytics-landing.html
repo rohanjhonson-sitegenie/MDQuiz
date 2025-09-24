@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Analytics Landing - Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 0 0% 3.9%;
+            --primary: 0 0% 9%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 0 0% 96.1%;
+            --secondary-foreground: 0 0% 9%;
+            --muted: 0 0% 96.1%;
+            --muted-foreground: 0 0% 45.1%;
+            --border: 0 0% 89.8%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .card {
+            background: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            border: 1px solid hsl(var(--border));
+        }
+
+        .badge-primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .badge-secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+    <div class="container mx-auto max-w-7xl">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-8">
+            <i data-lucide="bar-chart-3" class="h-8 w-8 text-gray-900"></i>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Quiz Analytics</h1>
+                <p class="text-gray-600">View detailed reports and analytics for your quizzes</p>
+            </div>
+        </div>
+
+        <!-- Quiz Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Quiz Card 1 - Published -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">JavaScript Fundamentals</h3>
+                        <span class="badge-primary px-2 py-1 rounded text-xs font-medium">Published</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Test your knowledge of core JavaScript concepts including variables, functions, and closures.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card 2 - Draft -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">React Best Practices</h3>
+                        <span class="badge-secondary px-2 py-1 rounded text-xs font-medium">Draft</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Advanced React patterns and performance optimization techniques for building scalable applications.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card 3 -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">CSS Grid Mastery</h3>
+                        <span class="badge-primary px-2 py-1 rounded text-xs font-medium">Published</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Master CSS Grid layout with practical examples and real-world use cases.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card 4 -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">TypeScript Deep Dive</h3>
+                        <span class="badge-primary px-2 py-1 rounded text-xs font-medium">Published</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Comprehensive TypeScript assessment covering all key concepts from basic types to advanced generics and decorators.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card 5 -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">Node.js API Development</h3>
+                        <span class="badge-primary px-2 py-1 rounded text-xs font-medium">Published</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Build RESTful APIs with Node.js and Express.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card 6 -->
+            <div class="card rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-medium text-gray-900">Database Design Principles</h3>
+                        <span class="badge-secondary px-2 py-1 rounded text-xs font-medium">Draft</span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2">
+                        Learn database normalization, indexing strategies, and query optimization.
+                    </p>
+                </div>
+                <div class="px-6 pb-6 pt-0">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>Analytics Available</span>
+                        </div>
+                        <button class="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (Hidden by default, shown when no quizzes) -->
+        <div class="hidden">
+            <div class="card rounded-lg shadow p-16 text-center">
+                <i data-lucide="file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                <h3 class="text-lg font-semibold mb-2">No Quizzes Found</h3>
+                <p class="text-gray-600 mb-4">
+                    Create some quizzes first to view their analytics and reports.
+                </p>
+                <button class="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                    Go to Quiz Management
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

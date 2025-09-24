@@ -20,6 +20,7 @@ import {
   IconCalendar,
   IconLayoutKanban,
   IconQuestionMark,
+  IconChartBar,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -98,6 +99,11 @@ const adminSidebarData: SidebarData = {
           title: 'Quiz Management',
           url: '/admin/quiz-management',
           icon: IconQuestionMark,
+        },
+        {
+          title: 'Quiz Analytics',
+          url: '/admin/quiz-analytics',
+          icon: IconChartBar,
         },
       ],
     },

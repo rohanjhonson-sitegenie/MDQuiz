@@ -40,14 +40,24 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
       try {
         setLoadError(null)
         const quizData = await getPublishedQuiz(quizSlug)
-        setQuiz(quizData)
 
         if (!quizData) {
           setLoadError('Quiz not found or not published')
+          setQuiz(null)
+          return
         }
+
+        if (!quizData.id) {
+          setLoadError('Quiz data is incomplete (missing ID)')
+          setQuiz(null)
+          return
+        }
+
+        setQuiz(quizData)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load quiz'
         setLoadError(errorMessage)
+        setQuiz(null)
       }
     }
 
@@ -61,11 +71,11 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     }
 
     const currentQ = quiz.questions[currentQuestion]
-    if (!currentQ) return null
+    if (!currentQ || !currentQ.id) return null
 
     // Find the section that contains this question
     const section = quiz.sections.find(s =>
-      s.questions.some(q => q.id === currentQ.id)
+      s.questions?.some(q => q && q.id === currentQ.id)
     )
 
     return section || null
@@ -73,6 +83,8 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
 
   // Section timer management
   useEffect(() => {
+    console.log('Section timer effect running, quiz:', quiz?.title, 'currentQuestion:', currentQuestion)
+
     if (!quiz || quiz.structure_type !== 'sectioned') {
       // Clear timer for non-sectioned quizzes
       if (timerRef.current) {
@@ -85,10 +97,16 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     }
 
     const section = getCurrentQuestionSection()
-    if (!section) return
+    console.log('Current section:', section)
+
+    if (!section) {
+      console.log('No section found for current question')
+      return
+    }
 
     // Check if we've entered a new section
     if (section.id !== currentSectionId) {
+      console.log('Entering new section:', section.id)
       setCurrentSectionId(section.id || null)
 
       // Check if this section has a time limit
@@ -133,22 +151,45 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
 
   // Handle quiz submission
   const handleSubmit = useCallback(async () => {
-    if (!quiz) return
+    console.log('=== SUBMIT QUIZ CLICKED ===')
+    console.log('Quiz object:', quiz)
+    console.log('Quiz ID:', quiz?.id)
+    console.log('Answers:', answers)
+    console.log('Session ID:', sessionId)
+
+    if (!quiz) {
+      console.error('Quiz is null or undefined')
+      setSubmitError('Quiz data not loaded. Please refresh and try again.')
+      return
+    }
+
+    if (!quiz.id) {
+      console.error('Quiz ID is missing, quiz object:', quiz)
+      setSubmitError('Quiz ID is missing. Please refresh and try again.')
+      return
+    }
 
     setIsSubmitting(true)
     setSubmitError(null)
 
     try {
+      console.log('Calling submitQuizResponse with quiz.id:', quiz.id)
       const result = await submitQuizResponse(quiz.id, answers, sessionId)
+      console.log('Submit result:', result)
+
       if (result.success) {
+        console.log('Quiz submitted successfully, setting isSubmitted to true')
         setIsSubmitted(true)
       } else {
+        console.error('Submit failed with error:', result.error)
         setSubmitError(result.error || 'Failed to submit quiz. Please try again.')
       }
     } catch (err) {
+      console.error('Exception during submit:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit quiz. Please try again.'
       setSubmitError(errorMessage)
     } finally {
+      console.log('Submit process finished, setting isSubmitting to false')
       setIsSubmitting(false)
     }
   }, [quiz, sessionId, answers, submitQuizResponse])
@@ -159,17 +200,19 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
 
     // Find the next section or submit if this is the last section
     const currentSection = getCurrentQuestionSection()
-    if (!currentSection) return
+    if (!currentSection || !currentSection.questions) return
 
     // Find the last question in current section
     const currentSectionQuestions = quiz.questions.filter(q =>
-      currentSection.questions.some(sq => sq.id === q.id)
+      q && q.id && currentSection.questions?.some(sq => sq && sq.id === q.id)
     )
 
     if (currentSectionQuestions.length === 0) return
 
     const lastQuestionInSection = currentSectionQuestions[currentSectionQuestions.length - 1]
-    const lastQuestionIndex = quiz.questions.findIndex(q => q.id === lastQuestionInSection.id)
+    if (!lastQuestionInSection || !lastQuestionInSection.id) return
+
+    const lastQuestionIndex = quiz.questions.findIndex(q => q && q.id === lastQuestionInSection.id)
 
     if (lastQuestionIndex >= quiz.questions.length - 1) {
       // This was the last section, auto-submit
@@ -224,7 +267,8 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     const currentQ = quiz.questions[currentQuestion]
     const section = getCurrentQuestionSection()
 
-    if (!section || !currentQ) return false
+    if (!section || !currentQ || !currentQ.id) return false
+    if (!section.questions || section.questions.length === 0) return false
 
     // Check if this is the first question in the section
     const sectionQuestions = section.questions.sort((a, b) => a.order_index - b.order_index)
@@ -304,11 +348,53 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
   }
 
   if (isSubmitted) {
+    if (!quiz) {
+      return (
+        <div className='flex items-center justify-center min-h-screen'>
+          <Card className='w-full max-w-md'>
+            <CardContent className='pt-6'>
+              <div className='text-center'>
+                <CheckCircle className='h-12 w-12 text-green-600 mx-auto mb-4' />
+                <h2 className='text-xl font-semibold mb-2'>Quiz Submitted Successfully</h2>
+                <p className='text-muted-foreground mb-4'>
+                  Your responses have been recorded. Thank you for completing the quiz!
+                </p>
+                <Button onClick={() => window.location.reload()} variant='outline'>
+                  Take Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
     return <QuizResults quiz={quiz} answers={answers} />
   }
 
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
   const currentQ = quiz.questions[currentQuestion]
+
+  if (!currentQ) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <Card className='w-full max-w-md'>
+          <CardContent className='pt-6'>
+            <div className='text-center'>
+              <AlertCircle className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+              <h2 className='text-xl font-semibold mb-2'>Question Not Found</h2>
+              <p className='text-muted-foreground mb-4'>
+                Unable to load the current question.
+              </p>
+              <Button onClick={() => window.location.reload()} variant='outline'>
+                Reload Quiz
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const isLastQuestion = currentQuestion === quiz.questions.length - 1
   const hasAnswer = answers[currentQ.id] !== undefined
 

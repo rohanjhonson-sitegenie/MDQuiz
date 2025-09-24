@@ -5,6 +5,8 @@ import { useQuizStore } from '@/stores/quizStore'
 import { cn } from '@/lib/utils'
 import { QuizMetricsCards } from './QuizMetricsCards'
 import { QuizResponseTable } from './QuizResponseTable'
+import { AnalyticsChartsGrid } from './AnalyticsChartsGrid'
+import { useQuizAnalytics } from '@/hooks/useQuizAnalytics'
 import { BarChart3, FileText } from 'lucide-react'
 
 interface QuizReportsProps {
@@ -15,9 +17,10 @@ interface QuizReportsProps {
 export function QuizReports({ className, quizId }: QuizReportsProps) {
   const { selectedQuizId, selectedQuiz } = useQuizStore()
 
-  // Use provided quizId or fall back to store selected quiz
   const activeQuizId = quizId || selectedQuizId
-  const activeQuiz = quizId ? null : selectedQuiz // When using prop quizId, we don't need store quiz data
+  const activeQuiz = quizId ? null : selectedQuiz
+
+  const analytics = useQuizAnalytics(activeQuizId)
 
   if (!activeQuizId) {
     return (
@@ -32,10 +35,8 @@ export function QuizReports({ className, quizId }: QuizReportsProps) {
 
   return (
     <div className={cn('flex flex-col h-full bg-background', className)}>
-      {/* Reports content */}
       <div className='flex-1 overflow-y-auto p-6'>
         <div className='max-w-6xl mx-auto space-y-6'>
-          {/* Quiz subtitle - only show when we have quiz title from store */}
           {activeQuiz && (
             <div className='pb-6 border-b'>
               <p className='text-lg font-medium text-muted-foreground'>
@@ -44,10 +45,13 @@ export function QuizReports({ className, quizId }: QuizReportsProps) {
             </div>
           )}
 
-          {/* Metrics overview */}
           <QuizMetricsCards quizId={activeQuizId} />
 
-          {/* Response details */}
+          <AnalyticsChartsGrid
+            trendData={analytics.trendData}
+            questionStats={analytics.questionStats}
+          />
+
           <div className='space-y-4'>
             <div className='flex items-center gap-2'>
               <FileText className='h-5 w-5 text-muted-foreground' />

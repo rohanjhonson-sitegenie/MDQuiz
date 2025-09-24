@@ -143,32 +143,18 @@ export const useQuizStore = create<QuizStore>()(
           try {
             set({ isLoading: true, error: null })
 
-            console.log('🔍 Loading quiz by ID:', quizId)
-
-            // Use getQuizWithSections to load both questions and sections
             const quiz = await repository.getQuizWithSections(quizId)
 
-            console.log('📦 Raw quiz from repository:', quiz)
-
             if (quiz) {
-              // Simple normalization of loaded data
               const normalizedQuiz = normalizeQuiz(quiz)
-
-              console.log('✅ Normalized quiz:', normalizedQuiz)
-
-              // Convert to markdown using transformation layer
               const markdown = transformToMarkdown(normalizedQuiz)
-
-              console.log('📝 Generated markdown:', markdown.substring(0, 200))
-
               set({ selectedQuiz: normalizedQuiz, markdownContent: markdown })
             } else {
-              console.warn('⚠️ Quiz not found')
               set({ error: 'Quiz not found' })
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load quiz'
-            console.error('❌ Quiz load error:', error)
+            console.error('Error loading quiz:', error)
             set({ error: errorMessage })
           } finally {
             set({ isLoading: false })

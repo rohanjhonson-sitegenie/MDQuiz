@@ -103,10 +103,17 @@ export function useQuizData() {
       })
 
       if (!targetQuiz) {
+        console.error('Quiz not found for slug:', slug)
         return null
       }
 
       const quizData = targetQuiz
+
+      if (!quizData.id) {
+        console.error('Quiz data missing ID:', quizData)
+        throw new Error('Quiz data is incomplete - missing ID')
+      }
+
       const settings = quizData.settings || {}
       const structureType = settings.structure_type as 'mixed' | 'sectioned' || 'mixed'
 
@@ -157,10 +164,16 @@ export function useQuizData() {
     respondentName?: string | null,
     respondentEmail?: string | null
   ): Promise<SubmissionResult> => {
+    console.log('=== submitQuizResponse called ===')
+    console.log('quizId:', quizId)
+    console.log('answers:', answers)
+    console.log('sessionId:', sessionId)
+
     setIsLoading(true)
     setError(null)
 
     try {
+      console.log('Inserting into responses table...')
       const { data, error: submitError } = await supabase
         .from('responses')
         .insert({
@@ -173,15 +186,21 @@ export function useQuizData() {
         .select('id')
         .single()
 
+      console.log('Insert response:', { data, error: submitError })
+
       if (submitError) {
+        console.error('Supabase insert error:', submitError)
         throw new Error(submitError.message)
       }
 
+      console.log('Response submitted successfully, ID:', data?.id)
+
       return {
         success: true,
-        responseId: data.id
+        responseId: data?.id
       }
     } catch (err) {
+      console.error('Exception in submitQuizResponse:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit quiz'
       setError(errorMessage)
       return {

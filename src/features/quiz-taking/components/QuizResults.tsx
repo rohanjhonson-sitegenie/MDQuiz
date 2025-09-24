@@ -14,14 +14,14 @@ interface Quiz {
 }
 
 interface QuizResultsProps {
-  quiz: Quiz
+  quiz: Quiz | null
   answers: Record<string, unknown>
 }
 
 export function QuizResults({ quiz, answers }: QuizResultsProps) {
   const answeredQuestions = Object.keys(answers).length
-  const totalQuestions = quiz.questions.length
-  const completionPercentage = Math.round((answeredQuestions / totalQuestions) * 100)
+  const totalQuestions = quiz?.questions.length || 0
+  const completionPercentage = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0
 
   return (
     <div className='container max-w-2xl mx-auto py-12 px-4'>
@@ -37,7 +37,7 @@ export function QuizResults({ quiz, answers }: QuizResultsProps) {
 
         <CardContent className='space-y-6'>
           <div>
-            <h3 className='text-lg font-medium mb-2'>{quiz.title}</h3>
+            <h3 className='text-lg font-medium mb-2'>{quiz?.title || 'Quiz'}</h3>
             <p className='text-muted-foreground'>
               Thank you for completing this quiz. Your responses have been submitted successfully.
             </p>
