@@ -58,6 +58,7 @@ import { Route as AdminAuthenticatedChatsIndexRouteImport } from './routes/admin
 import { Route as AdminAuthenticatedCalendarIndexRouteImport } from './routes/admin/_authenticated/calendar/index'
 import { Route as AdminAuthenticatedBlogsIndexRouteImport } from './routes/admin/_authenticated/blogs/index'
 import { Route as AdminAuthenticatedAppsIndexRouteImport } from './routes/admin/_authenticated/apps/index'
+import { Route as AdminAuthenticatedQuizAnalyticsQuizIdRouteImport } from './routes/admin/_authenticated/quiz-analytics/$quizId'
 import { Route as AdminAuthenticatedBlogsNewRouteImport } from './routes/admin/_authenticated/blogs/new'
 import { Route as AdminAuthenticatedBlogsIdEditRouteImport } from './routes/admin/_authenticated/blogs/$id.edit'
 
@@ -367,6 +368,12 @@ const AdminAuthenticatedDemosThreePaneNavigatorLazyRoute =
       './routes/admin/_authenticated/demos/three-pane-navigator.lazy'
     ).then((d) => d.Route),
   )
+const AdminAuthenticatedQuizAnalyticsQuizIdRoute =
+  AdminAuthenticatedQuizAnalyticsQuizIdRouteImport.update({
+    id: '/quiz-analytics/$quizId',
+    path: '/quiz-analytics/$quizId',
+    getParentRoute: () => AdminAuthenticatedRouteRoute,
+  } as any)
 const AdminAuthenticatedBlogsNewRoute =
   AdminAuthenticatedBlogsNewRouteImport.update({
     id: '/new',
@@ -418,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/me/': typeof MeAuthenticatedIndexRoute
   '/user/': typeof UserAuthenticatedIndexRoute
   '/admin/blogs/new': typeof AdminAuthenticatedBlogsNewRoute
+  '/admin/quiz-analytics/$quizId': typeof AdminAuthenticatedQuizAnalyticsQuizIdRoute
   '/admin/demos/three-pane-navigator': typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
   '/admin/apps': typeof AdminAuthenticatedAppsIndexRoute
   '/admin/blogs/': typeof AdminAuthenticatedBlogsIndexRoute
@@ -468,6 +476,7 @@ export interface FileRoutesByTo {
   '/admin/quiz-management': typeof AdminAuthenticatedQuizManagementLazyRoute
   '/docs/ux-guidelines': typeof DocsUxGuidelinesIndexRoute
   '/admin/blogs/new': typeof AdminAuthenticatedBlogsNewRoute
+  '/admin/quiz-analytics/$quizId': typeof AdminAuthenticatedQuizAnalyticsQuizIdRoute
   '/admin/demos/three-pane-navigator': typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
   '/admin/apps': typeof AdminAuthenticatedAppsIndexRoute
   '/admin/blogs': typeof AdminAuthenticatedBlogsIndexRoute
@@ -526,6 +535,7 @@ export interface FileRoutesById {
   '/me/_authenticated/': typeof MeAuthenticatedIndexRoute
   '/user/_authenticated/': typeof UserAuthenticatedIndexRoute
   '/admin/_authenticated/blogs/new': typeof AdminAuthenticatedBlogsNewRoute
+  '/admin/_authenticated/quiz-analytics/$quizId': typeof AdminAuthenticatedQuizAnalyticsQuizIdRoute
   '/admin/_authenticated/demos/three-pane-navigator': typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
   '/admin/_authenticated/apps/': typeof AdminAuthenticatedAppsIndexRoute
   '/admin/_authenticated/blogs/': typeof AdminAuthenticatedBlogsIndexRoute
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/me/'
     | '/user/'
     | '/admin/blogs/new'
+    | '/admin/quiz-analytics/$quizId'
     | '/admin/demos/three-pane-navigator'
     | '/admin/apps'
     | '/admin/blogs/'
@@ -632,6 +643,7 @@ export interface FileRouteTypes {
     | '/admin/quiz-management'
     | '/docs/ux-guidelines'
     | '/admin/blogs/new'
+    | '/admin/quiz-analytics/$quizId'
     | '/admin/demos/three-pane-navigator'
     | '/admin/apps'
     | '/admin/blogs'
@@ -689,6 +701,7 @@ export interface FileRouteTypes {
     | '/me/_authenticated/'
     | '/user/_authenticated/'
     | '/admin/_authenticated/blogs/new'
+    | '/admin/_authenticated/quiz-analytics/$quizId'
     | '/admin/_authenticated/demos/three-pane-navigator'
     | '/admin/_authenticated/apps/'
     | '/admin/_authenticated/blogs/'
@@ -1106,6 +1119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRouteImport
       parentRoute: typeof AdminAuthenticatedRouteRoute
     }
+    '/admin/_authenticated/quiz-analytics/$quizId': {
+      id: '/admin/_authenticated/quiz-analytics/$quizId'
+      path: '/quiz-analytics/$quizId'
+      fullPath: '/admin/quiz-analytics/$quizId'
+      preLoaderRoute: typeof AdminAuthenticatedQuizAnalyticsQuizIdRouteImport
+      parentRoute: typeof AdminAuthenticatedRouteRoute
+    }
     '/admin/_authenticated/blogs/new': {
       id: '/admin/_authenticated/blogs/new'
       path: '/new'
@@ -1169,6 +1189,7 @@ interface AdminAuthenticatedRouteRouteChildren {
   AdminAuthenticatedBlogsRouteRoute: typeof AdminAuthenticatedBlogsRouteRouteWithChildren
   AdminAuthenticatedQuizManagementLazyRoute: typeof AdminAuthenticatedQuizManagementLazyRoute
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+  AdminAuthenticatedQuizAnalyticsQuizIdRoute: typeof AdminAuthenticatedQuizAnalyticsQuizIdRoute
   AdminAuthenticatedDemosThreePaneNavigatorLazyRoute: typeof AdminAuthenticatedDemosThreePaneNavigatorLazyRoute
   AdminAuthenticatedAppsIndexRoute: typeof AdminAuthenticatedAppsIndexRoute
   AdminAuthenticatedCalendarIndexRoute: typeof AdminAuthenticatedCalendarIndexRoute
@@ -1187,6 +1208,8 @@ const AdminAuthenticatedRouteRouteChildren: AdminAuthenticatedRouteRouteChildren
     AdminAuthenticatedQuizManagementLazyRoute:
       AdminAuthenticatedQuizManagementLazyRoute,
     AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+    AdminAuthenticatedQuizAnalyticsQuizIdRoute:
+      AdminAuthenticatedQuizAnalyticsQuizIdRoute,
     AdminAuthenticatedDemosThreePaneNavigatorLazyRoute:
       AdminAuthenticatedDemosThreePaneNavigatorLazyRoute,
     AdminAuthenticatedAppsIndexRoute: AdminAuthenticatedAppsIndexRoute,

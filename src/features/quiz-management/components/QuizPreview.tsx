@@ -8,14 +8,15 @@ import { useQuizValidation } from '@/hooks/useQuizValidation'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Circle, Clock, FileQuestion, AlertCircle, ExternalLink, AlertTriangle } from 'lucide-react'
+import { CheckCircle, Circle, Clock, FileQuestion, AlertCircle, ExternalLink, AlertTriangle, BarChart3 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 
 interface QuizPreviewProps {
   className?: string
 }
 
 export function QuizPreview({ className }: QuizPreviewProps) {
-  const { markdownContent, selectedQuiz } = useQuizStore()
+  const { markdownContent, selectedQuiz, publishQuiz, unpublishQuiz, isLoading } = useQuizStore()
   const { validation, canPublish, hasErrors } = useQuizValidation(markdownContent)
 
   // Parse markdown to quiz structure for preview
@@ -48,6 +49,18 @@ export function QuizPreview({ className }: QuizPreviewProps) {
       const slug = generateQuizSlug(previewQuiz.title)
       const quizUrl = `/quiz/${slug}`
       window.open(quizUrl, '_blank')
+    }
+  }
+
+  const handlePublishToggle = async () => {
+    if (!selectedQuiz?.id) return
+
+    if (selectedQuiz.published) {
+      await unpublishQuiz(selectedQuiz.id)
+    } else {
+      if (canPublish) {
+        await publishQuiz(selectedQuiz.id)
+      }
     }
   }
 
@@ -92,33 +105,65 @@ export function QuizPreview({ className }: QuizPreviewProps) {
 
             <div className='flex items-center justify-center gap-4 text-sm'>
               {previewQuiz.published ? (
-                <button
-                  onClick={handleViewLiveQuiz}
-                  className='hover:scale-105 transition-transform'
-                  title='Click to view live quiz'
-                >
-                  <Badge variant='default' className='cursor-pointer hover:bg-primary/80 flex items-center gap-1'>
-                    Published
-                    <ExternalLink className='h-3 w-3' />
-                  </Badge>
-                </button>
+                <>
+                  <button
+                    onClick={handleViewLiveQuiz}
+                    className='hover:scale-105 transition-transform'
+                    title='Click to view live quiz'
+                  >
+                    <Badge variant='default' className='cursor-pointer hover:bg-primary/80 flex items-center gap-1 h-9 px-3'>
+                      Published
+                      <ExternalLink className='h-3 w-3' />
+                    </Badge>
+                  </button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={handlePublishToggle}
+                    disabled={isLoading}
+                    className='h-9 px-3'
+                  >
+                    Unpublish
+                  </Button>
+                </>
               ) : (
-                <Badge variant='secondary'>
-                  Draft
-                </Badge>
+                <>
+                  <Badge variant='secondary' className='h-9 px-3'>
+                    Draft
+                  </Badge>
+                  <Button
+                    variant='default'
+                    size='sm'
+                    onClick={handlePublishToggle}
+                    disabled={isLoading || !canPublish}
+                    title={!canPublish ? 'Fix validation issues before publishing' : 'Publish quiz'}
+                    className='h-9 px-3'
+                  >
+                    {isLoading ? 'Publishing...' : 'Publish'}
+                  </Button>
+                </>
               )}
-              
+
               {previewQuiz.category?.name && (
-                <Badge variant='outline'>
+                <Badge variant='outline' className='h-9 px-3'>
                   {previewQuiz.category.name}
                 </Badge>
               )}
-              
+
               {previewQuiz.settings?.time_limit && (
                 <div className='flex items-center gap-1 text-muted-foreground'>
                   <Clock className='h-4 w-4' />
                   {previewQuiz.settings.time_limit} minutes
                 </div>
+              )}
+
+              {selectedQuiz?.id && (
+                <Button asChild variant='outline' size='sm' className='h-9 px-3'>
+                  <Link to={`/admin/quiz-analytics/$quizId`} params={{ quizId: selectedQuiz.id }}>
+                    <BarChart3 className='h-4 w-4 mr-1' />
+                    View Reports
+                  </Link>
+                </Button>
               )}
             </div>
           </div>

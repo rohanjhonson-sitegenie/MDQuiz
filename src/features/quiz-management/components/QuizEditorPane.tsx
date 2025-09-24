@@ -8,9 +8,6 @@ import { Button } from '@/components/ui/button'
 import { ResizeHandle } from '@/features/three-pane-navigator/components/ResizeHandle'
 import { MarkdownEditor } from './MarkdownEditor'
 import { QuizPreview } from './QuizPreview'
-import { SectionList } from './SectionList'
-import { SectionEditor } from './SectionEditor'
-import { SectionQuestionEditor } from './SectionQuestionEditor'
 import { QuizStructureToggle } from './QuizStructureToggle'
 
 interface QuizEditorPaneProps {
@@ -21,22 +18,13 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
   const {
     selectedQuiz,
     sections,
-    selectedSectionId,
     paneWidths,
     setPaneWidth,
-    setSelectedSection,
     loadSections,
-    createSection,
-    updateSection,
-    deleteSection,
-    reorderSections,
     toggleQuizStructure,
-    createQuestion,
-    updateQuestion,
-    deleteQuestion,
-    reorderQuestions,
     isLoading
   } = useQuizStore()
+
   
   // Custom resize logic adapted from three-pane navigator patterns
   const isResizing = useRef(false)
@@ -97,29 +85,6 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
     }
   }, [selectedQuiz?.id, loadSections])
 
-  // Helper functions for section management
-  const handleCreateSection = () => {
-    if (selectedQuiz?.id) {
-      createSection(selectedQuiz.id, `Section ${sections.length + 1}`)
-    }
-  }
-
-  const handleSectionReorder = (result: { source: { index: number }; destination: { index: number } }) => {
-    const { source, destination } = result
-    if (!destination || source.index === destination.index) return
-
-    const reorderedSections = Array.from(sections)
-    const [removed] = reorderedSections.splice(source.index, 1)
-    reorderedSections.splice(destination.index, 0, removed)
-
-    const sectionOrders = reorderedSections.map((section, index) => ({
-      id: section.id,
-      order_index: index
-    }))
-
-    reorderSections(sectionOrders)
-  }
-
   const handleToggleStructure = (structureType: 'mixed' | 'sectioned') => {
     if (selectedQuiz?.id) {
       toggleQuizStructure(selectedQuiz.id, structureType)
@@ -127,8 +92,6 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
   }
 
   const currentStructureType = selectedQuiz?.settings?.structure_type || 'mixed'
-  const isSectionedMode = currentStructureType === 'sectioned'
-  const selectedSection = selectedSectionId ? sections.find(s => s.id === selectedSectionId) : null
 
   if (!selectedQuiz) {
     return (
@@ -165,10 +128,9 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
 
   return (
     <div className={cn('flex h-full', className)}>
-      {/* Left Panel - Structure Management + Markdown Editor */}
+      {/* Left Panel - Markdown Editor (50% width) */}
       <div
-        className='flex-shrink-0 border-r border-border bg-card flex flex-col min-h-0'
-        style={{ width: `${paneWidths.editor}px` }}
+        className='flex-1 border-r border-border bg-card flex flex-col min-h-0'
       >
         {/* Quiz Structure Toggle */}
         <div className='px-4 py-3 border-b border-border flex-shrink-0'>
@@ -218,13 +180,7 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
         </div>
       </div>
 
-      {/* Resize Handle */}
-      <ResizeHandle
-        onMouseDown={handleMouseDown}
-        className='hover:bg-primary/20'
-      />
-
-      {/* Live Preview Pane */}
+      {/* Preview Pane (50% width) */}
       <div className='flex-1 bg-muted/10 flex flex-col min-h-0'>
         <div className='flex items-center justify-between px-4 py-3 border-b border-border bg-card flex-shrink-0'>
           <h3 className='text-sm font-semibold text-foreground'>Live Preview</h3>

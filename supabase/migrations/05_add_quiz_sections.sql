@@ -40,20 +40,20 @@ CREATE POLICY "Public can read sections from published quizzes" ON quiz_sections
 
 CREATE POLICY "Admins can read all quiz sections" ON quiz_sections
     FOR SELECT
-    USING (auth.jwt() ->> 'user_role' = 'admin');
+    USING ((auth.jwt() ->> 'user_role') IN ('admin', 'superadmin'));
 
 CREATE POLICY "Admins can create quiz sections" ON quiz_sections
     FOR INSERT
-    WITH CHECK (auth.jwt() ->> 'user_role' = 'admin');
+    WITH CHECK ((auth.jwt() ->> 'user_role') IN ('admin', 'superadmin'));
 
 CREATE POLICY "Admins can update quiz sections" ON quiz_sections
     FOR UPDATE
-    USING (auth.jwt() ->> 'user_role' = 'admin')
-    WITH CHECK (auth.jwt() ->> 'user_role' = 'admin');
+    USING ((auth.jwt() ->> 'user_role') IN ('admin', 'superadmin'))
+    WITH CHECK ((auth.jwt() ->> 'user_role') IN ('admin', 'superadmin'));
 
 CREATE POLICY "Admins can delete quiz sections" ON quiz_sections
     FOR DELETE
-    USING (auth.jwt() ->> 'user_role' = 'admin');
+    USING ((auth.jwt() ->> 'user_role') IN ('admin', 'superadmin'));
 
 -- Grant permissions
 GRANT SELECT ON quiz_sections TO anon, authenticated, service_role;

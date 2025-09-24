@@ -5,6 +5,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Quiz, QuizSection, Question } from '@/lib/simple-types'
 import { normalizeQuiz, safeJsonParse } from '@/lib/simple-types'
 
+// Helper to extract single item from Supabase response (handles array bug with .single())
+function extractSingleResult<T>(data: T | T[] | null): T | null {
+  if (!data) return null
+  return Array.isArray(data) ? data[0] || null : data
+}
+
 // Define interfaces that were missing
 interface QuizCategory {
   id: string
@@ -80,12 +86,14 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to fetch quiz: ${error.message}`)
     }
 
-    // Simple normalization to handle data format
+    const quizData = extractSingleResult(data)
+    if (!quizData) return null
+
     return normalizeQuiz({
-      ...data,
-      settings: safeJsonParse(data.settings, { structure_type: 'mixed' }),
-      questions: data.questions || [],
-      sections: data.sections || []
+      ...quizData,
+      settings: safeJsonParse(quizData.settings, { structure_type: 'mixed' }),
+      questions: quizData.questions || [],
+      sections: quizData.sections || []
     })
   }
 
@@ -93,6 +101,8 @@ export class QuizRepository implements IQuizRepository {
    * Get quiz with sections and questions (comprehensive method for both mixed and sectioned)
    */
   async getQuizWithSections(id: string): Promise<Quiz | null> {
+    console.log('🔎 Repository: Fetching quiz with ID:', id)
+
     const { data, error } = await this.supabase
       .from('quizzes')
       .select(`
@@ -110,19 +120,31 @@ export class QuizRepository implements IQuizRepository {
       .order('order_index', { foreignTable: 'quiz_sections.questions', ascending: true })
       .single()
 
+    console.log('📊 Repository: Query result - data:', data, 'error:', error)
+
     if (error) {
       if (error.code === 'PGRST116') { // No rows returned
+        console.warn('⚠️ Repository: No quiz found with ID:', id)
         return null
       }
+      console.error('❌ Repository: Error fetching quiz:', error)
       throw new Error(`Failed to fetch quiz with sections: ${error.message}`)
     }
 
-    // Simple normalization to handle data format
+    const quizData = extractSingleResult(data)
+
+    if (!quizData) {
+      console.warn('⚠️ Repository: No quiz data returned')
+      return null
+    }
+
+    console.log('📦 Repository: Normalized quiz data:', quizData)
+
     return normalizeQuiz({
-      ...data,
-      settings: safeJsonParse(data.settings, { structure_type: 'mixed' }),
-      questions: data.questions || [],
-      sections: data.sections || []
+      ...quizData,
+      settings: safeJsonParse(quizData.settings, { structure_type: 'mixed' }),
+      questions: quizData.questions || [],
+      sections: quizData.sections || []
     })
   }
 
@@ -417,32 +439,31 @@ export class QuizRepository implements IQuizRepository {
     averageScore: number
     completionRate: number
   }> {
-    // Get basic response count
-    const { count: totalResponses, error: countError } = await this.supabase
-      .from('responses')
-      .select('*', { count: 'exact', head: true })
-      .eq('quiz_id', quizId)
+    console.log('📊 Getting quiz stats for:', quizId)
 
-    if (countError) {
-      throw new Error(`Failed to fetch response count: ${countError.message}`)
-    }
-
-    if (!totalResponses || totalResponses === 0) {
-      return {
-        totalResponses: 0,
-        averageScore: 0,
-        completionRate: 0
-      }
-    }
-
-    // Get response data for calculations
+    // Get response data for calculations (fetch all instead of using count with head:true)
+    // Note: COUNT with head:true doesn't work properly with RLS policies
     const { data: responses, error: responsesError } = await this.supabase
       .from('responses')
       .select('answers')
       .eq('quiz_id', quizId)
 
+    console.log('📈 Response data result:', { count: responses?.length, error: responsesError })
+
     if (responsesError) {
-      throw new Error(`Failed to fetch response data: ${responsesError.message}`)
+      console.error('❌ Response fetch error:', responsesError)
+      throw new Error(`Failed to fetch responses: ${responsesError.message}`)
+    }
+
+    const totalResponses = responses?.length || 0
+
+    if (totalResponses === 0) {
+      console.warn('⚠️ No responses found for quiz:', quizId)
+      return {
+        totalResponses: 0,
+        averageScore: 0,
+        completionRate: 0
+      }
     }
 
     // Calculate simple completion rate (responses with answers)

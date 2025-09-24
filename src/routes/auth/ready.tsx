@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/authStore'
+import { AuthSessionManager } from '@/lib/auth-session-manager'
 
 export const Route = createFileRoute('/auth/ready')({
   component: AuthReady,
@@ -37,8 +38,7 @@ function AuthReady() {
       }
 
       try {
-        // For satellite DB: decode JWT payload manually and set user in store
-        // instead of using supabase.auth.setSession() which requires signature verification
+        // Decode CTID token to get user info
         const parts = access_token.split('.')
         if (parts.length !== 3) {
           throw new Error('Invalid JWT format')
@@ -46,7 +46,6 @@ function AuthReady() {
 
         const payload = JSON.parse(atob(parts[1]))
         const userRole = payload.user_role || 'user'
-        const userProfile = userRole // Use user_role for userProfile field
 
         // Create user object from JWT payload
         const authUser = {
@@ -54,7 +53,7 @@ function AuthReady() {
           email: payload.email,
           role: [userRole],
           userRole: userRole,
-          userProfile: userProfile,
+          userProfile: userRole,
           exp: payload.exp,
           displayName:
             payload.user_metadata?.display_name || payload.user_metadata?.name,
@@ -62,10 +61,33 @@ function AuthReady() {
             payload.user_metadata?.avatar_url || payload.user_metadata?.picture,
         }
 
-        // Set user in auth store directly (bypass Supabase session for satellite DB)
-        const { setUser, setAccessToken } = useAuthStore.getState().auth
+        // Try to exchange tokens, but don't fail if edge function isn't deployed
+        let satelliteToken = ''
+        try {
+          const sessionManager = new AuthSessionManager(access_token)
+          const result = await sessionManager.exchangeTokens()
+          satelliteToken = result.satelliteToken
+
+          // Debug: Decode and log satellite token payload
+          const satParts = satelliteToken.split('.')
+          if (satParts.length === 3) {
+            const satPayload = JSON.parse(atob(satParts[1]))
+            console.log('✅ Token exchange successful')
+            console.log('📋 Satellite token payload:', satPayload)
+            console.log('👤 User role in satellite token:', satPayload.user_role)
+          }
+        } catch (exchangeError) {
+          console.warn('⚠️ Token exchange failed (edge function may not be deployed):', exchangeError)
+          console.log('Proceeding with CTID token only (RLS must be disabled)')
+          // Use CTID token as fallback
+          satelliteToken = access_token
+        }
+
+        // Set both CTID token and satellite token in auth store
+        const { setUser, setAccessToken, setSatelliteToken } = useAuthStore.getState().auth
         setUser(authUser)
-        setAccessToken(access_token)
+        setAccessToken(access_token) // Keep CTID token for refresh
+        setSatelliteToken(satelliteToken) // Set satellite token for database access
 
         // Clean up URL hash and redirect to intended destination
         history.replaceState(null, '', location.pathname + location.search)
@@ -73,13 +95,27 @@ function AuthReady() {
         navigate({ to: next })
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('Error processing CTID tokens:', err)
-        // Redirect back to CTID service for authentication
-        const returnTo = `${location.origin}/auth/ready?next=${encodeURIComponent('/')}`
-        const idServiceUrl =
-          import.meta.env.VITE_ID_SERVICE_URL || 'https://devid.ctedu.ca'
-        const url = `${idServiceUrl}/login?return_to=${encodeURIComponent(returnTo)}`
-        location.assign(url)
+        console.error('❌ Error processing CTID tokens:', err)
+
+        // Show error to user instead of infinite redirect
+        alert(`Authentication error: ${err instanceof Error ? err.message : 'Unknown error'}. Please try again.`)
+
+        // Only redirect if we haven't tried before (check for a flag in sessionStorage)
+        const retryKey = 'auth_retry_count'
+        const retryCount = parseInt(sessionStorage.getItem(retryKey) || '0')
+
+        if (retryCount < 2) {
+          sessionStorage.setItem(retryKey, (retryCount + 1).toString())
+          const returnTo = `${location.origin}/auth/ready?next=${encodeURIComponent('/')}`
+          const idServiceUrl =
+            import.meta.env.VITE_ID_SERVICE_URL || 'https://devid.ctedu.ca'
+          const url = `${idServiceUrl}/login?return_to=${encodeURIComponent(returnTo)}`
+          location.assign(url)
+        } else {
+          // Clear retry count and redirect to home
+          sessionStorage.removeItem(retryKey)
+          navigate({ to: '/' })
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 import { redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/authStore'
+import { AuthSessionManager } from './auth-session-manager'
 
 interface DecodedToken {
   user_role?: string
@@ -27,10 +28,10 @@ function decodeJWT(token: string): DecodedToken | null {
 export const requireRole =
   (allowedRoles: string[]) =>
   async ({ location }: { location: { href: string } }) => {
-    // Check auth store for CTID token
+    // Check auth store for tokens
     const authStore = useAuthStore.getState().auth
 
-    // If no token in auth store, redirect to CTID login
+    // If no CTID token in auth store, redirect to CTID login
     if (!authStore.accessToken || !authStore.user) {
       const returnTo = `${window.location.origin}/auth/ready?next=${encodeURIComponent(location.href)}`
       const idServiceUrl =
@@ -40,7 +41,30 @@ export const requireRole =
       return
     }
 
-    // Decode and validate JWT token
+    // Check if we need to refresh the satellite token (skip if using fallback CTID token)
+    const isUsingCtidFallback = authStore.satelliteToken === authStore.accessToken
+
+    if (!authStore.satelliteToken && !isUsingCtidFallback) {
+      try {
+        const sessionManager = new AuthSessionManager(authStore.accessToken)
+        const refreshResult = await sessionManager.refreshSatelliteToken()
+
+        if (refreshResult.success && refreshResult.satelliteToken) {
+          authStore.setSatelliteToken(refreshResult.satelliteToken)
+        } else {
+          // If refresh fails, use CTID token as fallback
+          console.warn('⚠️ Satellite token refresh failed, using CTID token as fallback')
+          authStore.setSatelliteToken(authStore.accessToken)
+        }
+      } catch (error) {
+        console.error('Error refreshing satellite token:', error)
+        // Use CTID token as fallback instead of redirecting
+        console.warn('⚠️ Using CTID token as fallback (RLS must be disabled)')
+        authStore.setSatelliteToken(authStore.accessToken)
+      }
+    }
+
+    // Decode and validate CTID token for role checking
     const decodedToken = decodeJWT(authStore.accessToken)
 
     if (!decodedToken) {
