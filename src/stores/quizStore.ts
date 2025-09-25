@@ -9,12 +9,44 @@ import { transformToMarkdown, transformMixedToSectioned, transformSectionedToMix
 import { parseMarkdownQuiz } from '@/lib/markdown-quiz-parser'
 import { validateQuiz, normalizeQuiz, formatErrors, SimpleValidationError } from '@/lib/simple-types'
 import { createClient } from '@/lib/supabase'
+// Import sample files as raw text content
+import sampleMixedContent from '../../sample-mixed-quiz.md?raw'
+import sampleSectionedContent from '../../sample-sectioned-quiz.md?raw'
 
 // Calculate responsive default for editor pane to achieve 60% of available space
 const calculateEditorDefault = () => {
   if (typeof window === 'undefined') return 600 // SSR fallback
   const availableWidth = window.innerWidth - 320 - 100 // Subtract quiz list width and margins
   return Math.min(1200, Math.max(400, Math.round(availableWidth * 0.6)))
+}
+
+// Generate sample markdown content for new quizzes using actual sample files
+const generateSampleMarkdown = (structureType: 'mixed' | 'sectioned') => {
+  // Fallback if imports failed
+  if (!sampleMixedContent || !sampleSectionedContent) {
+    return `# Sample Quiz
+
+This is a sample quiz created from template.
+
+## Question 1
+**Type:** multiple_choice
+
+What is your favorite programming language?
+
+a) JavaScript
+b) TypeScript
+c) Python
+d) All of the above
+
+**Answer:** d
+**Explanation:** All programming languages have their strengths!`
+  }
+
+  if (structureType === 'sectioned') {
+    return sampleSectionedContent
+  } else {
+    return sampleMixedContent
+  }
 }
 
 const PANE_DIMENSIONS = {
@@ -60,11 +92,33 @@ export const useQuizStore = create<QuizStore>()(
 
         // Navigation actions (adapted from three-pane patterns)
         setSelectedQuiz: (quizId) => {
+          const currentState = get()
+          console.log('[SETSELECTEDQUIZ] Called with:', {
+            quizId,
+            currentSelectedId: currentState.selectedQuizId,
+            hasMarkdownContent: !!currentState.markdownContent,
+            markdownPreview: currentState.markdownContent?.substring(0, 50) || 'none'
+          })
+
           set({ selectedQuizId: quizId, activePane: quizId ? 'editor' : 'list' })
-          
+
           if (quizId) {
-            // Load quiz and transform to markdown
-            get().loadQuizById(quizId)
+            // Skip loading if we just created this quiz and it's already selected with sample content
+            const justCreated = currentState.selectedQuizId === quizId &&
+                               currentState.markdownContent &&
+                               currentState.markdownContent.length > 100 &&
+                               (currentState.markdownContent.includes('JavaScript Fundamentals') ||
+                                currentState.markdownContent.includes('Web Development Fundamentals'))
+
+            console.log('[SETSELECTEDQUIZ] Just created check:', justCreated)
+
+            if (!justCreated) {
+              console.log('[SETSELECTEDQUIZ] Loading quiz by ID')
+              // Load quiz and transform to markdown
+              get().loadQuizById(quizId)
+            } else {
+              console.log('[SETSELECTEDQUIZ] Skipping load - using sample content')
+            }
           } else {
             set({ selectedQuiz: null, markdownContent: '' })
           }
@@ -147,14 +201,27 @@ export const useQuizStore = create<QuizStore>()(
 
             if (quiz) {
               const normalizedQuiz = normalizeQuiz(quiz)
-              const markdown = transformToMarkdown(normalizedQuiz)
-              set({ selectedQuiz: normalizedQuiz, markdownContent: markdown })
+
+              // Check if this is a fresh quiz with no actual content (only sample content)
+              const hasActualQuestions = normalizedQuiz.questions && normalizedQuiz.questions.length > 0
+              const hasActualSections = normalizedQuiz.sections && normalizedQuiz.sections.length > 0 &&
+                normalizedQuiz.sections.some(section => section.questions && section.questions.length > 0)
+
+              // If quiz has no actual content, preserve sample markdown content
+              if (!hasActualQuestions && !hasActualSections) {
+                console.log('[LOADQUIZBYID] Fresh quiz detected - preserving sample content')
+                const sampleContent = generateSampleMarkdown(normalizedQuiz.settings?.structure_type || 'mixed')
+                set({ selectedQuiz: normalizedQuiz, markdownContent: sampleContent })
+              } else {
+                console.log('[LOADQUIZBYID] Quiz has content - using transformed markdown')
+                const markdown = transformToMarkdown(normalizedQuiz)
+                set({ selectedQuiz: normalizedQuiz, markdownContent: markdown })
+              }
             } else {
               set({ error: 'Quiz not found' })
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load quiz'
-            console.error('Error loading quiz:', error)
             set({ error: errorMessage })
           } finally {
             set({ isLoading: false })
@@ -164,36 +231,70 @@ export const useQuizStore = create<QuizStore>()(
         saveQuiz: async () => {
           try {
             const { selectedQuizId, selectedQuiz, markdownContent } = get()
+            console.log('💾 [SAVE-TRACE] Starting save flow:', {
+              selectedQuizId,
+              hasSelectedQuiz: !!selectedQuiz,
+              markdownLength: markdownContent.length,
+              markdownPreview: markdownContent.substring(0, 200) + '...'
+            })
 
             if (!selectedQuizId || !selectedQuiz) {
+              console.error('❌ [SAVE-TRACE] No quiz selected')
               throw new Error('No quiz selected to save')
             }
 
             // Block editing of published quizzes
             if (selectedQuiz.published) {
+              console.error('❌ [SAVE-TRACE] Attempting to save published quiz')
               throw new Error('Cannot save changes to published quiz. Unpublish the quiz first to make edits.')
             }
 
             set({ isLoading: true, error: null })
+            console.log('📝 [SAVE-TRACE] Set loading state')
 
             // SIMPLE VALIDATION: Parse markdown and basic validation
+            console.log('📄 [SAVE-TRACE] Parsing markdown content...')
             const parsedQuiz = parseMarkdownQuiz(markdownContent)
+            console.log('📊 [SAVE-TRACE] Parsed quiz structure:', {
+              title: parsedQuiz.title,
+              description: parsedQuiz.description,
+              structure_type: parsedQuiz.structure_type,
+              sections_count: parsedQuiz.sections.length,
+              questions_count: parsedQuiz.questions.length,
+              settings: parsedQuiz.settings,
+              settings_keys: Object.keys(parsedQuiz.settings || {})
+            })
 
             // Simple validation without throwing errors
             const validation = validateQuiz({
               ...parsedQuiz,
               id: selectedQuizId
             })
+            console.log('🔍 [SAVE-TRACE] Validation results:', {
+              valid: validation.valid,
+              canPublish: validation.canPublish,
+              errors: validation.errors,
+              errorCount: validation.errors.length
+            })
 
             if (!validation.valid) {
-              console.warn('Quiz validation warnings:', validation.errors)
+              console.warn('⚠️ [SAVE-TRACE] Quiz validation warnings:', validation.errors)
               // Continue anyway - don't block saving for minor issues
             }
 
             // Normalize and ensure required fields
+            console.log('🔧 [SAVE-TRACE] Normalizing quiz structure...')
             const serializedQuiz = normalizeQuiz({
               ...parsedQuiz,
               id: selectedQuizId
+            })
+            console.log('📦 [SAVE-TRACE] Normalized quiz:', {
+              id: serializedQuiz.id,
+              title: serializedQuiz.title,
+              structure_type: serializedQuiz.settings.structure_type,
+              settings: serializedQuiz.settings,
+              has_questions: serializedQuiz.questions.length > 0,
+              has_sections: serializedQuiz.sections.length > 0
             })
 
             // Preserve existing quiz metadata
@@ -203,18 +304,29 @@ export const useQuizStore = create<QuizStore>()(
               published: selectedQuiz.published,
               created_at: selectedQuiz.created_at
             }
+            console.log('💼 [SAVE-TRACE] Final quiz to save:', {
+              ...quizToSave,
+              questions: `[${quizToSave.questions.length} questions]`,
+              sections: `[${quizToSave.sections.length} sections]`
+            })
 
             // VALIDATION GATE 3: Save via repository with built-in validation
+            console.log('💾 [SAVE-TRACE] Saving to database via repository...')
             const savedQuiz = await repository.updateQuiz(selectedQuizId, quizToSave)
+            console.log('✅ [SAVE-TRACE] Successfully saved to database')
 
             // Simple normalization of saved data
             const normalizedQuiz = normalizeQuiz(savedQuiz)
+            console.log('🔄 [SAVE-TRACE] Normalized saved data')
 
             // Update local state with normalized data
             set({ selectedQuiz: normalizedQuiz })
+            console.log('📱 [SAVE-TRACE] Updated local state')
 
             // Refresh quiz list
+            console.log('🔄 [SAVE-TRACE] Refreshing quiz list...')
             await get().loadQuizzes()
+            console.log('✨ [SAVE-TRACE] Quiz saved successfully!')
 
           } catch (error) {
             let errorMessage = 'Failed to save quiz'
@@ -233,19 +345,21 @@ export const useQuizStore = create<QuizStore>()(
         },
 
         createQuiz: async () => {
+          console.log('[CREATEQUIZ] Function called - starting quiz creation')
           try {
             set({ isLoading: true, error: null })
+            console.log('[CREATEQUIZ] Initial state set, creating quiz object')
 
-            // Create new quiz with defaults
+            // Create new quiz using Repository pattern with proper data structure
             const newQuiz: Omit<Quiz, 'id' | 'created_at' | 'updated_at'> = {
               title: 'New Quiz',
               description: 'Enter quiz description...',
               category_id: get().selectedCategoryId,
               settings: {
-                structure_type: 'mixed',
+                structure_type: 'mixed', // Properly nested in settings
                 time_limit: 30,
-                show_feedback: true,
-                randomize_questions: false
+                randomize_questions: false,
+                show_feedback: true
               },
               published: false,
               questions: [],
@@ -253,19 +367,42 @@ export const useQuizStore = create<QuizStore>()(
             }
 
             const createdQuiz = await repository.createQuiz(newQuiz)
-            
-            // Add to quiz list and select
-            set(state => ({
-              quizzes: [createdQuiz, ...state.quizzes]
-            }))
-            
-            get().setSelectedQuiz(createdQuiz.id)
-            
+
+            // Generate sample content based on structure type
+            const sampleContent = generateSampleMarkdown('mixed')
+
+            // Add to local state
+            const currentQuizzes = get().quizzes
+            const updatedQuizzes = [...currentQuizzes, createdQuiz]
+
+            // Set all state atomically - DO NOT call setSelectedQuiz or loadQuizById as they will overwrite sample content
+            set({
+              quizzes: updatedQuizzes,
+              selectedQuizId: createdQuiz.id,
+              selectedQuiz: createdQuiz,
+              markdownContent: sampleContent,
+              activePane: 'editor',
+              isLoading: false
+            })
+
+            // Force a state notification by triggering a minimal state change
+            // This ensures Zustand subscriptions fire properly
+            setTimeout(() => {
+              set((state) => ({ ...state }))
+            }, 0)
+
+            console.log('[CREATEQUIZ] Quiz created successfully:', {
+              title: createdQuiz.title,
+              quizzesCount: updatedQuizzes.length,
+              sampleContentLoaded: sampleContent.length > 0,
+              sampleContentPreview: sampleContent.substring(0, 50) + '...'
+            })
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to create quiz'
-            set({ error: errorMessage })
-          } finally {
-            set({ isLoading: false })
+            console.error('[CREATEQUIZ] Error during quiz creation:', error)
+            set({
+              error: error instanceof Error ? error.message : 'Failed to create quiz',
+              isLoading: false
+            })
           }
         },
 
@@ -295,39 +432,68 @@ export const useQuizStore = create<QuizStore>()(
         publishQuiz: async (quizId?: string) => {
           try {
             const targetQuizId = quizId || get().selectedQuizId
+            console.log('🚀 [PUBLISH-TRACE] Starting publish flow:', { targetQuizId, providedQuizId: quizId })
+
             if (!targetQuizId) {
+              console.error('❌ [PUBLISH-TRACE] No quiz ID provided')
               throw new Error('No quiz specified to publish')
             }
 
             set({ isLoading: true, error: null })
+            console.log('📝 [PUBLISH-TRACE] Set loading state, cleared errors')
 
             // Load quiz for validation
+            console.log('📥 [PUBLISH-TRACE] Loading quiz for validation...')
             const quizToValidate = await repository.getQuizById(targetQuizId)
+            console.log('📊 [PUBLISH-TRACE] Loaded quiz data:', {
+              found: !!quizToValidate,
+              title: quizToValidate?.title,
+              structure_type: quizToValidate?.settings?.structure_type,
+              has_sections: quizToValidate?.sections?.length || 0,
+              has_questions: quizToValidate?.questions?.length || 0,
+              settings: quizToValidate?.settings
+            })
+
             if (!quizToValidate) {
+              console.error('❌ [PUBLISH-TRACE] Quiz not found in database')
               throw new Error('Quiz not found')
             }
 
             // Validate quiz before publishing
+            console.log('🔍 [PUBLISH-TRACE] Validating quiz structure...')
             const validation = validateQuiz(quizToValidate)
+            console.log('📋 [PUBLISH-TRACE] Validation results:', {
+              valid: validation.valid,
+              canPublish: validation.canPublish,
+              errors: validation.errors,
+              errorCount: validation.errors.length
+            })
 
             if (!validation.canPublish) {
+              console.error('❌ [PUBLISH-TRACE] Validation failed:', validation.errors)
               throw new Error(`Cannot publish quiz: ${validation.errors.join(', ')}`)
             }
 
             // Update quiz published status
+            console.log('💾 [PUBLISH-TRACE] Updating quiz published status to true...')
             await repository.updateQuiz(targetQuizId, { published: true })
+            console.log('✅ [PUBLISH-TRACE] Successfully updated published status')
 
             // Refresh quiz list and selected quiz
+            console.log('🔄 [PUBLISH-TRACE] Refreshing quiz list and selected quiz...')
             await get().loadQuizzes()
             if (get().selectedQuizId === targetQuizId) {
               await get().loadQuizById(targetQuizId)
             }
+            console.log('✨ [PUBLISH-TRACE] Quiz published successfully!')
 
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to publish quiz'
+            console.error('💥 [PUBLISH-TRACE] Publish failed:', { error: errorMessage, stack: error instanceof Error ? error.stack : 'No stack' })
             set({ error: errorMessage })
           } finally {
             set({ isLoading: false })
+            console.log('🏁 [PUBLISH-TRACE] Publish flow completed')
           }
         },
 
@@ -570,7 +736,7 @@ export const useQuizStore = create<QuizStore>()(
           try {
             set({ isLoading: true, error: null })
 
-            const createdQuestion = await repository.createQuestion(question)
+            await repository.createQuestion(question)
 
             // Reload the current quiz to update the questions list
             const { selectedQuizId } = get()

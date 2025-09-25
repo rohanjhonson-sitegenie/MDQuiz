@@ -2,6 +2,8 @@
 
 Test your knowledge of HTML, CSS, and modern web development practices.
 
+> Settings: time_limit_minutes=18, allow_backward_navigation=true, allowed_question_types=["multiple_choice", "true_false", "text_input"], show_section_feedback=true, passing_threshold=70
+
 ## Q1
 
 Which HTML element is used to define the main content of a document?

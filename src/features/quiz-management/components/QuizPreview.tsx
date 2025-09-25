@@ -53,7 +53,9 @@ export function QuizPreview({ className }: QuizPreviewProps) {
   }
 
   const handlePublishToggle = async () => {
-    if (!selectedQuiz?.id) return
+    if (!selectedQuiz?.id) {
+      return
+    }
 
     if (selectedQuiz.published) {
       await unpublishQuiz(selectedQuiz.id)

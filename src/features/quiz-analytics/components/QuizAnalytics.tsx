@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { supabase } from '@/lib/supabase-client'
-import { BarChart3, Download, Users, TrendingUp, Calendar, Loader2, AlertCircle } from 'lucide-react'
+import { BarChart3, Download, Users, TrendingUp, Calendar, Loader2, AlertCircle, Layers } from 'lucide-react'
+import { useSectionAnalytics } from '../hooks/useSectionAnalytics'
+import { SectionPerformanceChart } from './SectionPerformanceChart'
+import { SectionCompletionFunnel } from './SectionCompletionFunnel'
+import { SectionTimeUtilizationChart } from './SectionTimeUtilizationChart'
+import { SectionSummaryCards } from './SectionSummaryCards'
 
 function normalizeAnswer(answer: string): string {
   return answer
@@ -61,6 +66,16 @@ export function QuizAnalytics({ quizId, quizTitle }: QuizAnalyticsProps) {
   const [error, setError] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
+
+  // Load section analytics for sectioned quizzes
+  const {
+    sectionAnalytics,
+    funnelData,
+    timeUtilizationData,
+    isLoading: isSectionLoading,
+    error: sectionError,
+    totalStarted
+  } = useSectionAnalytics(quizId)
 
   const loadAnalytics = useCallback(async () => {
     setIsLoading(true)
@@ -349,6 +364,36 @@ export function QuizAnalytics({ quizId, quizTitle }: QuizAnalyticsProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Section Analytics (for sectioned quizzes) */}
+      {sectionAnalytics.length > 0 && (
+        <>
+          <div className='mt-8 mb-4'>
+            <h3 className='text-xl font-semibold flex items-center gap-2'>
+              <Layers className='h-5 w-5' />
+              Section-Wise Analytics
+            </h3>
+            <p className='text-sm text-muted-foreground mt-1'>
+              Detailed performance breakdown by quiz section
+            </p>
+          </div>
+
+          {/* Section Summary Cards */}
+          <SectionSummaryCards sections={sectionAnalytics} />
+
+          {/* Section Performance & Completion */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6'>
+            <SectionPerformanceChart sections={sectionAnalytics} />
+            <SectionCompletionFunnel
+              funnelData={funnelData}
+              totalStarted={totalStarted}
+            />
+          </div>
+
+          {/* Time Utilization */}
+          <SectionTimeUtilizationChart utilizationData={timeUtilizationData} />
+        </>
+      )}
 
       {/* Question Performance */}
       <Card>

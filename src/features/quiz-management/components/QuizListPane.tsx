@@ -35,6 +35,7 @@ export const QuizListPane = forwardRef<HTMLDivElement, QuizListPaneProps>(
       loadCategories()
     }, [loadQuizzes, loadCategories])
 
+
     // Filter quizzes based on search query
     const filteredQuizzes = quizzes.filter(quiz =>
       quiz.title.toLowerCase().includes(searchQuery.toLowerCase())

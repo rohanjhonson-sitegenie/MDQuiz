@@ -2,6 +2,8 @@
 
 Master the core concepts of React including components, hooks, and state management.
 
+> Settings: time_limit_minutes=25, allow_backward_navigation=true, allowed_question_types=["multiple_choice", "text_input"], show_section_feedback=true, passing_threshold=75
+
 ## Q1
 
 What is JSX in React?

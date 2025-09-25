@@ -29,9 +29,12 @@ interface QuizQuestion {
   id: string
   question_text: string
   question_type: string
+  section_id?: string
+  order_index?: number
   options: Record<string, unknown>
   answer_data: Record<string, unknown>
 }
+
 
 export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
   const [responses, setResponses] = useState<ResponseData[]>([])
@@ -55,7 +58,8 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
         ])
 
         setResponses(responsesData as ResponseData[])
-        setQuestions(quizData?.questions || [])
+        const questionsFromRepo = quizData?.questions || []
+        setQuestions(questionsFromRepo)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load data'
         setError(errorMessage)
@@ -119,9 +123,15 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
     return false
   }
 
-  const getResponseScore = (response: ResponseData): { correct: number; total: number } => {
+  const getResponseScore = (response: ResponseData): { correct: number; total: number; orphaned?: number } => {
     let correct = 0
     let total = 0
+    let orphaned = 0
+
+    // If questions aren't loaded yet, return 0s to avoid showing incorrect data
+    if (!questions || questions.length === 0) {
+      return { correct: 0, total: Object.keys(response.answers).length, orphaned: 0 }
+    }
 
     Object.entries(response.answers).forEach(([questionId, userAnswer]) => {
       const question = questions.find(q => q.id === questionId)
@@ -130,34 +140,63 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
         if (isAnswerCorrect(question, userAnswer)) {
           correct++
         }
+      } else {
+        orphaned++
       }
     })
 
-    return { correct, total }
+    return { correct, total, orphaned }
   }
 
   // Component for detailed answer breakdown
   const AnswerDetails = ({ response }: { response: ResponseData }) => {
     const [isOpen, setIsOpen] = useState(false)
-    const score = getResponseScore(response)
+
+    // Check if questions are loaded before calculating score
+    const isQuestionsLoaded = questions && questions.length > 0
+    const score = isQuestionsLoaded ? getResponseScore(response) : null
+
+    // Check if this response is orphaned (quiz was updated after response)
+    const isOrphaned = Boolean(score && score.orphaned && score.orphaned > 0 && score.total === 0)
 
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="flex items-center gap-2 h-auto p-2">
             {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            <Badge
-              variant={score.correct === score.total ? "default" : score.correct > score.total * 0.5 ? "secondary" : "destructive"}
-              className="text-xs"
-            >
-              {score.correct}/{score.total} correct
-            </Badge>
+            {!isQuestionsLoaded ? (
+              <Badge variant="outline" className="text-xs">
+                Loading...
+              </Badge>
+            ) : isOrphaned ? (
+              <Badge variant="outline" className="text-xs border-orange-500 text-orange-600">
+                Invalid (quiz updated)
+              </Badge>
+            ) : (
+              <Badge
+                variant={score!.correct === score!.total ? "default" : score!.correct > score!.total * 0.5 ? "secondary" : "destructive"}
+                className="text-xs"
+              >
+                {score!.correct}/{score!.total} correct
+              </Badge>
+            )}
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
           <div className="space-y-2 max-w-2xl">
-            {questions
-              .filter(q => response.answers[q.id] !== undefined)
+            {/* DEBUG MARKER START */}
+            {isOrphaned ? (
+              <div className="p-3 rounded-lg border border-orange-200 bg-orange-50 text-sm text-orange-700">
+                <p className="font-medium">⚠️ This response is no longer valid</p>
+                <p className="text-xs mt-1">The quiz was updated after this response was submitted. The questions in this response no longer exist.</p>
+              </div>
+            ) : null}
+            {!isQuestionsLoaded ? (
+              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm">
+                <p>Loading questions...</p>
+              </div>
+            ) : (
+              questions.filter(q => response.answers[q.id] !== undefined)
               .map((question) => {
               const userAnswer = response.answers[question.id]
               const correct = isAnswerCorrect(question, userAnswer)
@@ -202,7 +241,8 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
                   </div>
                 </div>
               )
-            })}
+            })
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -214,9 +254,11 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
       // Create headers with question columns
       const baseHeaders = ['Session ID', 'Respondent Name', 'Respondent Email', 'Score', 'Total Questions', 'Submitted At']
 
-      // Add question-specific columns
+      // Questions already come in correct order from repository query
+      const sortedQuestions = questions
+
       const questionHeaders: string[] = []
-      questions.forEach((question, index) => {
+      sortedQuestions.forEach((_question, index) => {
         const questionNum = index + 1
         questionHeaders.push(
           `Q${questionNum} Question`,
@@ -240,9 +282,9 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
           new Date(response.submitted_at).toLocaleString()
         ]
 
-        // Add question-specific data
+        // Add question-specific data using sorted questions
         const questionData: string[] = []
-        questions.forEach((question) => {
+        sortedQuestions.forEach((question) => {
           const userAnswer = response.answers[question.id]
           const userAnswerText = userAnswer !== undefined ? getAnswerText(question, userAnswer) : 'No answer'
           const correctAnswerText = getCorrectAnswerText(question)

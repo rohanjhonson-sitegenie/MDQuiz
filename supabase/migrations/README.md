@@ -34,16 +34,30 @@ This directory contains all database schema migrations for the MDQuiz applicatio
    - Implements helper functions for quiz structure management
    - RLS policies support both 'admin' and 'superadmin' roles
 
+6. **06_responses_improvements.sql** - Responses table improvements (CONSOLIDATED)
+   - Fixes RLS policies to allow SELECT after INSERT for anonymous users
+   - Adds unique constraint to prevent duplicate session submissions
+   - Creates performance indexes for session lookups
+   - Adds helper function for safe response insertion
+   - **Note**: This migration consolidates all responses-related fixes
+
 ## Removed Migrations
 
 The following migrations were removed during consolidation:
 
+### Previously Removed
 - ~~**04_external_jwt_support.sql**~~ - Obsolete (replaced by token-exchange edge function)
 - ~~**05_support_superadmin_role.sql**~~ - Merged into 04
 - ~~**06_disable_rls_for_dev.sql**~~ - Deleted (was temporary dev fix)
 - ~~**08_allow_superadmin_in_profiles.sql**~~ - Merged into 04
 - ~~**09_update_rls_for_superadmin.sql**~~ - Merged into 04
 - ~~**10_update_responses_rls_for_superadmin.sql**~~ - Merged into 04
+
+### Recently Consolidated (2025-01)
+- ~~**07_fix_quiz_sections_rls.sql**~~ - Redundant (05 already had correct policies)
+- ~~**08_disable_rls_responses_dev.sql**~~ - Merged into 06 (dev-only change removed)
+- ~~**08_fix_duplicate_sessions.sql**~~ - Merged into 06
+- ~~**08_fix_responses_select_policy.sql**~~ - Merged into 06
 
 ## Authentication Flow
 

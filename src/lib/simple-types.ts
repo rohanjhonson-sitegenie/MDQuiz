@@ -155,16 +155,40 @@ export function validateQuestion(question: any): { valid: boolean; errors: strin
 
 export function validateQuiz(quiz: any): { valid: boolean; errors: string[]; canPublish?: boolean } {
   const errors: string[] = []
+  console.log('🔍 [VALIDATE-TRACE] Starting quiz validation:', {
+    title: quiz?.title,
+    id: quiz?.id,
+    structure_type: quiz?.settings?.structure_type,
+    questions_count: quiz?.questions?.length || 0,
+    sections_count: quiz?.sections?.length || 0,
+    settings: quiz?.settings
+  })
 
-  if (!quiz.title) errors.push('Quiz title is required')
-  if (!quiz.id) errors.push('Quiz ID is required')
+  if (!quiz.title) {
+    errors.push('Quiz title is required')
+    console.log('❌ [VALIDATE-TRACE] Missing title')
+  }
+  if (!quiz.id) {
+    errors.push('Quiz ID is required')
+    console.log('❌ [VALIDATE-TRACE] Missing ID')
+  }
 
   // Check if quiz has questions (either standalone or in sections)
-  const hasQuestions = (quiz.questions && quiz.questions.length > 0) ||
-                      (quiz.sections && quiz.sections.some((section: any) => section.questions && section.questions.length > 0))
+  const hasStandaloneQuestions = quiz.questions && quiz.questions.length > 0
+  const hasSectionQuestions = quiz.sections && quiz.sections.some((section: any) => section.questions && section.questions.length > 0)
+  const hasQuestions = hasStandaloneQuestions || hasSectionQuestions
+
+  console.log('📊 [VALIDATE-TRACE] Question analysis:', {
+    hasStandaloneQuestions,
+    hasSectionQuestions,
+    hasQuestions,
+    standaloneCount: quiz?.questions?.length || 0,
+    sectionCount: quiz?.sections?.length || 0
+  })
 
   if (!hasQuestions) {
     errors.push('Quiz must have at least one question')
+    console.log('❌ [VALIDATE-TRACE] No questions found')
   }
 
   // Validate standalone questions if present
@@ -195,6 +219,12 @@ export function validateQuiz(quiz: any): { valid: boolean; errors: string[]; can
   }
 
   const canPublish = errors.length === 0 && hasQuestions
+  console.log('📊 [VALIDATE-TRACE] Final validation result:', {
+    valid: errors.length === 0,
+    canPublish,
+    errorCount: errors.length,
+    errors: errors
+  })
 
   return { valid: errors.length === 0, errors, canPublish }
 }

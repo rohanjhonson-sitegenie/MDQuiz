@@ -65,13 +65,12 @@ export function MarkdownEditor({ className }: MarkdownEditorProps) {
     }
 
     try {
-      const parsedQuiz = parseMarkdownQuiz(markdownContent)
+      parseMarkdownQuiz(markdownContent)
 
       // Just validate, don't auto-save
       setError(null) // Clear any previous errors
 
-      // Optional: Show success message
-      console.log('Quiz parsed successfully:', parsedQuiz)
+      // Quiz parsed successfully
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to parse markdown'
       setError(`Parse error: ${errorMessage}`)

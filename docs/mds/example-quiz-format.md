@@ -2,6 +2,8 @@
 
 A comprehensive quiz testing your knowledge of JavaScript fundamentals including variables, functions, objects, and modern ES6+ features.
 
+> Settings: time_limit_minutes=20, allow_backward_navigation=true, allowed_question_types=["multiple_choice", "true_false", "text_input"], show_section_feedback=true, passing_threshold=70
+
 ## Q1
 
 What is the correct way to declare a variable in modern JavaScript?

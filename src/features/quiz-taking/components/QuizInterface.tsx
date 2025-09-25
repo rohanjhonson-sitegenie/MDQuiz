@@ -36,6 +36,7 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
   // Section-based timer state
   const [sectionTimeLeft, setSectionTimeLeft] = useState<number | null>(null)
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null)
+  const [timerHasStarted, setTimerHasStarted] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const { isLoading, error, getPublishedQuiz, submitQuizResponse } = useQuizData()
@@ -60,6 +61,19 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
         }
 
         setQuiz(quizData)
+
+
+        // Initialize timer for mixed mode quizzes
+        if (quizData.structure_type === 'mixed') {
+          const globalTimeLimit = quizData.settings?.time_limit_minutes as number | undefined
+          if (globalTimeLimit && globalTimeLimit > 0) {
+            const seconds = globalTimeLimit * 60
+            // Only set timer if one isn't already running
+            if (sectionTimeLeft === null) {
+              setSectionTimeLeft(seconds)
+            }
+          }
+        }
 
         // Check contact requirement and show form if needed
         const contactRequirement = quizData.settings?.contact_requirement || 'optional'
@@ -93,90 +107,56 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     return section || null
   }, [quiz, currentQuestion])
 
-  // Section timer management
+  // Section timer management - separated into two effects
   useEffect(() => {
-    console.log('Section timer effect running, quiz:', quiz?.title, 'currentQuestion:', currentQuestion)
-
     if (!quiz || quiz.structure_type !== 'sectioned') {
-      // Clear timer for non-sectioned quizzes
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
-      }
-      setSectionTimeLeft(null)
       setCurrentSectionId(null)
+      // Don't reset timer for mixed mode if it's already running
+      if (!timerHasStarted) {
+        setSectionTimeLeft(null)
+      }
       return
     }
 
-    const section = getCurrentQuestionSection()
-    console.log('Current section:', section)
-
-    if (!section) {
-      console.log('No section found for current question')
+    // Find section directly in effect
+    const currentQ = quiz.questions[currentQuestion]
+    if (!currentQ || !currentQ.id) {
       return
     }
 
-    // Check if we've entered a new section
+    const section = quiz.sections?.find(s =>
+      s.questions?.some(q => q && q.id === currentQ.id)
+    )
+
+    if (!section || !section.id) {
+      return
+    }
+
+    // Only update if different section
     if (section.id !== currentSectionId) {
-      console.log('Entering new section:', section.id)
-      setCurrentSectionId(section.id || null)
 
       // Check if this section has a time limit
       const timeLimit = section.settings?.time_limit_minutes as number | undefined
+
       if (timeLimit && timeLimit > 0) {
-        setSectionTimeLeft(timeLimit * 60) // Convert minutes to seconds
-
-        // Clear existing timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-        }
-
-        // Start new timer
-        timerRef.current = setInterval(() => {
-          setSectionTimeLeft(prev => {
-            if (prev === null || prev <= 1) {
-              // Time's up - auto-advance to next section or submit
-              handleTimerExpired()
-              return 0
-            }
-            return prev - 1
-          })
-        }, 1000)
+        const seconds = timeLimit * 60
+        setCurrentSectionId(section.id)
+        setSectionTimeLeft(seconds)
       } else {
-        // No time limit for this section
+        setCurrentSectionId(section.id)
         setSectionTimeLeft(null)
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-          timerRef.current = null
-        }
-      }
-    }
-
-    // Cleanup timer on unmount
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
       }
     }
   }, [quiz, currentQuestion, currentSectionId])
 
-  // Handle quiz submission
+  // Handle quiz submission (defined before handleTimerExpired which uses it)
   const handleSubmit = useCallback(async () => {
-    console.log('=== SUBMIT QUIZ CLICKED ===')
-    console.log('Quiz object:', quiz)
-    console.log('Quiz ID:', quiz?.id)
-    console.log('Answers:', answers)
-    console.log('Session ID:', sessionId)
-
     if (!quiz) {
-      console.error('Quiz is null or undefined')
       setSubmitError('Quiz data not loaded. Please refresh and try again.')
       return
     }
 
     if (!quiz.id) {
-      console.error('Quiz ID is missing, quiz object:', quiz)
       setSubmitError('Quiz ID is missing. Please refresh and try again.')
       return
     }
@@ -185,7 +165,6 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     setSubmitError(null)
 
     try {
-      console.log('Calling submitQuizResponse with quiz.id:', quiz.id)
       const result = await submitQuizResponse(
         quiz.id,
         answers,
@@ -193,24 +172,127 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
         contactData?.email,
         contactData?.name
       )
-      console.log('Submit result:', result)
 
       if (result.success) {
-        console.log('Quiz submitted successfully, setting isSubmitted to true')
         setIsSubmitted(true)
       } else {
-        console.error('Submit failed with error:', result.error)
         setSubmitError(result.error || 'Failed to submit quiz. Please try again.')
       }
     } catch (err) {
-      console.error('Exception during submit:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit quiz. Please try again.'
       setSubmitError(errorMessage)
     } finally {
-      console.log('Submit process finished, setting isSubmitting to false')
       setIsSubmitting(false)
     }
   }, [quiz, sessionId, answers, contactData, submitQuizResponse])
+
+  // Handle timer expiration (defined before useEffect that uses it)
+  const handleTimerExpired = useCallback(() => {
+    if (!quiz) return
+
+    if (quiz.structure_type === 'mixed') {
+      // For mixed mode quizzes, submit the entire quiz when timer expires
+      handleSubmit()
+      return
+    }
+
+    // For sectioned quizzes, handle section-by-section navigation
+    const currentSection = getCurrentQuestionSection()
+
+    if (!currentSection || !currentSection.questions) {
+      handleSubmit()
+      return
+    }
+
+    // Find the last question in current section
+    const currentSectionQuestions = quiz.questions.filter(q =>
+      q && q.id && currentSection.questions?.some(sq => sq && sq.id === q.id)
+    )
+
+    if (currentSectionQuestions.length === 0) {
+      handleSubmit()
+      return
+    }
+
+    const lastQuestionInSection = currentSectionQuestions[currentSectionQuestions.length - 1]
+    if (!lastQuestionInSection || !lastQuestionInSection.id) {
+      handleSubmit()
+      return
+    }
+
+    const lastQuestionIndex = quiz.questions.findIndex(q => q && q.id === lastQuestionInSection.id)
+
+    if (lastQuestionIndex >= quiz.questions.length - 1) {
+      // This was the last section, auto-submit
+      handleSubmit()
+    } else {
+      // Move to the next section
+      setCurrentQuestion(lastQuestionIndex + 1)
+    }
+  }, [quiz, getCurrentQuestionSection, handleSubmit])
+
+  // Effect to start timer when sectionTimeLeft is set for the first time
+  useEffect(() => {
+    // Only start timer if we don't already have one running and we have time > 0
+    if (!timerRef.current && sectionTimeLeft !== null && sectionTimeLeft > 0) {
+      const intervalId = setInterval(() => {
+        setSectionTimeLeft(prev => {
+          if (prev === null || prev <= 1) {
+            return 0 // Don't clear interval here, let the expiration effect handle it
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      timerRef.current = intervalId
+      setTimerHasStarted(true)
+    }
+  }, [sectionTimeLeft])
+
+  // Cleanup effect - only runs on component unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [])
+
+  // Page refresh/close protection - prevent users from accidentally losing progress
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      // Only show warning if quiz is in progress (not submitted and has answers or timer running)
+      const hasAnswers = Object.keys(answers).length > 0
+      const timerActive = timerHasStarted && sectionTimeLeft !== null && sectionTimeLeft > 0
+      const quizInProgress = !isSubmitted && (hasAnswers || timerActive)
+
+      if (quizInProgress) {
+        event.preventDefault()
+        event.returnValue = '' // Required for Chrome
+        return '' // Required for some older browsers
+      }
+    }
+
+    // Add the event listener
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [answers, timerHasStarted, sectionTimeLeft, isSubmitted])
+
+  // Separate effect to handle timer expiration
+  useEffect(() => {
+    if (sectionTimeLeft === 0 && timerRef.current && timerHasStarted) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+      setTimerHasStarted(false)
+      handleTimerExpired()
+    }
+  }, [sectionTimeLeft, handleTimerExpired, timerHasStarted])
+
 
   // Handle contact form submission
   const handleContactSubmit = useCallback((data: { email: string; name?: string }) => {
@@ -225,34 +307,6 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     setShowContactForm(false)
   }, [])
 
-  // Handle timer expiration
-  const handleTimerExpired = useCallback(() => {
-    if (!quiz) return
-
-    // Find the next section or submit if this is the last section
-    const currentSection = getCurrentQuestionSection()
-    if (!currentSection || !currentSection.questions) return
-
-    // Find the last question in current section
-    const currentSectionQuestions = quiz.questions.filter(q =>
-      q && q.id && currentSection.questions?.some(sq => sq && sq.id === q.id)
-    )
-
-    if (currentSectionQuestions.length === 0) return
-
-    const lastQuestionInSection = currentSectionQuestions[currentSectionQuestions.length - 1]
-    if (!lastQuestionInSection || !lastQuestionInSection.id) return
-
-    const lastQuestionIndex = quiz.questions.findIndex(q => q && q.id === lastQuestionInSection.id)
-
-    if (lastQuestionIndex >= quiz.questions.length - 1) {
-      // This was the last section, auto-submit
-      handleSubmit()
-    } else {
-      // Move to the next section
-      setCurrentQuestion(lastQuestionIndex + 1)
-    }
-  }, [quiz, getCurrentQuestionSection, handleSubmit])
 
   // Format time for display
   const formatTime = useCallback((seconds: number) => {
@@ -274,20 +328,28 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     }
   }, [quiz, currentQuestion])
 
+  // Helper function to check if backward navigation is allowed
+  const isBackwardNavigationAllowed = useCallback(() => {
+    if (!quiz) {
+      return true
+    }
+
+    if (quiz.structure_type === 'sectioned') {
+      const section = getCurrentQuestionSection()
+      const allowBackward = section?.settings?.allow_backward_navigation as boolean | undefined
+      return allowBackward !== false // Default to true if not explicitly set to false
+    } else {
+      // Mixed mode - check global settings
+      const allowBackward = quiz.settings?.allow_backward_navigation as boolean | undefined
+      return allowBackward !== false // Default to true if not explicitly set to false
+    }
+  }, [quiz, getCurrentQuestionSection])
+
   const handlePrevious = useCallback(() => {
-    if (currentQuestion > 0) {
-      // Check if backward navigation is allowed in current section
-      if (quiz?.structure_type === 'sectioned') {
-        const section = getCurrentQuestionSection()
-        const allowBackward = section?.settings?.allow_backward_navigation as boolean | undefined
-        if (allowBackward === false) {
-          return // Don't allow backward navigation
-        }
-      }
+    if (currentQuestion > 0 && isBackwardNavigationAllowed()) {
       setCurrentQuestion(prev => prev - 1)
     }
-  }, [currentQuestion, quiz, getCurrentQuestionSection])
-
+  }, [currentQuestion, isBackwardNavigationAllowed])
 
   // Helper function to check if this is the first question in its section
   const isFirstQuestionInSection = useCallback(() => {
@@ -305,17 +367,6 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
     const sectionQuestions = section.questions.sort((a, b) => a.order_index - b.order_index)
     return sectionQuestions[0]?.id === currentQ.id
   }, [quiz, currentQuestion, getCurrentQuestionSection])
-
-  // Helper function to check if backward navigation is allowed
-  const isBackwardNavigationAllowed = useCallback(() => {
-    if (!quiz || quiz.structure_type !== 'sectioned') {
-      return true // Allow backward navigation for non-sectioned quizzes
-    }
-
-    const section = getCurrentQuestionSection()
-    const allowBackward = section?.settings?.allow_backward_navigation as boolean | undefined
-    return allowBackward !== false // Default to true if not explicitly set to false
-  }, [quiz, getCurrentQuestionSection])
 
   // Helper function to check if progress bar should be shown
   const shouldShowProgressBar = useCallback(() => {
@@ -445,123 +496,123 @@ export function QuizInterface({ quizSlug }: QuizInterfaceProps) {
         />
       )}
 
-      <div className='container max-w-4xl mx-auto py-8 px-4'>
-      {/* Quiz Header */}
-      <Card className='mb-6'>
-        <CardHeader>
-          <CardTitle className='text-2xl'>{quiz.title}</CardTitle>
-          {quiz.description && (
-            <p className='text-muted-foreground'>{quiz.description}</p>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className='flex items-center justify-between mb-2'>
-            <span className='text-sm text-muted-foreground'>
-              Question {currentQuestion + 1} of {quiz.questions.length}
-            </span>
-            <div className='flex items-center gap-4'>
-              {sectionTimeLeft !== null && (
-                <div className='flex items-center gap-2 text-sm font-medium text-orange-600'>
-                  <Clock className='h-4 w-4' />
-                  <span>{formatTime(sectionTimeLeft)}</span>
-                </div>
+        <div className='container max-w-4xl mx-auto py-8 px-4'>
+          {/* Quiz Header */}
+          <Card className='mb-6'>
+            <CardHeader>
+              <CardTitle className='text-2xl'>{quiz.title}</CardTitle>
+              {quiz.description && (
+                <p className='text-muted-foreground'>{quiz.description}</p>
               )}
-              <span className='text-sm text-muted-foreground'>
-                {Math.round(progress)}% Complete
-              </span>
-            </div>
-          </div>
-          {shouldShowProgressBar() && (
-            <Progress value={progress} className='h-2' />
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section Header (for sectioned quizzes) */}
-      {quiz.structure_type === 'sectioned' && isFirstQuestionInSection() && (() => {
-        const section = getCurrentQuestionSection()
-        return section ? (
-          <Card className='mb-6 border-primary/20 bg-primary/5'>
-            <CardContent className='pt-6'>
-              <div className='flex items-center gap-3 mb-4'>
-                <div className='w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold'>
-                  S
-                </div>
-                <div>
-                  <h2 className='text-xl font-semibold text-foreground'>{section.title}</h2>
-                  {section.description && (
-                    <p className='text-sm text-muted-foreground mt-1'>{section.description}</p>
+            </CardHeader>
+            <CardContent>
+              <div className='flex items-center justify-between mb-2'>
+                <span className='text-sm text-muted-foreground'>
+                  Question {currentQuestion + 1} of {quiz.questions.length}
+                </span>
+                <div className='flex items-center gap-4'>
+                  {sectionTimeLeft !== null && (
+                    <div className='flex items-center gap-2 text-sm font-medium text-orange-600'>
+                      <Clock className='h-4 w-4' />
+                      <span>{formatTime(sectionTimeLeft)}</span>
+                    </div>
                   )}
+                  <span className='text-sm text-muted-foreground'>
+                    {Math.round(progress)}% Complete
+                  </span>
                 </div>
               </div>
+              {shouldShowProgressBar() && (
+                <Progress value={progress} className='h-2' />
+              )}
             </CardContent>
           </Card>
-        ) : null
-      })()}
 
-      {/* Question */}
-      <Card className='mb-6'>
-        <CardContent className='pt-6'>
-          <QuestionRenderer
-            question={currentQ}
-            answer={answers[currentQ.id]}
-            onAnswerChange={(answer) => handleAnswerChange(currentQ.id, answer)}
-          />
-        </CardContent>
-      </Card>
+          {/* Section Header (for sectioned quizzes) */}
+          {quiz.structure_type === 'sectioned' && isFirstQuestionInSection() && (() => {
+            const section = getCurrentQuestionSection()
+            return section ? (
+              <Card className='mb-6 border-primary/20 bg-primary/5'>
+                <CardContent className='pt-6'>
+                  <div className='flex items-center gap-3 mb-4'>
+                    <div className='w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold'>
+                      S
+                    </div>
+                    <div>
+                      <h2 className='text-xl font-semibold text-foreground'>{section.title}</h2>
+                      {section.description && (
+                        <p className='text-sm text-muted-foreground mt-1'>{section.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null
+          })()}
 
-      {/* Submit Error Alert */}
-      {submitError && (
-        <Alert variant='destructive' className='mb-6'>
-          <AlertCircle className='h-4 w-4' />
-          <AlertDescription>
-            {submitError}
-          </AlertDescription>
-        </Alert>
-      )}
+          {/* Question */}
+          <Card className='mb-6'>
+            <CardContent className='pt-6'>
+              <QuestionRenderer
+                question={currentQ}
+                answer={answers[currentQ.id]}
+                onAnswerChange={(answer) => handleAnswerChange(currentQ.id, answer)}
+              />
+            </CardContent>
+          </Card>
 
-      {/* Navigation */}
-      <div className='flex items-center justify-between'>
-        <Button
-          variant='outline'
-          onClick={handlePrevious}
-          disabled={currentQuestion === 0 || isSubmitting || !isBackwardNavigationAllowed() || isFirstQuestionInSection()}
-        >
-          <ArrowLeft className='h-4 w-4 mr-2' />
-          Previous
-        </Button>
-
-        <div className='flex gap-2'>
-          {isLastQuestion ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={!hasAnswer || isSubmitting}
-              className='bg-green-600 hover:bg-green-700'
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className='h-4 w-4 mr-2' />
-                  Submit Quiz
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={handleNext}
-              disabled={!hasAnswer || isSubmitting}
-            >
-              Next
-              <ArrowRight className='h-4 w-4 ml-2' />
-            </Button>
+          {/* Submit Error Alert */}
+          {submitError && (
+            <Alert variant='destructive' className='mb-6'>
+              <AlertCircle className='h-4 w-4' />
+              <AlertDescription>
+                {submitError}
+              </AlertDescription>
+            </Alert>
           )}
+
+          {/* Navigation */}
+          <div className='flex items-center justify-between'>
+            <Button
+              variant='outline'
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0 || isSubmitting || !isBackwardNavigationAllowed() || isFirstQuestionInSection()}
+            >
+              <ArrowLeft className='h-4 w-4 mr-2' />
+              Previous
+            </Button>
+
+            <div className='flex gap-2'>
+              {isLastQuestion ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!hasAnswer || isSubmitting}
+                  className='bg-green-600 hover:bg-green-700'
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className='h-4 w-4 mr-2' />
+                      Submit Quiz
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  disabled={!hasAnswer || isSubmitting}
+                >
+                  Next
+                  <ArrowRight className='h-4 w-4 ml-2' />
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
     </>
   )
 }

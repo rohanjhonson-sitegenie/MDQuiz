@@ -37,22 +37,7 @@ const getBarColor = (percentage: number) => {
 }
 
 export function AnalyticsChartsGrid({ trendData, questionStats }: AnalyticsChartsGridProps) {
-  // TEMPORARY: Add mock data to show 10 dates
-  const mockTrendData = [
-    { date: '9/15/2025', count: 3 },
-    { date: '9/16/2025', count: 5 },
-    { date: '9/17/2025', count: 8 },
-    { date: '9/18/2025', count: 4 },
-    { date: '9/19/2025', count: 12 },
-    { date: '9/20/2025', count: 15 },
-    { date: '9/21/2025', count: 9 },
-    { date: '9/22/2025', count: 11 },
-    { date: '9/23/2025', count: 7 },
-    { date: '9/24/2025', count: 14 }
-  ]
-
-  const displayTrendData = mockTrendData.length > 0 ? mockTrendData : trendData
-  const hasTrendData = displayTrendData.length > 0
+  const hasTrendData = trendData.length > 0
   const hasQuestionData = questionStats.length > 0
 
   const pieChartData = questionStats.map((item, index) => ({
@@ -101,7 +86,7 @@ export function AnalyticsChartsGrid({ trendData, questionStats }: AnalyticsChart
             </div>
             {hasTrendData ? (
               <ResponsiveContainer width='100%' height={250}>
-                <LineChart data={displayTrendData}>
+                <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray='3 3' className='stroke-muted' />
                   <XAxis
                     dataKey='date'

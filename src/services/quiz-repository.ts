@@ -5,10 +5,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Quiz, QuizSection, Question } from '@/lib/simple-types'
 import { normalizeQuiz, safeJsonParse } from '@/lib/simple-types'
 
-// Helper to extract single item from Supabase response (handles array bug with .single())
+// Helper to extract single item from Supabase response (handles array behavior with RLS)
 function extractSingleResult<T>(data: T | T[] | null): T | null {
   if (!data) return null
-  return Array.isArray(data) ? data[0] || null : data
+
+  if (Array.isArray(data)) {
+    return data.length > 0 ? data[0] : null
+  }
+  return data
 }
 
 // Define interfaces that were missing
@@ -17,6 +21,17 @@ interface QuizCategory {
   name: string
   slug: string
   description?: string
+  created_at?: string
+}
+
+interface QuizResponse {
+  id: string
+  quiz_id: string
+  session_id?: string
+  answers: Record<string, unknown>
+  respondent_name?: string
+  respondent_email?: string
+  submitted_at?: string
   created_at?: string
 }
 
@@ -63,20 +78,18 @@ export class QuizRepository implements IQuizRepository {
    * Get quiz by ID with all related data
    */
   async getQuizById(id: string): Promise<Quiz | null> {
+    // Get basic quiz data
     const { data, error } = await this.supabase
       .from('quizzes')
       .select(`
         *,
         category:quiz_categories(id, name, slug, description, created_at),
-        questions(*),
         sections:quiz_sections(
           *,
           questions(*)
         )
       `)
       .eq('id', id)
-      .order('order_index', { foreignTable: 'questions', ascending: true })
-      .order('order_index', { foreignTable: 'sections', ascending: true })
       .single()
 
     if (error) {
@@ -86,13 +99,45 @@ export class QuizRepository implements IQuizRepository {
       throw new Error(`Failed to fetch quiz: ${error.message}`)
     }
 
+    // Get questions in proper order using separate queries with manual sorting
+    const questionsResult = await this.supabase
+      .from('questions')
+      .select('*')
+      .eq('quiz_id', id)
+
+    const sectionsResult = await this.supabase
+      .from('quiz_sections')
+      .select('*')
+      .eq('quiz_id', id)
+      .order('order_index')
+
+    if (questionsResult.error || sectionsResult.error) {
+      throw new Error(`Failed to fetch questions and sections: ${questionsResult.error?.message || sectionsResult.error?.message}`)
+    }
+
+    // Manual sorting by section order then question order
+    const questions = questionsResult.data || []
+    const sections = sectionsResult.data || []
+    const sectionOrderMap = new Map(sections.map(s => [s.id, s.order_index]))
+
+    questions.sort((a, b) => {
+      const aSectionOrder = sectionOrderMap.get(a.section_id) ?? 999
+      const bSectionOrder = sectionOrderMap.get(b.section_id) ?? 999
+      if (aSectionOrder !== bSectionOrder) {
+        return aSectionOrder - bSectionOrder
+      }
+      return (a.order_index ?? 0) - (b.order_index ?? 0)
+    })
+
+    data.questions = questions
+
     const quizData = extractSingleResult(data)
     if (!quizData) return null
 
     return normalizeQuiz({
       ...quizData,
-      settings: safeJsonParse(quizData.settings, { structure_type: 'mixed' }),
-      questions: quizData.questions || [],
+      settings: safeJsonParse(quizData.settings, {}),
+      questions: questions,
       sections: quizData.sections || []
     })
   }
@@ -130,7 +175,7 @@ export class QuizRepository implements IQuizRepository {
 
     return normalizeQuiz({
       ...quizData,
-      settings: safeJsonParse(quizData.settings, { structure_type: 'mixed' }),
+      settings: safeJsonParse(quizData.settings, {}),
       questions: quizData.questions || [],
       sections: quizData.sections || []
     })
@@ -142,26 +187,42 @@ export class QuizRepository implements IQuizRepository {
   async createQuiz(quiz: Omit<Quiz, 'id' | 'created_at' | 'updated_at'>): Promise<Quiz> {
     const { questions, sections, ...quizData } = quiz
 
-    // Insert quiz record
-    const { data, error: quizError } = await this.supabase
+    // Insert quiz record (without .select() due to RLS issues)
+    const insertData = {
+      title: quizData.title,
+      description: quizData.description,
+      category_id: quizData.category_id,
+      settings: quizData.settings || {},
+      published: quizData.published || false
+    }
+
+    const { error: quizError } = await this.supabase
       .from('quizzes')
-      .insert({
-        title: quizData.title,
-        description: quizData.description,
-        category_id: quizData.category_id,
-        settings: quizData.settings || {},
-        published: quizData.published || false
-      })
-      .select()
-      .single()
+      .insert(insertData)
+
 
     if (quizError) {
       throw new Error(`Failed to create quiz: ${quizError.message}`)
     }
 
-    const newQuiz = extractSingleResult(data)
+    // Since RLS blocks .select() on insert, fetch the most recently created quiz by this user
+    // This is a workaround for RLS policy restrictions
+    const { data: newQuizData, error: fetchError } = await this.supabase
+      .from('quizzes')
+      .select('*')
+      .eq('title', insertData.title)
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch created quiz: ${fetchError.message}`)
+    }
+
+    const newQuiz = extractSingleResult(newQuizData)
+
     if (!newQuiz) {
-      throw new Error('Failed to create quiz: No data returned')
+      throw new Error('Failed to retrieve created quiz')
     }
 
     try {
@@ -269,53 +330,154 @@ export class QuizRepository implements IQuizRepository {
 
     // Handle sections if provided
     if (sections) {
-      // Delete existing sections (will cascade to questions in sections)
-      const { error: deleteSectionsError } = await this.supabase
+      // Fetch existing sections to preserve IDs where possible
+      const { data: existingSections } = await this.supabase
         .from('quiz_sections')
-        .delete()
+        .select('id, title, order_index')
         .eq('quiz_id', id)
+        .order('order_index')
 
-      if (deleteSectionsError) {
-        throw new Error(`Failed to delete existing sections: ${deleteSectionsError.message}`)
+      // Delete sections that no longer exist in the update
+      if (existingSections && existingSections.length > 0) {
+        const newSectionTitles = new Set(sections.map(s => s.title))
+        const sectionsToDelete = existingSections.filter(es => !newSectionTitles.has(es.title))
+
+        if (sectionsToDelete.length > 0) {
+          const { error: deleteSectionsError } = await this.supabase
+            .from('quiz_sections')
+            .delete()
+            .in('id', sectionsToDelete.map(s => s.id))
+
+          if (deleteSectionsError) {
+            throw new Error(`Failed to delete removed sections: ${deleteSectionsError.message}`)
+          }
+        }
       }
 
-      // Create sections and their questions
+      // Update or create sections and their questions
       for (const section of sections) {
-        const { data: newSection, error: sectionError } = await this.supabase
-          .from('quiz_sections')
-          .insert({
-            quiz_id: id,
-            title: section.title,
-            description: section.description,
-            order_index: section.order_index,
-            settings: section.settings || {}
-          })
-          .select()
-          .single()
+        // Check if section exists (match by title)
+        const existingSection = existingSections?.find(es => es.title === section.title)
 
-        if (sectionError) {
-          throw new Error(`Failed to create section "${section.title}": ${sectionError.message}`)
+        let sectionId: string
+
+        if (existingSection) {
+          // Update existing section
+
+          const { error: updateError } = await this.supabase
+            .from('quiz_sections')
+            .update({
+              description: section.description,
+              order_index: section.order_index,
+              settings: section.settings || {}
+            })
+            .eq('id', existingSection.id)
+
+          if (updateError) {
+            throw new Error(`Failed to update section "${section.title}": ${updateError.message}`)
+          }
+
+          sectionId = existingSection.id
+        } else {
+          // Create new section
+
+          const { error: insertError } = await this.supabase
+            .from('quiz_sections')
+            .insert({
+              quiz_id: id,
+              title: section.title,
+              description: section.description,
+              order_index: section.order_index,
+              settings: section.settings || {}
+            })
+
+          if (insertError) {
+            throw new Error(`Failed to create section "${section.title}": ${insertError.message}`)
+          }
+
+          // Fetch the newly created section
+          const { data: newSections, error: selectError } = await this.supabase
+            .from('quiz_sections')
+            .select('id')
+            .eq('quiz_id', id)
+            .eq('title', section.title)
+            .eq('order_index', section.order_index)
+
+          if (!newSections || newSections.length === 0 || selectError) {
+            continue
+          }
+
+          sectionId = Array.isArray(newSections) ? newSections[0].id : newSections.id
         }
 
-        // Insert questions for this section
+        // Update or insert questions for this section
         if (section.questions && section.questions.length > 0) {
-          const sectionQuestionsToInsert = section.questions.map((question, index) => ({
-            quiz_id: id,
-            section_id: newSection.id,
-            question_text: question.question_text,
-            question_type: question.question_type,
-            question_content: question.question_content || {},
-            options: question.options || {},
-            answer_data: question.answer_data || {},
-            order_index: question.order_index ?? index
-          }))
-
-          const { error: sectionQuestionsError } = await this.supabase
+          // Fetch existing questions for this section
+          const { data: existingQuestions } = await this.supabase
             .from('questions')
-            .insert(sectionQuestionsToInsert)
+            .select('id, question_text, order_index')
+            .eq('section_id', sectionId)
+            .order('order_index')
 
-          if (sectionQuestionsError) {
-            throw new Error(`Failed to insert questions for section "${section.title}": ${sectionQuestionsError.message}`)
+          for (const question of section.questions) {
+            // Try to match existing question by text and order
+            const existingQuestion = existingQuestions?.find(
+              eq => eq.question_text === question.question_text || eq.order_index === question.order_index
+            )
+
+            if (existingQuestion) {
+              // Update existing question
+              const { error: updateError } = await this.supabase
+                .from('questions')
+                .update({
+                  question_text: question.question_text,
+                  question_type: question.question_type,
+                  question_content: question.question_content || {},
+                  options: question.options || {},
+                  answer_data: question.answer_data || {},
+                  order_index: question.order_index ?? existingQuestion.order_index
+                })
+                .eq('id', existingQuestion.id)
+
+              if (updateError) {
+                throw new Error(`Failed to update question: ${updateError.message}`)
+              }
+            } else {
+              // Insert new question
+              const { error: insertError } = await this.supabase
+                .from('questions')
+                .insert({
+                  quiz_id: id,
+                  section_id: sectionId,
+                  question_text: question.question_text,
+                  question_type: question.question_type,
+                  question_content: question.question_content || {},
+                  options: question.options || {},
+                  answer_data: question.answer_data || {},
+                  order_index: question.order_index ?? 0
+                })
+
+              if (insertError) {
+                throw new Error(`Failed to insert question: ${insertError.message}`)
+              }
+            }
+          }
+
+          // Delete questions that no longer exist
+          if (existingQuestions && existingQuestions.length > 0) {
+            const newQuestionTexts = new Set(section.questions.map(q => q.question_text))
+            const questionsToDelete = existingQuestions.filter(eq => !newQuestionTexts.has(eq.question_text))
+
+            if (questionsToDelete.length > 0) {
+              const { error: deleteError } = await this.supabase
+                .from('questions')
+                .delete()
+                .in('id', questionsToDelete.map(q => q.id))
+
+              if (deleteError) {
+                throw new Error(`Failed to delete removed questions: ${deleteError.message}`)
+              }
+            }
           }
         }
       }
@@ -323,35 +485,72 @@ export class QuizRepository implements IQuizRepository {
 
     // Update standalone questions if provided (and no sections)
     if (questions && (!sections || sections.length === 0)) {
-      // Delete existing questions
-      const { error: deleteError } = await this.supabase
+      // Fetch existing questions
+      const { data: existingQuestions } = await this.supabase
         .from('questions')
-        .delete()
+        .select('id, question_text, order_index')
         .eq('quiz_id', id)
+        .is('section_id', null)
+        .order('order_index')
 
-      if (deleteError) {
-        throw new Error(`Failed to delete existing questions: ${deleteError.message}`)
+      for (const question of questions) {
+        // Try to match existing question by text or order
+        const existingQuestion = existingQuestions?.find(
+          eq => eq.question_text === question.question_text || eq.order_index === question.order_index
+        )
+
+        if (existingQuestion) {
+          // Update existing question
+          const { error: updateError } = await this.supabase
+            .from('questions')
+            .update({
+              question_text: question.question_text,
+              question_type: question.question_type,
+              question_content: question.question_content || {},
+              options: question.options || {},
+              answer_data: question.answer_data || {},
+              order_index: question.order_index ?? existingQuestion.order_index
+            })
+            .eq('id', existingQuestion.id)
+
+          if (updateError) {
+            throw new Error(`Failed to update question: ${updateError.message}`)
+          }
+        } else {
+          // Insert new question
+          const { error: insertError } = await this.supabase
+            .from('questions')
+            .insert({
+              quiz_id: id,
+              question_text: question.question_text,
+              question_type: question.question_type,
+              question_content: question.question_content || {},
+              options: question.options || {},
+              answer_data: question.answer_data || {},
+              order_index: question.order_index ?? 0,
+              ...(question.section_id && { section_id: question.section_id })
+            })
+
+          if (insertError) {
+            throw new Error(`Failed to insert question: ${insertError.message}`)
+          }
+        }
       }
 
-      // Insert new questions
-      if (questions.length > 0) {
-        const questionsToInsert = questions.map((question, index) => ({
-          quiz_id: id,
-          question_text: question.question_text,
-          question_type: question.question_type,
-          question_content: question.question_content || {},
-          options: question.options || {},
-          answer_data: question.answer_data || {},
-          order_index: question.order_index ?? index,
-          ...(question.section_id && { section_id: question.section_id })
-        }))
+      // Delete questions that no longer exist
+      if (existingQuestions && existingQuestions.length > 0) {
+        const newQuestionTexts = new Set(questions.map(q => q.question_text))
+        const questionsToDelete = existingQuestions.filter(eq => !newQuestionTexts.has(eq.question_text))
 
-        const { error: insertError } = await this.supabase
-          .from('questions')
-          .insert(questionsToInsert)
+        if (questionsToDelete.length > 0) {
+          const { error: deleteError } = await this.supabase
+            .from('questions')
+            .delete()
+            .in('id', questionsToDelete.map(q => q.id))
 
-        if (insertError) {
-          throw new Error(`Failed to insert updated questions: ${insertError.message}`)
+          if (deleteError) {
+            throw new Error(`Failed to delete removed questions: ${deleteError.message}`)
+          }
         }
       }
     }
@@ -420,7 +619,7 @@ export class QuizRepository implements IQuizRepository {
   /**
    * Get quiz responses for analytics
    */
-  async getQuizResponses(quizId: string): Promise<Response[]> {
+  async getQuizResponses(quizId: string): Promise<QuizResponse[]> {
     const { data, error } = await this.supabase
       .from('responses')
       .select('*')
@@ -544,7 +743,7 @@ export class QuizRepository implements IQuizRepository {
     return matchedCount / correctKeywords.length
   }
 
-  private isAnswerCorrect(question: any, userAnswer: unknown): boolean {
+  private isAnswerCorrect(question: Question, userAnswer: unknown): boolean {
     if (question.question_type === 'multiple_choice') {
       const options = question.options as { correct_index?: number }
       return userAnswer === options.correct_index
@@ -737,7 +936,7 @@ export class QuizRepository implements IQuizRepository {
   /**
    * Create new question
    */
-  async createQuestion(question: Omit<Question, 'id' | 'created_at' | 'updated_at'>): Promise<Question> {
+  async createQuestion(question: Omit<Question, 'id' | 'created_at' | 'updated_at'> & { quiz_id: string }): Promise<Question> {
     const { data, error } = await this.supabase
       .from('questions')
       .insert({

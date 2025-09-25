@@ -20,6 +20,7 @@ export interface PublicSection {
   title: string
   description?: string
   order_index: number
+  settings?: Record<string, unknown>
   questions: PublicQuestion[]
 }
 
@@ -74,6 +75,7 @@ export function useQuizData() {
             title,
             description,
             order_index,
+            settings,
             questions (
               id,
               question_text,
@@ -117,6 +119,7 @@ export function useQuizData() {
       const settings = quizData.settings || {}
       const structureType = settings.structure_type as 'mixed' | 'sectioned' || 'mixed'
 
+
       // Handle sectioned vs mixed structure
       let allQuestions: any[] = []
       let sections: any[] = []
@@ -139,7 +142,7 @@ export function useQuizData() {
         )
       }
 
-      return {
+      const finalQuiz = {
         id: quizData.id,
         title: quizData.title,
         description: quizData.description,
@@ -148,6 +151,9 @@ export function useQuizData() {
         questions: allQuestions,
         sections: sections.length > 0 ? sections : undefined
       }
+
+
+      return finalQuiz
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load quiz'
       setError(errorMessage)
@@ -164,16 +170,10 @@ export function useQuizData() {
     respondentName?: string | null,
     respondentEmail?: string | null
   ): Promise<SubmissionResult> => {
-    console.log('=== submitQuizResponse called ===')
-    console.log('quizId:', quizId)
-    console.log('answers:', answers)
-    console.log('sessionId:', sessionId)
-
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log('Inserting into responses table...')
       const { data, error: submitError } = await supabase
         .from('responses')
         .insert({
@@ -186,21 +186,15 @@ export function useQuizData() {
         .select('id')
         .single()
 
-      console.log('Insert response:', { data, error: submitError })
-
       if (submitError) {
-        console.error('Supabase insert error:', submitError)
         throw new Error(submitError.message)
       }
-
-      console.log('Response submitted successfully, ID:', data?.id)
 
       return {
         success: true,
         responseId: data?.id
       }
     } catch (err) {
-      console.error('Exception in submitQuizResponse:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit quiz'
       setError(errorMessage)
       return {

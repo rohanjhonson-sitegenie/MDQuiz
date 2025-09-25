@@ -2,6 +2,8 @@
 
 Test your understanding of core JavaScript concepts including variables, functions, and basic syntax.
 
+> Settings: time_limit_minutes=12, allow_backward_navigation=false, allowed_question_types=["multiple_choice", "true_false"], show_section_feedback=true, passing_threshold=80
+
 ## Q1
 
 What is the correct way to declare a variable in JavaScript ES6?

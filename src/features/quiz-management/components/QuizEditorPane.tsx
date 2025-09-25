@@ -5,7 +5,6 @@ import { useRef, useCallback, useEffect } from 'react'
 import { useQuizStore } from '@/stores/quizStore'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { ResizeHandle } from '@/features/three-pane-navigator/components/ResizeHandle'
 import { MarkdownEditor } from './MarkdownEditor'
 import { QuizPreview } from './QuizPreview'
 import { QuizStructureToggle } from './QuizStructureToggle'
@@ -19,7 +18,6 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
   const {
     selectedQuiz,
     sections,
-    paneWidths,
     setPaneWidth,
     loadSections,
     toggleQuizStructure,
@@ -35,19 +33,6 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
   const minWidth = 300
   const maxWidth = 1200
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      isResizing.current = true
-      startX.current = e.clientX
-      startWidth.current = paneWidths.editor
-
-      document.body.style.cursor = 'col-resize'
-      document.body.style.userSelect = 'none'
-
-      e.preventDefault()
-    },
-    [paneWidths.editor]
-  )
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {

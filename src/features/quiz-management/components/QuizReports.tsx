@@ -7,7 +7,9 @@ import { QuizMetricsCards } from './QuizMetricsCards'
 import { QuizResponseTable } from './QuizResponseTable'
 import { AnalyticsChartsGrid } from './AnalyticsChartsGrid'
 import { useQuizAnalytics } from '@/hooks/useQuizAnalytics'
-import { BarChart3, FileText } from 'lucide-react'
+import { BarChart3, FileText, Layers } from 'lucide-react'
+import { useSectionAnalytics } from '@/features/quiz-analytics/hooks/useSectionAnalytics'
+import { SectionPerformanceChart } from '@/features/quiz-analytics/components/SectionPerformanceChart'
 
 interface QuizReportsProps {
   className?: string
@@ -21,6 +23,9 @@ export function QuizReports({ className, quizId }: QuizReportsProps) {
   const activeQuiz = quizId ? null : selectedQuiz
 
   const analytics = useQuizAnalytics(activeQuizId)
+
+  // Load section analytics for sectioned quizzes
+  const { sectionAnalytics } = useSectionAnalytics(activeQuizId || '')
 
   if (!activeQuizId) {
     return (
@@ -51,6 +56,26 @@ export function QuizReports({ className, quizId }: QuizReportsProps) {
             trendData={analytics.trendData}
             questionStats={analytics.questionStats}
           />
+
+          {/* Section Analytics (for sectioned quizzes) */}
+          {sectionAnalytics.length > 0 && (
+            <>
+              <div className='pt-8 pb-4 border-t'>
+                <div className='flex items-center gap-2 mb-1'>
+                  <Layers className='h-5 w-5 text-primary' />
+                  <h3 className='text-xl font-semibold text-foreground'>
+                    Section-Wise Analytics
+                  </h3>
+                </div>
+                <p className='text-sm text-muted-foreground'>
+                  Performance comparison across quiz sections
+                </p>
+              </div>
+
+              {/* Section Performance Comparison */}
+              <SectionPerformanceChart sections={sectionAnalytics} />
+            </>
+          )}
 
           <div className='space-y-4'>
             <div className='flex items-center gap-2'>

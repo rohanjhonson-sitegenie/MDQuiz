@@ -69,6 +69,8 @@ export function parseMarkdownQuiz(markdownContent: string, sectionId?: string): 
       const descLines: string[] = []
       for (const prevLine of prevLines) {
         if (prevLine.trim().startsWith('# ')) break
+        // Skip settings lines when building description
+        if (prevLine.trim().startsWith('> Settings:')) continue
         if (prevLine.trim()) descLines.unshift(prevLine.trim())
       }
       quiz.description = descLines.join(' ')
@@ -105,26 +107,45 @@ export function parseMarkdownQuiz(markdownContent: string, sectionId?: string): 
       continue
     }
 
-    // Parse section settings (> Settings: key=value, key2=value2)
-    if (currentSection && line.match(/^> Settings:/)) {
+    // Parse settings (> Settings: key=value, key2=value2)
+    // Can be either section settings (when in a section) or global quiz settings (mixed mode)
+    if (line.match(/^> Settings:/)) {
       const settingsText = line.substring(11).trim() // Remove '> Settings: '
+      console.log('⚙️ [PARSER-TRACE] Found settings line:', { settingsText, inSection: !!currentSection })
+
       const settings: Record<string, any> = {}
 
       // Parse key=value pairs
       const pairs = settingsText.split(',')
+      console.log('📝 [PARSER-TRACE] Parsing settings pairs:', pairs)
+
       for (const pair of pairs) {
         const [key, value] = pair.split('=').map(s => s.trim())
         if (key && value) {
+          console.log('🔑 [PARSER-TRACE] Processing pair:', { key, value, originalValue: value })
+
           // Try to parse as JSON, fall back to string
           try {
-            settings[key] = JSON.parse(value)
+            const parsedValue = JSON.parse(value)
+            settings[key] = parsedValue
+            console.log('✅ [PARSER-TRACE] JSON parsed successfully:', { key, parsedValue, type: typeof parsedValue })
           } catch {
             settings[key] = value
+            console.log('📝 [PARSER-TRACE] Using string value:', { key, value, type: 'string' })
           }
         }
       }
 
-      currentSection.settings = settings
+      console.log('🏗️ [PARSER-TRACE] Final parsed settings:', settings)
+
+      // Apply settings to current section or global quiz
+      if (currentSection) {
+        currentSection.settings = settings
+        console.log('🏷️ [PARSER-TRACE] Applied settings to current section:', currentSection.title)
+      } else {
+        quiz.settings = settings
+        console.log('🌐 [PARSER-TRACE] Applied settings to global quiz (mixed mode)')
+      }
       continue
     }
 

@@ -28,20 +28,6 @@ export const supabase = createSupabaseClient(supabaseUrl, supabasePublishableKey
         ...init.headers,
       }
 
-      console.log('🌐 Supabase fetch with satellite token:', !!satelliteToken)
-
-      if (satelliteToken) {
-        // Debug: decode and log token payload
-        try {
-          const parts = satelliteToken.split('.')
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]))
-            console.log('🔍 Satellite token payload being sent:', payload)
-          }
-        } catch (e) {
-          console.error('Failed to decode token for debugging:', e)
-        }
-      }
 
       return fetch(input, { ...init, headers: customHeaders })
     },
@@ -52,17 +38,26 @@ export async function initializeSupabaseSession() {
   const authStore = useAuthStore.getState()
   const { satelliteToken } = authStore.auth
 
-  console.log('🔍 [Supabase] initializeSupabaseSession called')
-  console.log('🔍 [Supabase] Satellite token available:', !!satelliteToken)
-
   if (satelliteToken) {
-    supabase.realtime.setAuth(satelliteToken)
+    try {
+      // Try to set the session using the satellite token
+      const { data, error } = await supabase.auth.setSession({
+        access_token: satelliteToken,
+        refresh_token: satelliteToken // In this case we use the same token
+      })
 
-    console.log('✅ [Supabase] Authentication configured via global fetch override')
+      if (error) {
+        // Fall back to realtime auth
+        supabase.realtime.setAuth(satelliteToken)
+      }
 
-    return { data: { session: null, user: null }, error: null }
+      return { data, error }
+    } catch (error) {
+      // Fall back to realtime auth
+      supabase.realtime.setAuth(satelliteToken)
+      return { data: { session: null, user: null }, error: null }
+    }
   } else {
-    console.warn('⚠️ [Supabase] No satellite token available for session initialization')
     return null
   }
 }
