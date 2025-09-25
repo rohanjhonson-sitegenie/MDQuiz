@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase-client'
-import { calculateSectionScore } from '@/lib/scoring-utils'
+// import { calculateSectionScore } from '@/lib/scoring-utils'
 import type { SectionAnalytics, SectionCompletionFunnelData, SectionTimeUtilization } from '../types/section-analytics.types'
 
 interface UseSectionAnalyticsReturn {
@@ -104,13 +104,13 @@ export function useSectionAnalytics(quizId: string): UseSectionAnalyticsReturn {
 
       for (const section of sections) {
         const sectionQuestions = section.questions || []
-        const sectionQuestionIds = sectionQuestions.map(q => q.id)
+        // const sectionQuestionIds = sectionQuestions.map(q => q.id)
 
         // Calculate section-specific metrics from responses
         let totalAttempts = 0
         let totalCompletions = 0
         let totalScore = 0
-        let totalTime = 0
+        // let totalTime = 0
         let timeoutCount = 0
         let passCount = 0
         let timeSamples: number[] = []
@@ -188,7 +188,7 @@ export function useSectionAnalytics(quizId: string): UseSectionAnalyticsReturn {
           return false
         }
 
-        const avgScore = totalAttempts > 0 ? totalScore / totalAttempts : 0
+        // const avgScore = totalAttempts > 0 ? totalScore / totalAttempts : 0
         const avgTime = timeSamples.length > 0
           ? timeSamples.reduce((a, b) => a + b, 0) / timeSamples.length
           : 0

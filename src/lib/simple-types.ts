@@ -103,6 +103,7 @@ export interface QuizSettings {
   max_attempts?: number
   show_correct_answers?: boolean
   allow_review?: boolean
+  contact_requirement?: 'none' | 'optional' | 'required'
 }
 
 export interface Quiz {
@@ -339,6 +340,7 @@ export interface QuizStore {
   reorderSections: (sectionOrders: { id: string; order_index: number }[]) => Promise<void>
   moveQuestionToSection: (questionId: string, sectionId: string | null) => Promise<void>
   toggleQuizStructure: (quizId: string, structureType: 'mixed' | 'sectioned') => Promise<void>
+  updateContactRequirement: (quizId: string, contactRequirement: 'none' | 'optional' | 'required') => Promise<void>
 
   // Question Management Actions
   createQuestion: (question: Omit<Question, 'id' | 'created_at' | 'updated_at'>) => Promise<void>

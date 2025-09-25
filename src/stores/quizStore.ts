@@ -291,10 +291,10 @@ export const useQuizStore = create<QuizStore>()(
             console.log('📦 [SAVE-TRACE] Normalized quiz:', {
               id: serializedQuiz.id,
               title: serializedQuiz.title,
-              structure_type: serializedQuiz.settings.structure_type,
+              structure_type: serializedQuiz.settings?.structure_type,
               settings: serializedQuiz.settings,
-              has_questions: serializedQuiz.questions.length > 0,
-              has_sections: serializedQuiz.sections.length > 0
+              has_questions: (serializedQuiz.questions || []).length > 0,
+              has_sections: (serializedQuiz.sections || []).length > 0
             })
 
             // Preserve existing quiz metadata
@@ -306,8 +306,8 @@ export const useQuizStore = create<QuizStore>()(
             }
             console.log('💼 [SAVE-TRACE] Final quiz to save:', {
               ...quizToSave,
-              questions: `[${quizToSave.questions.length} questions]`,
-              sections: `[${quizToSave.sections.length} sections]`
+              questions: `[${(quizToSave.questions || []).length} questions]`,
+              sections: `[${(quizToSave.sections || []).length} sections]`
             })
 
             // VALIDATION GATE 3: Save via repository with built-in validation
@@ -354,7 +354,7 @@ export const useQuizStore = create<QuizStore>()(
             const newQuiz: Omit<Quiz, 'id' | 'created_at' | 'updated_at'> = {
               title: 'New Quiz',
               description: 'Enter quiz description...',
-              category_id: get().selectedCategoryId,
+              category_id: get().selectedCategoryId || undefined,
               settings: {
                 structure_type: 'mixed', // Properly nested in settings
                 time_limit: 30,

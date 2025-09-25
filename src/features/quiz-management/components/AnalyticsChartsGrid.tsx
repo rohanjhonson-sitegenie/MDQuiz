@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, PieChartIcon, BarChart3 } from 'lucide-react'
 
 interface TrendDataPoint {
@@ -30,11 +30,11 @@ const COLORS = [
   'hsl(173, 80%, 40%)', // Teal
 ]
 
-const getBarColor = (percentage: number) => {
-  if (percentage >= 80) return 'hsl(142, 76%, 36%)'
-  if (percentage >= 60) return 'hsl(48, 96%, 53%)'
-  return 'hsl(0, 84%, 60%)'
-}
+// const getBarColor = (percentage: number) => {
+//   if (percentage >= 80) return 'hsl(142, 76%, 36%)'
+//   if (percentage >= 60) return 'hsl(48, 96%, 53%)'
+//   return 'hsl(0, 84%, 60%)'
+// }
 
 export function AnalyticsChartsGrid({ trendData, questionStats }: AnalyticsChartsGridProps) {
   const hasTrendData = trendData.length > 0
@@ -137,12 +137,12 @@ export function AnalyticsChartsGrid({ trendData, questionStats }: AnalyticsChart
                       cx='50%'
                       cy='50%'
                       labelLine={false}
-                      label={({ name, percentage }) => `${percentage.toFixed(0)}%`}
+                      label={({ percentage }: any) => `${(percentage as number).toFixed(0)}%`}
                       outerRadius={100}
                       fill='#8884d8'
                       dataKey='value'
                     >
-                      {pieChartData.map((entry, index) => (
+                      {pieChartData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

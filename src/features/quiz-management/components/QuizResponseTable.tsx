@@ -59,7 +59,17 @@ export function QuizResponseTable({ quizId }: QuizResponseTableProps) {
 
         setResponses(responsesData as ResponseData[])
         const questionsFromRepo = quizData?.questions || []
-        setQuestions(questionsFromRepo)
+        // Transform Questions to QuizQuestion format
+        const transformedQuestions: QuizQuestion[] = questionsFromRepo.map(q => ({
+          id: q.id || '',
+          question_text: q.question_text,
+          question_type: q.question_type,
+          section_id: q.section_id,
+          order_index: q.order_index,
+          options: q.options || {},
+          answer_data: q.answer_data || {}
+        }))
+        setQuestions(transformedQuestions)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load data'
         setError(errorMessage)

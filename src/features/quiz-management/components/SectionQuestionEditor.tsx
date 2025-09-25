@@ -1,7 +1,7 @@
 // Section-aware question editor for adding and editing questions within sections
 // Provides a form-based interface for creating questions with different types
 
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

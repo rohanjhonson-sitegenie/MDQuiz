@@ -72,8 +72,8 @@ export function QuizAnalytics({ quizId, quizTitle }: QuizAnalyticsProps) {
     sectionAnalytics,
     funnelData,
     timeUtilizationData,
-    isLoading: isSectionLoading,
-    error: sectionError,
+    isLoading: _isSectionLoading,
+    error: _sectionError,
     totalStarted
   } = useSectionAnalytics(quizId)
 

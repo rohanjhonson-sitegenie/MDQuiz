@@ -38,7 +38,25 @@ function transformSectionedQuizToMarkdown(quiz: Quiz): string {
   // Transform sections
   if (quiz.sections && quiz.sections.length > 0) {
     const sortedSections = [...quiz.sections].sort((a, b) => a.order_index - b.order_index)
-    const sectionsMarkdown = sectionsToMarkdown(sortedSections)
+    // Transform QuizSection to ParsedSection format
+    const parsedSections = sortedSections.map(section => ({
+      id: section.id,
+      title: section.title,
+      description: section.description,
+      order_index: section.order_index,
+      settings: section.settings || {},
+      questions: (section.questions || []).map(q => ({
+        id: q.id,
+        section_id: q.section_id,
+        question_text: q.question_text,
+        question_type: q.question_type,
+        question_content: q.question_content || {},
+        options: q.options || {},
+        answer_data: q.answer_data || {},
+        order_index: q.order_index
+      }))
+    }))
+    const sectionsMarkdown = sectionsToMarkdown(parsedSections)
     lines.push(sectionsMarkdown)
   }
 
@@ -115,7 +133,7 @@ function transformMixedQuizToMarkdown(quiz: Quiz): string {
               const isCorrect = question.options.correct_index === choiceIndex
               const marker = isCorrect ? '[x]' : '[ ]'
               // Handle both string and object formats
-              const choiceText = typeof choice === 'string' ? choice : choice.text
+              const choiceText = typeof choice === 'string' ? choice : (choice as { text: string }).text
               lines.push(`- ${marker} ${choiceText}`)
             })
           }
@@ -217,7 +235,7 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
           if (settingValue === 'true') settingValue = true
           if (settingValue === 'false') settingValue = false
           if (!isNaN(Number(settingValue))) settingValue = Number(settingValue)
-          frontmatter.settings[settingKey] = settingValue
+          ;(frontmatter.settings as Record<string, unknown>)[settingKey] = settingValue
         } else {
           if (value === 'true') frontmatter[key] = true
           else if (value === 'false') frontmatter[key] = false
@@ -240,9 +258,14 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
     
     // Question header - match Q1, Q2, etc. format
     if (line.match(/^## Q\d+/)) {
-      if (currentQuestion) {
+      if (currentQuestion && currentQuestion.question_text) {
         questions.push({
-          ...currentQuestion,
+          question_text: currentQuestion.question_text,
+          question_type: currentQuestion.question_type || 'multiple_choice',
+          question_content: currentQuestion.question_content || {},
+          options: currentQuestion.options || {},
+          answer_data: currentQuestion.answer_data || { correct_answer: '' },
+          section_id: currentQuestion.section_id,
           order_index: questionIndex++
         })
       }
@@ -251,7 +274,7 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
         question_type: 'multiple_choice' as QuestionType,
         question_content: {},
         options: {},
-        answer_data: {}
+        answer_data: { correct_answer: '' }
       }
       continue
     }
@@ -267,6 +290,8 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
     // Multiple choice options - match - [x] and - [ ] format
     const mcMatch = line.match(/^- \[(x| )\]\s*(.+)$/)
     if (mcMatch) {
+      if (!currentQuestion.options) currentQuestion.options = {}
+      if (!currentQuestion.answer_data) currentQuestion.answer_data = { correct_answer: '' }
       if (!currentQuestion.options.choices) currentQuestion.options.choices = []
       currentQuestion.options.choices.push(mcMatch[2])
       if (mcMatch[1] === 'x') {
@@ -280,6 +305,7 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
     // True/False options - match True: or False: format
     const tfMatch = line.match(/^(True|False):\s*(.*)$/)
     if (tfMatch) {
+      if (!currentQuestion.answer_data) currentQuestion.answer_data = { correct_answer: '' }
       currentQuestion.answer_data.correct_answer = tfMatch[1].toLowerCase()
       currentQuestion.answer_data.explanation = tfMatch[2]
       currentQuestion.question_type = 'true_false'
@@ -289,6 +315,7 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
     // Text input answer - match Answer: format
     const answerMatch = line.match(/^Answer:\s*(.+)$/)
     if (answerMatch) {
+      if (!currentQuestion.answer_data) currentQuestion.answer_data = { correct_answer: '' }
       currentQuestion.answer_data.correct_answer = answerMatch[1]
       currentQuestion.question_type = 'text_input'
       continue
@@ -297,25 +324,31 @@ export function parseMarkdownToQuizLegacy(markdown: string): Partial<Quiz> {
     // Explanation
     const explanationMatch = line.match(/^\*\*Explanation:\*\*\s*(.+)$/)
     if (explanationMatch) {
+      if (!currentQuestion.answer_data) currentQuestion.answer_data = { correct_answer: '' }
       currentQuestion.answer_data.explanation = explanationMatch[1]
       continue
     }
   }
   
   // Add the last question
-  if (currentQuestion) {
+  if (currentQuestion && currentQuestion.question_text) {
     questions.push({
-      ...currentQuestion,
+      question_text: currentQuestion.question_text,
+      question_type: currentQuestion.question_type || 'multiple_choice',
+      question_content: currentQuestion.question_content || {},
+      options: currentQuestion.options || {},
+      answer_data: currentQuestion.answer_data || { correct_answer: '' },
+      section_id: currentQuestion.section_id,
       order_index: questionIndex
     })
   }
   
   // Build quiz object
   const quiz: Partial<Quiz> = {
-    title: frontmatter.title || 'Untitled Quiz',
-    description: frontmatter.description || null,
-    published: frontmatter.published || false,
-    settings: frontmatter.settings || {},
+    title: String(frontmatter.title || 'Untitled Quiz'),
+    description: frontmatter.description ? String(frontmatter.description) : undefined,
+    published: Boolean(frontmatter.published || false),
+    settings: (frontmatter.settings as Record<string, unknown>) || {},
     questions: questions as Question[]
   }
   
@@ -516,7 +549,7 @@ export function transformSectionedToMixed(markdown: string): string {
     return markdown
       .replace(/^## Section:.*$/gm, '') // Remove section headers
       .replace(/^> Settings:.*$/gm, '') // Remove settings
-      .replace(/^### (Q\d+|Question)/gm, (match, group) => {
+      .replace(/^### (Q\d+|Question)/gm, (_match, group) => {
         // Convert ### to ## and renumber questions
         return `## ${group}`
       })

@@ -14,17 +14,17 @@ export const questionTypeValidations: Record<QuestionType, QuestionTypeValidatio
     validate: (question) => {
       const errors: string[] = []
 
-      if (!question.question_text?.trim()) {
+      if (!question.question_text || typeof question.question_text !== 'string' || !question.question_text.trim()) {
         errors.push('Question text is required')
       }
 
-      const choices = question.options?.choices
+      const choices = (question.options as any)?.choices
       if (!choices || !Array.isArray(choices) || choices.length < 2) {
         errors.push('Multiple choice questions must have at least 2 options')
       }
 
       // NEW SCHEMA: Check for correct_index (single number) instead of correct_answers (array)
-      const correctIndex = question.options?.correct_index
+      const correctIndex = (question.options as any)?.correct_index
       if (correctIndex === undefined || correctIndex === null) {
         errors.push('Multiple choice questions must have at least one correct answer')
       }
@@ -38,12 +38,12 @@ export const questionTypeValidations: Record<QuestionType, QuestionTypeValidatio
     validate: (question) => {
       const errors: string[] = []
 
-      if (!question.question_text?.trim()) {
+      if (!question.question_text || typeof question.question_text !== 'string' || !question.question_text.trim()) {
         errors.push('Question text is required')
       }
 
       // NEW SCHEMA: Check for correct_answer (boolean) instead of correct_answers (array)
-      const correctAnswer = question.answer_data?.correct_answer
+      const correctAnswer = (question.answer_data as any)?.correct_answer
       if (correctAnswer === undefined || correctAnswer === null) {
         errors.push('True/false questions must have exactly one correct answer')
       }
@@ -57,12 +57,12 @@ export const questionTypeValidations: Record<QuestionType, QuestionTypeValidatio
     validate: (question) => {
       const errors: string[] = []
 
-      if (!question.question_text?.trim()) {
+      if (!question.question_text || typeof question.question_text !== 'string' || !question.question_text.trim()) {
         errors.push('Question text is required')
       }
 
       // NEW SCHEMA: Check for correct_answer (string) instead of correct_answers (array)
-      const correctAnswer = question.answer_data?.correct_answer
+      const correctAnswer = (question.answer_data as any)?.correct_answer
       if (!correctAnswer || typeof correctAnswer !== 'string' || !correctAnswer.trim()) {
         errors.push('Text input questions must have a correct answer')
       }

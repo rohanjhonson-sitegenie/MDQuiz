@@ -28,16 +28,23 @@ export function QuizPreview({ className }: QuizPreviewProps) {
 
       // Flatten questions from sections for preview display
       let questionsForPreview = parsed.questions || []
+      const sectionTitleMap = new Map<string, string>()
       if (parsed.structure_type === 'sectioned' && parsed.sections.length > 0) {
         questionsForPreview = parsed.sections.flatMap(section =>
-          (section.questions || []).map(q => ({ ...q, section_title: section.title }))
+          (section.questions || []).map(q => {
+            if (q.section_id) {
+              sectionTitleMap.set(q.section_id, section.title)
+            }
+            return q
+          })
         )
       }
 
       return {
         ...selectedQuiz,
         ...parsed,
-        questions: questionsForPreview
+        questions: questionsForPreview,
+        sectionTitleMap
       }
     } catch (_error) {
       return null
@@ -146,9 +153,9 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                 </>
               )}
 
-              {previewQuiz.category?.name && (
+              {selectedQuiz?.category_id && (
                 <Badge variant='outline' className='h-9 px-3'>
-                  {previewQuiz.category.name}
+                  Category
                 </Badge>
               )}
 
@@ -214,7 +221,9 @@ export function QuizPreview({ className }: QuizPreviewProps) {
               {previewQuiz.questions.map((question, index) => {
                 const questionValidation = validation.questionErrors.find(q => q.questionIndex === index)
                 const hasQuestionErrors = questionValidation && !questionValidation.isValid
-                const showSectionHeader = question.section_title && (index === 0 || previewQuiz.questions[index - 1].section_title !== question.section_title)
+                const currentSectionTitle = question.section_id ? previewQuiz.sectionTitleMap?.get(question.section_id) : undefined
+                const previousSectionTitle = index > 0 && previewQuiz.questions[index - 1].section_id ? previewQuiz.sectionTitleMap?.get(previewQuiz.questions[index - 1].section_id) : undefined
+                const showSectionHeader = currentSectionTitle && currentSectionTitle !== previousSectionTitle
 
                 return (
                   <div key={index}>
@@ -225,7 +234,7 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                           <div className='w-6 h-6 bg-primary/10 text-primary rounded flex items-center justify-center text-xs font-bold'>
                             S
                           </div>
-                          {question.section_title}
+                          {currentSectionTitle}
                         </h2>
                       </div>
                     )}
@@ -283,7 +292,7 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                   {/* Question content */}
                   {question.question_content?.additional_context && (
                     <div className='mb-4 p-3 bg-muted/50 rounded text-sm text-muted-foreground'>
-                      {question.question_content.additional_context}
+                      {String(question.question_content.additional_context)}
                     </div>
                   )}
 
@@ -400,7 +409,7 @@ export function QuizPreview({ className }: QuizPreviewProps) {
                         <div className='min-w-0 flex-1'>
                           <p className='text-sm font-medium text-blue-900 mb-1'>Explanation</p>
                           <p className='text-sm text-blue-800'>
-                            {question.answer_data.explanation}
+                            {String(question.answer_data?.explanation || '')}
                           </p>
                         </div>
                       </div>
