@@ -133,7 +133,10 @@ additional_redirect_urls = [
   "http://127.0.0.1:5176/auth/callback",
   "https://127.0.0.1:5176/auth/callback",
   "https://react-vite-shadcn-boilerplate.vercel.app",
-  "https://react-vite-shadcn-boilerplate.vercel.app/auth/callback"
+  "https://react-vite-shadcn-boilerplate.vercel.app/auth/callback",
+  "https://md-quiz.vercel.app",
+  "https://md-quiz.vercel.app/auth/callback",
+  "https://md-quiz.vercel.app/auth/ready"
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
