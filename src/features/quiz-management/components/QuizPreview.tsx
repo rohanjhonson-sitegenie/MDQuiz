@@ -26,16 +26,27 @@ export function QuizPreview({ className }: QuizPreviewProps) {
     try {
       const parsed = parseMarkdownQuiz(markdownContent)
 
-      // Flatten questions from sections for preview display
+      // For sectioned quizzes, maintain section structure and create section mapping
       let questionsForPreview = parsed.questions || []
       const sectionTitleMap = new Map<string, string>()
+      const sectionOrderMap = new Map<string, number>()
+
       if (parsed.structure_type === 'sectioned' && parsed.sections.length > 0) {
-        questionsForPreview = parsed.sections.flatMap(section =>
-          (section.questions || []).map(q => {
-            if (q.section_id) {
-              sectionTitleMap.set(q.section_id, section.title)
+        // Flatten questions from sections but maintain proper section references
+        questionsForPreview = parsed.sections.flatMap((section, sectionIndex) =>
+          (section.questions || []).map((q, questionIndex) => {
+            // Create a unique section identifier for this question's position
+            const sectionId = section.id || `section-${sectionIndex}`
+            sectionTitleMap.set(sectionId, section.title)
+            sectionOrderMap.set(sectionId, sectionIndex)
+
+            return {
+              ...q,
+              section_id: sectionId,
+              // Ensure questions maintain their section order
+              sectionIndex,
+              questionInSectionIndex: questionIndex
             }
-            return q
           })
         )
       }
@@ -44,7 +55,8 @@ export function QuizPreview({ className }: QuizPreviewProps) {
         ...selectedQuiz,
         ...parsed,
         questions: questionsForPreview,
-        sectionTitleMap
+        sectionTitleMap,
+        sectionOrderMap
       }
     } catch (_error) {
       return null
@@ -204,12 +216,23 @@ export function QuizPreview({ className }: QuizPreviewProps) {
             </div>
           )}
 
-          {!hasErrors && validation.questionErrors.length > 0 && (
+          {!hasErrors && validation.questionErrors.length > 0 && !previewQuiz.published && (
             <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
               <div className='flex items-center gap-2'>
                 <CheckCircle className='h-5 w-5 text-green-600' />
                 <span className='font-medium text-green-900'>
                   Quiz validation passed - ready to publish
+                </span>
+              </div>
+            </div>
+          )}
+
+          {!hasErrors && validation.questionErrors.length > 0 && previewQuiz.published && (
+            <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+              <div className='flex items-center gap-2'>
+                <CheckCircle className='h-5 w-5 text-blue-600' />
+                <span className='font-medium text-blue-900'>
+                  Quiz content validated - published and live
                 </span>
               </div>
             </div>
@@ -221,9 +244,17 @@ export function QuizPreview({ className }: QuizPreviewProps) {
               {previewQuiz.questions.map((question, index) => {
                 const questionValidation = validation.questionErrors.find(q => q.questionIndex === index)
                 const hasQuestionErrors = questionValidation && !questionValidation.isValid
+
+                // Improved section header logic for sectioned quizzes
                 const currentSectionTitle = question.section_id ? previewQuiz.sectionTitleMap?.get(question.section_id) : undefined
-                const previousSectionTitle = index > 0 && previewQuiz.questions[index - 1].section_id ? previewQuiz.sectionTitleMap?.get(previewQuiz.questions[index - 1].section_id) : undefined
-                const showSectionHeader = currentSectionTitle && currentSectionTitle !== previousSectionTitle
+                const previousQuestion = index > 0 ? previewQuiz.questions[index - 1] : null
+                const previousSectionTitle = previousQuestion?.section_id ? previewQuiz.sectionTitleMap?.get(previousQuestion.section_id) : undefined
+
+                // Show section header when:
+                // 1. We have a section title for this question
+                // 2. AND (it's the first question OR the previous question had a different section)
+                const showSectionHeader = currentSectionTitle &&
+                  (index === 0 || currentSectionTitle !== previousSectionTitle)
 
                 return (
                   <div key={index}>

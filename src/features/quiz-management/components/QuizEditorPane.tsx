@@ -145,36 +145,6 @@ export function QuizEditorPane({ className }: QuizEditorPaneProps) {
 
         {/* Unified Markdown Editor */}
         <div className='flex-shrink-0 flex flex-col'>
-          <div className='flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0'>
-            <h3 className='text-sm font-semibold text-foreground'>
-              Markdown Editor
-            </h3>
-            <div className='flex items-center space-x-2'>
-              <Button variant='ghost' size='sm' className='p-1 text-muted-foreground hover:text-foreground' title='Bold'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z' />
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 12h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z' />
-                </svg>
-              </Button>
-              <Button variant='ghost' size='sm' className='p-1 text-muted-foreground hover:text-foreground' title='Italic'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 4h-9m4 16H5m4-8l4-8' />
-                </svg>
-              </Button>
-              <Button variant='ghost' size='sm' className='p-1 text-muted-foreground hover:text-foreground' title='Link'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71' />
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' />
-                </svg>
-              </Button>
-              <div className='h-4 w-px bg-border'></div>
-              <Button variant='ghost' size='sm' className='p-1 text-muted-foreground hover:text-foreground' title='Help'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-                </svg>
-              </Button>
-            </div>
-          </div>
           <MarkdownEditor className='flex-shrink-0' />
         </div>
       </div>
